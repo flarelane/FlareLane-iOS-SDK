@@ -1,0 +1,90 @@
+//
+//  EventService.swift
+//  FlareLane
+//
+//  Copyright © 2021 FlareLabs. All rights reserved.
+//
+
+import Foundation
+
+class EventService {
+  /// Processed when notification is converted
+  /// - Parameter notification: Received notification
+  static func createConverted(notification: FlareLaneNotification) {
+    guard let deviceId = Globals.deviceIdInUserDefaults else {
+      Logger.error("deviceId does not set.")
+      return
+    }
+    
+    API.shared.sendEvent(   
+      deviceId: deviceId,
+      type: "CONVERTED",
+      notificationId: notification.id
+    ) { error in
+      if error != nil {
+        Logger.error("Failed send event request.")
+        return
+      }
+      
+      Logger.verbose("Succeed send event request.")
+    }
+    
+    guard let convertedHandler = EventHandlers.notificationConverted else {
+      Logger.verbose("unhandledNotification saved")
+      // If notificationConverted handler is nil, the last notification is saved and executed when the handler is registered.
+      EventHandlers.unhandledNotification = notification
+      return
+    }
+    
+    Logger.verbose("convertedHandler found, execute handler")
+    convertedHandler(notification)
+  }
+  
+  /// Processed when notification background received
+  /// - Parameter notificationId: ID of received notification
+  static func createBackgroundReceived(notificationId: String) {
+    guard let deviceId = Globals.deviceIdInUserDefaults else {
+      Logger.error("deviceId does not set.")
+      return
+    }
+    
+    Logger.verbose("Send BACKGROUND_RECEIVED event")
+    
+    API.shared.sendEvent(
+      deviceId: deviceId,
+      type: "BACKGROUND_RECEIVED",
+      notificationId: notificationId
+    ) { error in
+      if error != nil {
+        Logger.error("Failed send event request.")
+        return
+      }
+      
+      Logger.verbose("Succeed send event request.")
+    }
+  }
+  
+  /// Processed when notification foreground received
+  /// - Parameter notificationId: ID of received notification
+  static func createForegroundReceived(notificationId: String) {
+    guard let deviceId = Globals.deviceIdInUserDefaults else {
+      Logger.error("deviceId does not set.")
+      return
+    }
+    
+    Logger.verbose("Send FOREGROUND_RECEIVED event")
+    
+    API.shared.sendEvent(
+      deviceId: deviceId,
+      type: "FOREGROUND_RECEIVED",
+      notificationId: notificationId
+    ) { error in
+      if error != nil {
+        Logger.error("Failed send event request.")
+        return
+      }
+      
+      Logger.verbose("Succeed send event request.")
+    }
+  }
+}
