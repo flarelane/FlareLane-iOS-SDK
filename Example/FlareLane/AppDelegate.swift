@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import FlareLane
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -16,6 +17,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
+      
+      // Initialize by setting logLevel and projectId.
+      FlareLane.setLogLevel(level: .verbose)
+      FlareLane.initWithLaunchOptions(launchOptions, projectId: "a6135350-a4a4-44ca-abba-4bc09931d889")
+      
+      // Executes a handler with notification data when notification is converted.
+      FlareLane.setNotificationConvertedHandler() { payload in
+        // Do something...
+      }
+      
         return true
     }
 

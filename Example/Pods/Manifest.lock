@@ -1,0 +1,16 @@
+PODS:
+  - FlareLane (0.1.0)
+
+DEPENDENCIES:
+  - FlareLane (from `../`)
+
+EXTERNAL SOURCES:
+  FlareLane:
+    :path: "../"
+
+SPEC CHECKSUMS:
+  FlareLane: 2b501412f16eb119439b895d9f2a708b6742c2d6
+
+PODFILE CHECKSUM: 26170af3a7b54aa3634e93745b2d6fe213eac3d2
+
+COCOAPODS: 1.10.1

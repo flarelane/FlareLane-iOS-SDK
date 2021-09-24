@@ -1,0 +1,6 @@
+framework module Pods_FlareLane_Example {
+  umbrella header "Pods-FlareLane_Example-umbrella.h"
+
+  export *
+  module * { export * }
+}
