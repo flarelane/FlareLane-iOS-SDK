@@ -22,7 +22,7 @@ pod 'FlareLane'
 
 ## Author
 
-62019543, asxd153@gmail.com
+FlareLabs
 
 ## License
 
