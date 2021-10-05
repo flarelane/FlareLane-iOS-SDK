@@ -12,11 +12,13 @@
     "FlareLane": "admin@flarelane.com"
   },
   "source": {
-    "git": "https://github.com/flarekit/FlareLane-iOS-SDK.git",
+    "git": "https://github.com/flarelane/FlareLane-iOS-SDK.git",
     "tag": "1.0.0"
   },
   "platforms": {
     "ios": "11.0"
   },
-  "source_files": "FlareLane/Classes/**/*"
+  "source_files": "FlareLane/Classes/**/*",
+  "swift_versions": "5.0",
+  "swift_version": "5.0"
 }
