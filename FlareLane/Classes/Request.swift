@@ -14,7 +14,7 @@ final class Request {
     case serverSideError(Int)
   }
   
-  let baseURL: String = "https://service-api.flarelane.com/internal/v1/projects/\(Globals.projectId ?? "")"
+  let baseURL: String = "https://staging-service-api.flarelane.com/internal/v1/projects/\(Globals.projectId ?? "")"
   
   // MARK: - Methods
   

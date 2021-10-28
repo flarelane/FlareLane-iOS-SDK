@@ -14,12 +14,16 @@ class ColdStartNotificationManager {
   /// - Parameter launchOptions: AppDelegate didFinishLaunchingWithOptions
   static func setColdStartNotification(launchOptions: [UIApplication.LaunchOptionsKey: Any]?) {
     guard let coldStartNotification = launchOptions?[.remoteNotification] as? Dictionary<String, Any>,
+          let isFlareLane = coldStartNotification["isFlareLane"] as? Bool,
           let aps = coldStartNotification["aps"] as? Dictionary<String, Any>,
           let alert = aps["alert"] as? Dictionary<String, Any>,
           let notificationId = coldStartNotification["notificationId"] as? String,
           let body = alert["body"] as? String else {
-      
-      self.coldStartNotification = nil
+            self.coldStartNotification = nil
+            return
+          }
+    
+    if (!isFlareLane) {
       return
     }
     

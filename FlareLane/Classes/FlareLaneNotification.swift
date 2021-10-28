@@ -20,4 +20,10 @@ import Foundation
     self.title = title;
     self.url = url;
   }
-}
+  
+  static func isFlareLaneNotification (notification: UNNotification) -> Bool {
+    if (notification.request.content.userInfo["isFlareLane"] as? Bool == true) {
+      return true
+    }
+    return false
+  }}
