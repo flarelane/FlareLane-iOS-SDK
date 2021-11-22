@@ -2,8 +2,8 @@
 //  AppDelegate.swift
 //  FlareLane
 //
-//  Created by 62019543 on 09/24/2021.
-//  Copyright (c) 2021 62019543. All rights reserved.
+//  Created by FlareLane on 09/24/2021.
+//  Copyright (c) 2021 FlareLane. All rights reserved.
 //
 
 import UIKit
