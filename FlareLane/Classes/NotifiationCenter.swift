@@ -15,27 +15,15 @@ class NotificationCenter: NSObject, UNUserNotificationCenterDelegate {
   /// To handle notification converted
   func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
     Logger.verbose("Converted user notification.")
-    
-    let notificationData = response.notification.request.content
-    
-    guard let notificationId = self.getFlareLaneNotificationId(notification: response.notification) else {
+    guard let notification = FlareLaneNotification.getFlareLaneNotificationFromUNNotification(notification: response.notification) else {
       return
     }
     
-    if (ColdStartNotificationManager.coldStartNotification?.id == notificationId) {
+    if (ColdStartNotificationManager.coldStartNotification?.id == notification.id) {
       Logger.verbose("ColdStartNotification is exists. skip didReceive")
       // If the id of coldStartNotification is the same as notificationId, it stops to avoid duplicate execution
       return
     }
-    
-    
-    let notification = FlareLaneNotification(
-      id: notificationId,
-      body: notificationData.body,
-      // To avoid unexpected blank lines in place of titles
-      title: notificationData.title == "" ? nil : notificationData.title,
-      url: notificationData.userInfo["url"] as? String
-    )
     
     EventService.createConverted(notification: notification)
     
@@ -46,27 +34,13 @@ class NotificationCenter: NSObject, UNUserNotificationCenterDelegate {
   func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
     Logger.verbose("Presented user notification.")
     
-    guard let notificationId = getFlareLaneNotificationId(notification: notification) else {
+    guard let flarelaneNotification = FlareLaneNotification.getFlareLaneNotificationFromUNNotification(notification: notification) else {
       return
     }
     
-    EventService.createForegroundReceived(notificationId: notificationId)
+    EventService.createForegroundReceived(notificationId: flarelaneNotification.id)
     
     completionHandler([.alert, .sound])
-  }
-  
-  func getFlareLaneNotificationId (notification: UNNotification) -> String? {
-    if (!FlareLaneNotification.isFlareLaneNotification(notification: notification)) {
-      Logger.error("Not a notification from FlareLane.")
-      return nil
-    }
-    
-    guard let notificationId = notification.request.content.userInfo["notificationId"] as? String else {
-      Logger.error("notificationId does not set.")
-      return nil
-    }
-    
-    return notificationId
   }
   
 }
