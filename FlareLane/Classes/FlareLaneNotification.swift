@@ -49,7 +49,7 @@ import Foundation
     let notification = FlareLaneNotification(id: notificationId,
                                              body:body,
                                              title:alert["title"] as? String,
-                                             url: alert["url"] as? String)
+                                             url: userInfo["url"] as? String)
     
     return notification
   }

@@ -8,7 +8,8 @@
 import Foundation
 
 final class Globals {
-  static var sdkVersion = "1.0.3"
+  static var sdkVersion = "1.0.4"
+  static var sdkType = "native"
   
   /// projectId before initialization succeeds
   static var projectId: String? = nil

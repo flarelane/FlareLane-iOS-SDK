@@ -20,6 +20,14 @@ import UIKit
     Globals.logLevel = level
   }
   
+  /// Set sdk type
+  /// - Parameter sdkType: e.g. "native"
+  /// Must called before initWithLaunchOptions
+  @objc public static func setSdkType(sdkType: String) {
+    Logger.verbose("Set sdk type to \(sdkType)")
+    Globals.sdkType = sdkType
+  }
+  
   /// Initialize FlareLane SDK
   /// - Parameters:
   ///   - projectId: FlareLane projectId
@@ -39,7 +47,7 @@ import UIKit
     
     UNUserNotificationCenter.current().delegate = NotificationCenter.shared
     
-    appDelegate.swizzle()    
+    appDelegate.swizzle()
     
     ColdStartNotificationManager.process()
     
