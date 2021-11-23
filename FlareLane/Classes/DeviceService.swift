@@ -23,7 +23,7 @@ final class DeviceService {
       "timeZone": TimeZone.current.identifier,
       "apsEnvironment": ApsEnvironment.getEnvironmentString(),
       "bundleId": Bundle.main.bundleIdentifier,
-      "sdkType": Globals.sdkType
+      "sdkType": Globals.sdkType.rawValue
     ]
   }
   

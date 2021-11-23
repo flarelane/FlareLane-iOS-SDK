@@ -23,7 +23,7 @@ import UIKit
   /// Set sdk type
   /// - Parameter sdkType: e.g. "native"
   /// Must called before initWithLaunchOptions
-  @objc public static func setSdkType(sdkType: String) {
+  public static func setSdkType(sdkType: SdkType) {
     Logger.verbose("Set sdk type to \(sdkType)")
     Globals.sdkType = sdkType
   }
