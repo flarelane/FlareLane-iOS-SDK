@@ -7,8 +7,15 @@
 
 import Foundation
 
+public enum SdkType: String {
+  case native
+  case reactnative
+  case flutter
+}
+
 final class Globals {
-  static var sdkVersion = "1.0.3"
+  static var sdkVersion = "1.0.4"
+  static var sdkType: SdkType = .native
   
   /// projectId before initialization succeeds
   static var projectId: String? = nil

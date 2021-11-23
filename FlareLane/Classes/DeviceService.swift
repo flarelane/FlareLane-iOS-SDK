@@ -22,7 +22,8 @@ final class DeviceService {
       "countryCode": Locale.current.regionCode,
       "timeZone": TimeZone.current.identifier,
       "apsEnvironment": ApsEnvironment.getEnvironmentString(),
-      "bundleId": Bundle.main.bundleIdentifier
+      "bundleId": Bundle.main.bundleIdentifier,
+      "sdkType": Globals.sdkType.rawValue
     ]
   }
   

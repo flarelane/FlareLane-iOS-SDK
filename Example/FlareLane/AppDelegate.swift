@@ -26,7 +26,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
       FlareLane.setNotificationConvertedHandler() { payload in
         // Do something...
       }
-      
+       
         return true
     }
 
