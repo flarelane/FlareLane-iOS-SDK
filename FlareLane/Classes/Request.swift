@@ -14,21 +14,37 @@ final class Request {
     case serverSideError(Int)
   }
   
-  let baseURL: String = "https://service-api.flarelane.com/internal/v1/projects/\(Globals.projectId ?? "")"
+  var cachedURL: String?
+  func getBaseURL () -> String? {
+    if (cachedURL == nil) {
+      guard let projectId = Globals.projectId else {
+        Logger.error("Cannot request when FlareLane has not been initialized yet.");
+        return nil
+      }
+      
+      cachedURL = "https://service-api.flarelane.com/internal/v1/projects/\(projectId)"
+    }
+    
+    return cachedURL
+  }
   
   // MARK: - Methods
   
   func get(path: String, parameters: [String: String], completion: @escaping ([String: Any]?, Error?) -> Void) {
+    guard let baseURL = self.getBaseURL() else {
+      return
+    }
+    
     Logger.verbose("GET Request - path:\(path) body:\(parameters.description))")
     
     let components = { () -> URLComponents in
-      var components = URLComponents(string: "\(self.baseURL)\(path)")!
+      var components = URLComponents(string: "\(baseURL)\(path)")!
       components.queryItems = parameters.map { URLQueryItem(name: $0, value: $1) }
       components.percentEncodedQuery = components.percentEncodedQuery?.replacingOccurrences(of: "+", with: "%2B")
       return components
     }()
     
-    let request = { () -> URLRequest in 
+    let request = { () -> URLRequest in
       var request = URLRequest(url: components.url!)
       request.httpMethod = "GET"
       request.addValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -41,9 +57,9 @@ final class Request {
             let response = response as? HTTPURLResponse,
             (200 ..< 300) ~= response.statusCode,
             error == nil else {
-        completion(nil, error)
-        return
-      }
+              completion(nil, error)
+              return
+            }
       
       let responseObject = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any]
       completion(responseObject, nil)
@@ -53,10 +69,14 @@ final class Request {
   }
   
   func post(path: String, body: [String: Any?], completion: @escaping ([String: Any]?, Error?) -> Void) {
+    guard let baseURL = self.getBaseURL() else {
+      return
+    }
+    
     Logger.verbose("POST Request - path:\(path) body:\(body.description))")
     
     let request = { () -> URLRequest in
-      var request = URLRequest(url: URL(string: "\(self.baseURL)\(path)")!)
+      var request = URLRequest(url: URL(string: "\(baseURL)\(path)")!)
       request.httpMethod = "POST"
       request.httpBody = try? JSONSerialization.data(withJSONObject: body, options: [])
       request.addValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -67,9 +87,9 @@ final class Request {
       guard let data = data,
             let response = response as? HTTPURLResponse,
             error == nil else {
-        completion(nil, error)
-        return
-      }
+              completion(nil, error)
+              return
+            }
       
       if ((200 ..< 300) ~= response.statusCode) {
         let responseObject = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any]
@@ -84,10 +104,14 @@ final class Request {
   }
   
   func put(path: String, body: [String: Any?], completion: @escaping ([String: Any]?, Error?) -> Void) {
+    guard let baseURL = self.getBaseURL() else {
+      return
+    }
+    
     Logger.verbose("PUT Request - path:\(path) body:\(body.description))")
     
     let request = { () -> URLRequest in
-      var request = URLRequest(url: URL(string: "\(self.baseURL)\(path)")!)
+      var request = URLRequest(url: URL(string: "\(baseURL)\(path)")!)
       request.httpMethod = "PUT"
       request.httpBody = try? JSONSerialization.data(withJSONObject: body, options: [])
       request.addValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -98,9 +122,9 @@ final class Request {
       guard let data = data,
             let response = response as? HTTPURLResponse,
             error == nil else {
-        completion(nil, error)
-        return
-      }
+              completion(nil, error)
+              return
+            }
       
       if ((200 ..< 300) ~= response.statusCode) {
         let responseObject = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any]
@@ -115,10 +139,14 @@ final class Request {
   }
   
   func patch(path: String, body: [String: Any?], completion: @escaping ([String: Any]?, Error?) -> Void) {
+    guard let baseURL = self.getBaseURL() else {
+      return
+    }
+    
     Logger.verbose("PATCH Request - path:\(path) body:\(body.description))")
     
     let request = { () -> URLRequest in
-      var request = URLRequest(url: URL(string: "\(self.baseURL)\(path)")!)
+      var request = URLRequest(url: URL(string: "\(baseURL)\(path)")!)
       request.httpMethod = "PATCH"
       request.httpBody = try? JSONSerialization.data(withJSONObject: body, options: [])
       request.addValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -129,9 +157,9 @@ final class Request {
       guard let data = data,
             let response = response as? HTTPURLResponse,
             error == nil else {
-        completion(nil, error)
-        return
-      }
+              completion(nil, error)
+              return
+            }
       
       if ((200 ..< 300) ~= response.statusCode) {
         let responseObject = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any]
@@ -146,10 +174,14 @@ final class Request {
   }
   
   func delete(path: String, body: [String: Any?], completion: @escaping ([String: Any]?, Error?) -> Void) {
+    guard let baseURL = self.getBaseURL() else {
+      return
+    }
+    
     Logger.verbose("DELETE Request - path:\(path) body:\(body.description))")
     
     let request = { () -> URLRequest in
-      var request = URLRequest(url: URL(string: "\(self.baseURL)\(path)")!)
+      var request = URLRequest(url: URL(string: "\(baseURL)\(path)")!)
       request.httpMethod = "DELETE"
       request.httpBody = try? JSONSerialization.data(withJSONObject: body, options: [])
       request.addValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -160,9 +192,9 @@ final class Request {
       guard let data = data,
             let response = response as? HTTPURLResponse,
             error == nil else {
-        completion(nil, error)
-        return
-      }
+              completion(nil, error)
+              return
+            }
       
       if ((200 ..< 300) ~= response.statusCode) {
         let responseObject = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any]
