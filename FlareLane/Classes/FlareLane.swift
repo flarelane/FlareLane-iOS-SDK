@@ -20,12 +20,15 @@ import UIKit
     Globals.logLevel = level
   }
   
-  /// Set sdk type
-  /// - Parameter sdkType: e.g. "native"
+  /// Set sdk info
+  /// - Parameters:
+  ///   - sdkType: Platform in which the SDK runs
+  ///   - sdkVersion: Version of SDK by Platform
   /// Must called before initWithLaunchOptions
-  public static func setSdkType(sdkType: SdkType) {
-    Logger.verbose("Set sdk type to \(sdkType)")
+  public static func setSdkInfo(sdkType: SdkType, sdkVersion: String) {
+    Logger.verbose("Set sdk info to \(sdkType), \(sdkVersion)")
     Globals.sdkType = sdkType
+    Globals.sdkVersion = sdkVersion
   }
   
   /// Initialize FlareLane SDK
