@@ -41,7 +41,7 @@ import Foundation
           }
     
     let isFlareLane = userInfo["isFlareLane"] as? Bool
-    if (isFlareLane != nil && isFlareLane != true) {
+    if (isFlareLane != true) {
       Logger.error("Not a notification from FlareLane.")
       return nil
     }
@@ -69,12 +69,5 @@ import Foundation
     }
     
     return flarelaneNotification
-  }
-  
-  static func isFlareLaneNotification (notification: UNNotification) -> Bool {
-    if (notification.request.content.userInfo["isFlareLane"] as? Bool == true) {
-      return true
-    }
-    return false
   }
 }
