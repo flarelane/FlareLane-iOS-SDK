@@ -2,7 +2,7 @@
   "name": "FlareLane",
   "version": "1.0.5",
   "summary": "FlareLane iOS SDK",
-  "description": "TODO: Add long description of the pod here.",
+  "description": "FlareLane iOS SDK",
   "homepage": "https://github.com/flarelane/FlareLane-iOS-SDK",
   "license": {
     "type": "MIT",

@@ -7,26 +7,29 @@
 
 import Foundation
 
-@objc public class FlareLaneNotification: NSObject {
+@objc open class FlareLaneNotification: NSObject {
   // In case of structure, it is difficult to be compatible with Objective-C
   public var id: String
   public var body: String
   public var title: String?
   public var url: String?
+  public var imageUrl: String?
   
-  public init(id: String, body: String, title: String?, url: String?) {
+  public init(id: String, body: String, title: String?, url: String?, imageUrl: String?) {
     self.id = id;
     self.body = body;
     // To avoid unexpected blank lines in place of titles
     self.title = title == "" ? nil : title;
-    self.url = url;
+    self.url = url == "" ? nil : url;
+    self.imageUrl = imageUrl == "" ? nil : imageUrl;
   }
   
   public func toDictionary () -> [String: Optional<String>] {
     let data = ["id": self.id,
                 "title": self.title,
                 "body": self.body,
-                "url": self.url]
+                "url": self.url,
+                "imageUrl": self.imageUrl]
     
     return data
   }
@@ -49,7 +52,8 @@ import Foundation
     let notification = FlareLaneNotification(id: notificationId,
                                              body:body,
                                              title:alert["title"] as? String,
-                                             url: userInfo["url"] as? String)
+                                             url: userInfo["url"] as? String,
+                                             imageUrl: userInfo["imageUrl"] as? String)
     
     return notification
   }
@@ -63,8 +67,8 @@ import Foundation
     return notification;
   }
   
-  static func getFlareLaneNotificationFromUNNotification(notification: UNNotification) -> FlareLaneNotification? {
-    guard let flarelaneNotification = FlareLaneNotification.getFlareLaneNotificationFromUserInfo(userInfo: notification.request.content.userInfo) else {
+  public static func getFlareLaneNotificationFromUNNotificationContent(_ notificationContent: UNNotificationContent) -> FlareLaneNotification? {
+    guard let flarelaneNotification = FlareLaneNotification.getFlareLaneNotificationFromUserInfo(userInfo: notificationContent.userInfo) else {
       return nil
     }
     

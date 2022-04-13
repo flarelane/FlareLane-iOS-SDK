@@ -10,9 +10,7 @@
 #endif
 #endif
 
-#import "FlareLane.h"
-#import "FLNNotificationServiceExtension.h"
 
-FOUNDATION_EXPORT double FlareLaneVersionNumber;
-FOUNDATION_EXPORT const unsigned char FlareLaneVersionString[];
+FOUNDATION_EXPORT double Pods_FlareLaneNotificationServiceExtensionVersionNumber;
+FOUNDATION_EXPORT const unsigned char Pods_FlareLaneNotificationServiceExtensionVersionString[];
 

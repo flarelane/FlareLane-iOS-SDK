@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		04938C102803D3AD00CED062 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04938C0F2803D3AD00CED062 /* NotificationService.swift */; };
+		04938C142803D3AD00CED062 /* FlareLaneNotificationServiceExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 04938C0D2803D3AD00CED062 /* FlareLaneNotificationServiceExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		262F9413106C54226C632E8A /* Pods_FlareLaneNotificationServiceExtension.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 77652E81821EEC4B40A0B587 /* Pods_FlareLaneNotificationServiceExtension.framework */; };
 		48152E5927150BCA5857D1A2 /* Pods_FlareLane_Tests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 225596D4A3ADBCE066DF2596 /* Pods_FlareLane_Tests.framework */; };
 		607FACD61AFB9204008FA782 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACD51AFB9204008FA782 /* AppDelegate.swift */; };
 		607FACD81AFB9204008FA782 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACD71AFB9204008FA782 /* ViewController.swift */; };
@@ -18,6 +21,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		04938C122803D3AD00CED062 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 607FACC81AFB9204008FA782 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 04938C0C2803D3AD00CED062;
+			remoteInfo = FlareLaneNotificationServiceExtension;
+		};
 		607FACE61AFB9204008FA782 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 607FACC81AFB9204008FA782 /* Project object */;
@@ -27,10 +37,28 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		04938C152803D3AD00CED062 /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				04938C142803D3AD00CED062 /* FlareLaneNotificationServiceExtension.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		03FE7084E42E1AFCF6BF7802 /* Pods-FlareLane_Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-FlareLane_Example.debug.xcconfig"; path = "Target Support Files/Pods-FlareLane_Example/Pods-FlareLane_Example.debug.xcconfig"; sourceTree = "<group>"; };
+		04938C0D2803D3AD00CED062 /* FlareLaneNotificationServiceExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = FlareLaneNotificationServiceExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		04938C0F2803D3AD00CED062 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
+		04938C112803D3AD00CED062 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		07B08EAB0A0BA231908BA6B8 /* Pods-FlareLane_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-FlareLane_Example.release.xcconfig"; path = "Target Support Files/Pods-FlareLane_Example/Pods-FlareLane_Example.release.xcconfig"; sourceTree = "<group>"; };
 		225596D4A3ADBCE066DF2596 /* Pods_FlareLane_Tests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_FlareLane_Tests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		238EC773F386DEF04ED3A6E3 /* Pods-FlareLaneNotificationServiceExtension.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-FlareLaneNotificationServiceExtension.release.xcconfig"; path = "Target Support Files/Pods-FlareLaneNotificationServiceExtension/Pods-FlareLaneNotificationServiceExtension.release.xcconfig"; sourceTree = "<group>"; };
 		2A78EC333C72CB06474C9053 /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
 		35DF8215F94521ADC5AFFD8D /* FlareLane.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = FlareLane.podspec; path = ../FlareLane.podspec; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 		4240BE1426FD77690077B6FE /* FlareLane_Example.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = FlareLane_Example.entitlements; sourceTree = "<group>"; };
@@ -46,11 +74,21 @@
 		607FACE51AFB9204008FA782 /* FlareLane_Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FlareLane_Tests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		607FACEA1AFB9204008FA782 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		607FACEB1AFB9204008FA782 /* Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tests.swift; sourceTree = "<group>"; };
+		77652E81821EEC4B40A0B587 /* Pods_FlareLaneNotificationServiceExtension.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_FlareLaneNotificationServiceExtension.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		87660AB30D3A7FA1DA06A73E /* Pods_FlareLane_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_FlareLane_Example.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		9511FD1E8E1810A517AAB13A /* Pods-FlareLaneNotificationServiceExtension.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-FlareLaneNotificationServiceExtension.debug.xcconfig"; path = "Target Support Files/Pods-FlareLaneNotificationServiceExtension/Pods-FlareLaneNotificationServiceExtension.debug.xcconfig"; sourceTree = "<group>"; };
 		95DFC016F4610FE615804B9F /* Pods-FlareLane_Tests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-FlareLane_Tests.debug.xcconfig"; path = "Target Support Files/Pods-FlareLane_Tests/Pods-FlareLane_Tests.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		04938C0A2803D3AD00CED062 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				262F9413106C54226C632E8A /* Pods_FlareLaneNotificationServiceExtension.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		607FACCD1AFB9204008FA782 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -70,11 +108,21 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		04938C0E2803D3AD00CED062 /* FlareLaneNotificationServiceExtension */ = {
+			isa = PBXGroup;
+			children = (
+				04938C0F2803D3AD00CED062 /* NotificationService.swift */,
+				04938C112803D3AD00CED062 /* Info.plist */,
+			);
+			path = FlareLaneNotificationServiceExtension;
+			sourceTree = "<group>";
+		};
 		2D1C35BB5AA4EDC64987414C /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
 				87660AB30D3A7FA1DA06A73E /* Pods_FlareLane_Example.framework */,
 				225596D4A3ADBCE066DF2596 /* Pods_FlareLane_Tests.framework */,
+				77652E81821EEC4B40A0B587 /* Pods_FlareLaneNotificationServiceExtension.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -86,6 +134,7 @@
 				607FACF51AFB993E008FA782 /* Podspec Metadata */,
 				607FACD21AFB9204008FA782 /* Example for FlareLane */,
 				607FACE81AFB9204008FA782 /* Tests */,
+				04938C0E2803D3AD00CED062 /* FlareLaneNotificationServiceExtension */,
 				607FACD11AFB9204008FA782 /* Products */,
 				9D338E93A63448FDA4B46091 /* Pods */,
 				2D1C35BB5AA4EDC64987414C /* Frameworks */,
@@ -97,6 +146,7 @@
 			children = (
 				607FACD01AFB9204008FA782 /* FlareLane_Example.app */,
 				607FACE51AFB9204008FA782 /* FlareLane_Tests.xctest */,
+				04938C0D2803D3AD00CED062 /* FlareLaneNotificationServiceExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -157,6 +207,8 @@
 				07B08EAB0A0BA231908BA6B8 /* Pods-FlareLane_Example.release.xcconfig */,
 				95DFC016F4610FE615804B9F /* Pods-FlareLane_Tests.debug.xcconfig */,
 				4EB95071D4F3355BF3E9B4AF /* Pods-FlareLane_Tests.release.xcconfig */,
+				9511FD1E8E1810A517AAB13A /* Pods-FlareLaneNotificationServiceExtension.debug.xcconfig */,
+				238EC773F386DEF04ED3A6E3 /* Pods-FlareLaneNotificationServiceExtension.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -164,6 +216,24 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		04938C0C2803D3AD00CED062 /* FlareLaneNotificationServiceExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 04938C182803D3AD00CED062 /* Build configuration list for PBXNativeTarget "FlareLaneNotificationServiceExtension" */;
+			buildPhases = (
+				C07D79EB5447AB6C67FCC37B /* [CP] Check Pods Manifest.lock */,
+				04938C092803D3AD00CED062 /* Sources */,
+				04938C0A2803D3AD00CED062 /* Frameworks */,
+				04938C0B2803D3AD00CED062 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = FlareLaneNotificationServiceExtension;
+			productName = FlareLaneNotificationServiceExtension;
+			productReference = 04938C0D2803D3AD00CED062 /* FlareLaneNotificationServiceExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		607FACCF1AFB9204008FA782 /* FlareLane_Example */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 607FACEF1AFB9204008FA782 /* Build configuration list for PBXNativeTarget "FlareLane_Example" */;
@@ -173,10 +243,12 @@
 				607FACCD1AFB9204008FA782 /* Frameworks */,
 				607FACCE1AFB9204008FA782 /* Resources */,
 				7C86EA079A3FCDD76C25F0D5 /* [CP] Embed Pods Frameworks */,
+				04938C152803D3AD00CED062 /* Embed App Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				04938C132803D3AD00CED062 /* PBXTargetDependency */,
 			);
 			name = FlareLane_Example;
 			productName = FlareLane;
@@ -208,10 +280,15 @@
 		607FACC81AFB9204008FA782 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastSwiftUpdateCheck = 0830;
+				LastSwiftUpdateCheck = 1330;
 				LastUpgradeCheck = 0830;
 				ORGANIZATIONNAME = CocoaPods;
 				TargetAttributes = {
+					04938C0C2803D3AD00CED062 = {
+						CreatedOnToolsVersion = 13.3;
+						DevelopmentTeam = KH6M9J7Q97;
+						ProvisioningStyle = Automatic;
+					};
 					607FACCF1AFB9204008FA782 = {
 						CreatedOnToolsVersion = 6.3.1;
 						DevelopmentTeam = KH6M9J7Q97;
@@ -240,11 +317,19 @@
 			targets = (
 				607FACCF1AFB9204008FA782 /* FlareLane_Example */,
 				607FACE41AFB9204008FA782 /* FlareLane_Tests */,
+				04938C0C2803D3AD00CED062 /* FlareLaneNotificationServiceExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		04938C0B2803D3AD00CED062 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		607FACCE1AFB9204008FA782 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -305,6 +390,28 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
+		C07D79EB5447AB6C67FCC37B /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-FlareLaneNotificationServiceExtension-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
 		F76CC344402D6FFE35764838 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -330,6 +437,14 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		04938C092803D3AD00CED062 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				04938C102803D3AD00CED062 /* NotificationService.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		607FACCC1AFB9204008FA782 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -350,6 +465,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		04938C132803D3AD00CED062 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 04938C0C2803D3AD00CED062 /* FlareLaneNotificationServiceExtension */;
+			targetProxy = 04938C122803D3AD00CED062 /* PBXContainerItemProxy */;
+		};
 		607FACE71AFB9204008FA782 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 607FACCF1AFB9204008FA782 /* FlareLane_Example */;
@@ -377,6 +497,77 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		04938C162803D3AD00CED062 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9511FD1E8E1810A517AAB13A /* Pods-FlareLaneNotificationServiceExtension.debug.xcconfig */;
+			buildSettings = {
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = "$(inherited)";
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = KH6M9J7Q97;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = FlareLaneNotificationServiceExtension/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = FlareLaneNotificationServiceExtension;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2022 CocoaPods. All rights reserved.";
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.flarelane.example.FlareLaneNotificationServiceExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		04938C172803D3AD00CED062 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 238EC773F386DEF04ED3A6E3 /* Pods-FlareLaneNotificationServiceExtension.release.xcconfig */;
+			buildSettings = {
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = "$(inherited)";
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = KH6M9J7Q97;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = FlareLaneNotificationServiceExtension/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = FlareLaneNotificationServiceExtension;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2022 CocoaPods. All rights reserved.";
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				MARKETING_VERSION = 1.0;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.flarelane.example.FlareLaneNotificationServiceExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		607FACED1AFB9204008FA782 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -480,6 +671,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 03FE7084E42E1AFCF6BF7802 /* Pods-FlareLane_Example.debug.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = FlareLane_Example.entitlements;
 				DEVELOPMENT_TEAM = KH6M9J7Q97;
@@ -497,6 +689,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 07B08EAB0A0BA231908BA6B8 /* Pods-FlareLane_Example.release.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = FlareLane_Example.entitlements;
 				DEVELOPMENT_TEAM = KH6M9J7Q97;
@@ -553,6 +746,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		04938C182803D3AD00CED062 /* Build configuration list for PBXNativeTarget "FlareLaneNotificationServiceExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				04938C162803D3AD00CED062 /* Debug */,
+				04938C172803D3AD00CED062 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		607FACCB1AFB9204008FA782 /* Build configuration list for PBXProject "FlareLane" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

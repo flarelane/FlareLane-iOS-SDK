@@ -7,43 +7,57 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		0501A6E2DDF9CC561ADDEA9701F71A18 /* FlareLane-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 599D2DDC7B10A60FC1840B795042CD0F /* FlareLane-dummy.m */; };
 		0805F9DC7151BDE8A1CA42F5A8616776 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 73010CC983E3809BECEE5348DA1BB8C6 /* Foundation.framework */; };
-		0F82E6F6758AC41BB382AD67F9FBC217 /* FlareLane.swift in Sources */ = {isa = PBXBuildFile; fileRef = 806FC25A50ED3140626F171E046A5B0C /* FlareLane.swift */; };
-		1F51819DB4F7F9D1B3415A85068D1D9C /* FlareLane-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = F3952323C809329CB28B5ECFF11C6F4C /* FlareLane-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		1F86E8504CA1F7746E95B9E79B72F10C /* Pods-FlareLane_Example-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 14E60EDF8FF7C2C3BFF2009C6116FA6E /* Pods-FlareLane_Example-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		2652984B258BEC0252C7758CF04B916A /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDE693F1ECA24A48B77F313C8AAA1EA4 /* Logger.swift */; };
-		290F50CFFF66D5FB76DF160FF0C01133 /* Pods-FlareLane_Tests-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = AD49F44CF30680E29CDCA5622BE37BE8 /* Pods-FlareLane_Tests-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		0C3AA64C06FAAE1DA6AF8555695344F1 /* Globals.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79D8CCFC7525A9416A7971FDADA3D787 /* Globals.swift */; };
+		0E284BD05CD7387150F1411C645FB761 /* DeviceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 473A8047C0E1EA5B79D6F503C3EE8991 /* DeviceService.swift */; };
+		1E47EB28815A5A09CB0017B3078A8CAE /* Request.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AB94388B906A688B7904AD2C78E320D /* Request.swift */; };
+		1F86E8504CA1F7746E95B9E79B72F10C /* Pods-FlareLane_Example-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 3563DB129F807B705C15C10101A80123 /* Pods-FlareLane_Example-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		290F50CFFF66D5FB76DF160FF0C01133 /* Pods-FlareLane_Tests-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 019DFD57A86B34650EB7BE464527D527 /* Pods-FlareLane_Tests-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		2BA28F4C2F2B8F8A84A4ED612719539B /* FlareLane+Date.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEADE60000C82251C19A7E551751AB38 /* FlareLane+Date.swift */; };
 		2D70B765532D9E14A91D489CC89061AA /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 73010CC983E3809BECEE5348DA1BB8C6 /* Foundation.framework */; };
-		3CE4172BBFB9EA5E7967150F2CC599FF /* Pods-FlareLane_Example-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = F54543D60BE0155491A4472C8C1BD0A2 /* Pods-FlareLane_Example-dummy.m */; };
-		48603101278768DB0BFA60348139FAA9 /* FlareLane+UIDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 062BB0E85B8FB3A892FBA9F60131291C /* FlareLane+UIDevice.swift */; };
-		50F5157AE736D3F226034CA7C74AB85F /* EventHandlers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72AD2EEF1B16F6095ED0EB29CA99D783 /* EventHandlers.swift */; };
-		635058FF64C9879C84F07E723451311E /* FlareLane.h in Headers */ = {isa = PBXBuildFile; fileRef = 56E61A416F33EC9C2981B37F75D5A0C7 /* FlareLane.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		64CCF5C2C783FB45F6D9D6DBA0EA44B1 /* EventService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C886F9166F6C5D6288872BFB35C7E9C /* EventService.swift */; };
-		724E2E1B49BBE75D3A8638F6CC35BE39 /* FlareLane+Date.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7FEAE199BDF43BF998F2BF662878025 /* FlareLane+Date.swift */; };
-		8F69C4FE124DD2F10DE72626CCFD63E0 /* PermissionState.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE0C46836C4FD5F6F5C003D7479E01B8 /* PermissionState.swift */; };
-		99B30EEA3A55CC61066F7FB0F8682911 /* ApsEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92747288093489151C0AC0FF19A26A3F /* ApsEnvironment.swift */; };
-		9CCBF676965A3A1043C2E4DA1CFA8308 /* FlareLaneAppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28EF1607194A14069EF68ED8965AA20F /* FlareLaneAppDelegate.swift */; };
-		9D88BF8D85A86EEF9606B660F7F9F0EC /* Request.swift in Sources */ = {isa = PBXBuildFile; fileRef = 132F274F30C77DE22FDC1E1993F0D1C8 /* Request.swift */; };
-		A2E00E2CB8FA43C52D879B4971D96B08 /* Pods-FlareLane_Tests-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = E067EB0796B579E0C5F14B99616EC07B /* Pods-FlareLane_Tests-dummy.m */; };
-		AE6778590E170C2A4EC5904C4794FA27 /* DeviceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F172CCB19D36866D6F97F523E0906CF /* DeviceService.swift */; };
-		AF7AB1CA762E8C2F0D739EA43794724B /* NotifiationCenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A41E71B03B9D828BD6A4E3FE559A18EA /* NotifiationCenter.swift */; };
-		B5A6CF0FC6F80D3B40CA1B7222EA47FD /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 73010CC983E3809BECEE5348DA1BB8C6 /* Foundation.framework */; };
-		E321614AEFD2BAA0DA10E70B826E046C /* API.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C9AF6286E53BC7F9C1C17DCD14A268B /* API.swift */; };
-		E8791945F0BFC179D4E8FDB2F11CEEA7 /* FlareLaneNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAF9B39B34D776C4BF92234ECA9FA04D /* FlareLaneNotification.swift */; };
-		EC06F3C79AD3E0801215F0F583320DF5 /* ColdStartNotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30D3649FD94AEE95DE1EB20C15DFE7DA /* ColdStartNotificationManager.swift */; };
-		F34C9DFBE3C27449034506606A081E31 /* Globals.swift in Sources */ = {isa = PBXBuildFile; fileRef = 461A5933F7786220A70BC670E4A00B66 /* Globals.swift */; };
+		3CE4172BBFB9EA5E7967150F2CC599FF /* Pods-FlareLane_Example-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 3A94FE1CA718B59A370AC969337E713B /* Pods-FlareLane_Example-dummy.m */; };
+		3F36C4816FCE8B5C3BEEA96B06390B61 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C0F5E2B54D0CAF5F5963AF9BA8ECF63 /* Logger.swift */; };
+		40AA7731DD55A5EDC0642C28991052A3 /* FlareLane+UIDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9280A48C8F83EFBCD11091B4E2A69C78 /* FlareLane+UIDevice.swift */; };
+		461C34ABB6F01BBFAF4D47948CBD68CF /* ColdStartNotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96087B787474E2DE8AF6A80EF1056BC7 /* ColdStartNotificationManager.swift */; };
+		46657C1A9BB56FDEB7FC3BFA2C5AFA42 /* NotifiationCenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA97882525A0B1DD0A36EDC5ED8F1567 /* NotifiationCenter.swift */; };
+		4B181C352594D74776A1499CB2F6DF8A /* FlareLaneNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB988A2C12C349FD87138423A65E51EC /* FlareLaneNotification.swift */; };
+		69280C50FF135EA26503AAC343B29686 /* Pods-FlareLaneNotificationServiceExtension-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = CCD8FDF902FD67E297108047A94CA0D6 /* Pods-FlareLaneNotificationServiceExtension-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		6DF5E32EC52EDC199FC8F9B51295058A /* PermissionState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67A6665FBAE30D21C7A6438AC9ECB65A /* PermissionState.swift */; };
+		6F45324ED604EBA4881D2D501432EDC0 /* FlareLane.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AEA3939112827A7B2D42E16E82283E2 /* FlareLane.swift */; };
+		7CE16EF0D446E0F9570547B0D2D0E986 /* EventService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E677BF988C24CEBFCDE8B61C1B729C22 /* EventService.swift */; };
+		851CC6F609DF77C367207AB0F0611C39 /* FlareLaneExtensionHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC82A24CA2F748121A1E81AE45FC69FA /* FlareLaneExtensionHelper.swift */; };
+		858529C2707C60351FE354AC2DB082D8 /* EventHandlers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58DCCBD19E6199304D7DF46D1E5344BC /* EventHandlers.swift */; };
+		96AD177503A130478F795C25FCF15F2B /* FLNNotificationServiceExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = FF51FA7B32E8D74FDFE81C7D545808AA /* FLNNotificationServiceExtension.m */; };
+		A018B3006A594C0C985E54A7974921D4 /* FlareLane-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = E4386CECFFEE282BC6E872553A71919C /* FlareLane-dummy.m */; };
+		A2E00E2CB8FA43C52D879B4971D96B08 /* Pods-FlareLane_Tests-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = F8C37711E0D8A00AE2AF3172F7B9555E /* Pods-FlareLane_Tests-dummy.m */; };
+		AA7961DD3DDA699BA6BC5B3E9FDBCFCD /* FlareLaneNotificationServiceExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44AEFC3078ADC960C07D7380F212C844 /* FlareLaneNotificationServiceExtension.swift */; };
+		B1E4B2553D0CA8C61CAD6F038254D3E8 /* ApsEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 790E2C6E56C18E0BB4793AE150946806 /* ApsEnvironment.swift */; };
+		C52786B22E83C885B8BE051A44C29BCF /* FLNNotificationServiceExtension.h in Headers */ = {isa = PBXBuildFile; fileRef = E6F6A44C12DE5F12F97A5E835CB25EB0 /* FLNNotificationServiceExtension.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		D913C76B1E36930DFCB58C91789C7839 /* Pods-FlareLaneNotificationServiceExtension-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 1996EC9F38B600A5B871713BF07B3438 /* Pods-FlareLaneNotificationServiceExtension-dummy.m */; };
+		D9737D91670CC6DF62020558E2462770 /* FlareLaneAppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D0BB9361B1CED6ABAE8576D041EB3D2 /* FlareLaneAppDelegate.swift */; };
+		E5660AC9238D41E38514B6C8FBB47051 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 73010CC983E3809BECEE5348DA1BB8C6 /* Foundation.framework */; };
+		F4CFA39F453088512E8885827C6BCFFD /* FlareLane.h in Headers */ = {isa = PBXBuildFile; fileRef = A46EB0847BF411FEEAFFEF67D5B99CA2 /* FlareLane.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		F5E2EDC92ED804B9CBEEB7D094CF0EF6 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 73010CC983E3809BECEE5348DA1BB8C6 /* Foundation.framework */; };
+		F6D34C4FD1CD1604B75524B1104698ED /* API.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71137FC4FCD2E4175BD572A73EFD045A /* API.swift */; };
+		F8F4A45F163C505048965DFB51F84338 /* FlareLane-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 417A83C58E5CC734C07270B0CF945BB6 /* FlareLane-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		A091FFD35BB97101811B2530BE0DFD10 /* PBXContainerItemProxy */ = {
+		44D74459C868CCF7B30EC2B8D2FF6E05 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 9C5E71E8B90FFB34112F70B7C498D4FC;
 			remoteInfo = "Pods-FlareLane_Example";
 		};
-		C931495FB2678677F907F0CABCE30D54 /* PBXContainerItemProxy */ = {
+		DBBF6813DC01B72C8279CBB59F1DEF0F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 4F55632C78B657D8466AB296B2B37276;
+			remoteInfo = FlareLane;
+		};
+		E813BC2D7883CAAA90DA3D574FE92A3F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
 			proxyType = 1;
@@ -53,63 +67,84 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		062BB0E85B8FB3A892FBA9F60131291C /* FlareLane+UIDevice.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = "FlareLane+UIDevice.swift"; path = "FlareLane/Classes/FlareLane+UIDevice.swift"; sourceTree = "<group>"; };
-		1070DEB544F05217D8A70614B46E86E0 /* Pods-FlareLane_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-FlareLane_Example.release.xcconfig"; sourceTree = "<group>"; };
-		132F274F30C77DE22FDC1E1993F0D1C8 /* Request.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Request.swift; path = FlareLane/Classes/Request.swift; sourceTree = "<group>"; };
-		14E60EDF8FF7C2C3BFF2009C6116FA6E /* Pods-FlareLane_Example-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Pods-FlareLane_Example-umbrella.h"; sourceTree = "<group>"; };
-		1516095BBB34E45D38F8A79313EA7403 /* Pods-FlareLane_Example-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-FlareLane_Example-Info.plist"; sourceTree = "<group>"; };
-		1F60677F4B845BA57DDA7CBA178107F4 /* FlareLane.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = FlareLane.debug.xcconfig; sourceTree = "<group>"; };
-		28EF1607194A14069EF68ED8965AA20F /* FlareLaneAppDelegate.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = FlareLaneAppDelegate.swift; path = FlareLane/Classes/FlareLaneAppDelegate.swift; sourceTree = "<group>"; };
-		2C886F9166F6C5D6288872BFB35C7E9C /* EventService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = EventService.swift; path = FlareLane/Classes/EventService.swift; sourceTree = "<group>"; };
-		30D3649FD94AEE95DE1EB20C15DFE7DA /* ColdStartNotificationManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ColdStartNotificationManager.swift; path = FlareLane/Classes/ColdStartNotificationManager.swift; sourceTree = "<group>"; };
+		019DFD57A86B34650EB7BE464527D527 /* Pods-FlareLane_Tests-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Pods-FlareLane_Tests-umbrella.h"; sourceTree = "<group>"; };
+		087DCA2A32EADEEA522B2252EB9B93F1 /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; path = README.md; sourceTree = "<group>"; };
+		102FA4F57778E64DAB5CDDD3EAF464E0 /* Pods-FlareLane_Example.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = "Pods-FlareLane_Example.modulemap"; sourceTree = "<group>"; };
+		1035E5B7DEF81FD77509ED0D0229A099 /* FlareLane-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "FlareLane-Info.plist"; sourceTree = "<group>"; };
+		14D6CE1C447A7DAF9B776AC430A10751 /* Pods-FlareLane_Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-FlareLane_Example.debug.xcconfig"; sourceTree = "<group>"; };
+		15E92F42B703355FBE26B08849F0B7C0 /* Pods-FlareLaneNotificationServiceExtension */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = "Pods-FlareLaneNotificationServiceExtension"; path = Pods_FlareLaneNotificationServiceExtension.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		1996EC9F38B600A5B871713BF07B3438 /* Pods-FlareLaneNotificationServiceExtension-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-FlareLaneNotificationServiceExtension-dummy.m"; sourceTree = "<group>"; };
+		2825C49563E97B5A9E9BE0A1F1FF4457 /* Pods-FlareLane_Tests.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = "Pods-FlareLane_Tests.modulemap"; sourceTree = "<group>"; };
+		28DD07C7B851C2C207365BC5D364571D /* FlareLane.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = FlareLane.release.xcconfig; sourceTree = "<group>"; };
 		3436617CD45C3D08C96029819753F35C /* Pods-FlareLane_Example */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = "Pods-FlareLane_Example"; path = Pods_FlareLane_Example.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		3E598F3B21E2B95A638C499BBD9455FA /* FlareLane-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "FlareLane-prefix.pch"; sourceTree = "<group>"; };
-		461A5933F7786220A70BC670E4A00B66 /* Globals.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Globals.swift; path = FlareLane/Classes/Globals.swift; sourceTree = "<group>"; };
+		3563DB129F807B705C15C10101A80123 /* Pods-FlareLane_Example-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Pods-FlareLane_Example-umbrella.h"; sourceTree = "<group>"; };
+		35EB94C92C75196511219FC042453FC9 /* FlareLane.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = FlareLane.debug.xcconfig; sourceTree = "<group>"; };
+		3A94FE1CA718B59A370AC969337E713B /* Pods-FlareLane_Example-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-FlareLane_Example-dummy.m"; sourceTree = "<group>"; };
+		3F3207BCF09A3B9E8D8FAF6FC6C3DC33 /* Pods-FlareLane_Tests-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-FlareLane_Tests-acknowledgements.plist"; sourceTree = "<group>"; };
+		417A83C58E5CC734C07270B0CF945BB6 /* FlareLane-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "FlareLane-umbrella.h"; sourceTree = "<group>"; };
+		44AEFC3078ADC960C07D7380F212C844 /* FlareLaneNotificationServiceExtension.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = FlareLaneNotificationServiceExtension.swift; path = FlareLane/Classes/FlareLaneNotificationServiceExtension.swift; sourceTree = "<group>"; };
+		463E917961BB85ABC8BB2090644E33A4 /* Pods-FlareLane_Example-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-FlareLane_Example-acknowledgements.plist"; sourceTree = "<group>"; };
 		46EE48D057B7CF47EAE4F46C1F423018 /* Pods-FlareLane_Tests */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = "Pods-FlareLane_Tests"; path = Pods_FlareLane_Tests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		4C9AF6286E53BC7F9C1C17DCD14A268B /* API.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = API.swift; path = FlareLane/Classes/API.swift; sourceTree = "<group>"; };
-		56E61A416F33EC9C2981B37F75D5A0C7 /* FlareLane.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = FlareLane.h; path = FlareLane/Classes/FlareLane.h; sourceTree = "<group>"; };
-		57807418F68867992B28F66458E7C813 /* Pods-FlareLane_Example-frameworks.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-FlareLane_Example-frameworks.sh"; sourceTree = "<group>"; };
-		599D2DDC7B10A60FC1840B795042CD0F /* FlareLane-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "FlareLane-dummy.m"; sourceTree = "<group>"; };
-		5F172CCB19D36866D6F97F523E0906CF /* DeviceService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DeviceService.swift; path = FlareLane/Classes/DeviceService.swift; sourceTree = "<group>"; };
-		66BAC2A61C0FB3FBFF7FD590CE8C6EFF /* Pods-FlareLane_Tests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-FlareLane_Tests.release.xcconfig"; sourceTree = "<group>"; };
-		6DC2348F67F6190208F476FBE64813A4 /* Pods-FlareLane_Example.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = "Pods-FlareLane_Example.modulemap"; sourceTree = "<group>"; };
-		7131033F6B1F188DDBC88624C54F231C /* Pods-FlareLane_Tests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-FlareLane_Tests.debug.xcconfig"; sourceTree = "<group>"; };
-		72AD2EEF1B16F6095ED0EB29CA99D783 /* EventHandlers.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = EventHandlers.swift; path = FlareLane/Classes/EventHandlers.swift; sourceTree = "<group>"; };
+		473A8047C0E1EA5B79D6F503C3EE8991 /* DeviceService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DeviceService.swift; path = FlareLane/Classes/DeviceService.swift; sourceTree = "<group>"; };
+		4DAFCA1E6DA8B54840175CA30C0CC5AF /* FlareLane.podspec */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; indentWidth = 2; lastKnownFileType = text; path = FlareLane.podspec; sourceTree = "<group>"; tabWidth = 2; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
+		51540F5D87032529E2A4333B89A0038F /* Pods-FlareLane_Tests-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-FlareLane_Tests-Info.plist"; sourceTree = "<group>"; };
+		58DCCBD19E6199304D7DF46D1E5344BC /* EventHandlers.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = EventHandlers.swift; path = FlareLane/Classes/EventHandlers.swift; sourceTree = "<group>"; };
+		6030192341341EDDA7CEF945870EAF9D /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; path = LICENSE; sourceTree = "<group>"; };
+		67A6665FBAE30D21C7A6438AC9ECB65A /* PermissionState.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = PermissionState.swift; path = FlareLane/Classes/PermissionState.swift; sourceTree = "<group>"; };
+		70695346C27E23C1FD470F8FEF79B010 /* Pods-FlareLaneNotificationServiceExtension.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = "Pods-FlareLaneNotificationServiceExtension.modulemap"; sourceTree = "<group>"; };
+		71137FC4FCD2E4175BD572A73EFD045A /* API.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = API.swift; path = FlareLane/Classes/API.swift; sourceTree = "<group>"; };
 		73010CC983E3809BECEE5348DA1BB8C6 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS14.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
-		806FC25A50ED3140626F171E046A5B0C /* FlareLane.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = FlareLane.swift; path = FlareLane/Classes/FlareLane.swift; sourceTree = "<group>"; };
+		7891C14772B205631DED39B2C308FCF1 /* Pods-FlareLaneNotificationServiceExtension.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-FlareLaneNotificationServiceExtension.debug.xcconfig"; sourceTree = "<group>"; };
+		790E2C6E56C18E0BB4793AE150946806 /* ApsEnvironment.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ApsEnvironment.swift; path = FlareLane/Classes/ApsEnvironment.swift; sourceTree = "<group>"; };
+		79D8CCFC7525A9416A7971FDADA3D787 /* Globals.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Globals.swift; path = FlareLane/Classes/Globals.swift; sourceTree = "<group>"; };
+		7AB94388B906A688B7904AD2C78E320D /* Request.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Request.swift; path = FlareLane/Classes/Request.swift; sourceTree = "<group>"; };
+		7D0BB9361B1CED6ABAE8576D041EB3D2 /* FlareLaneAppDelegate.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = FlareLaneAppDelegate.swift; path = FlareLane/Classes/FlareLaneAppDelegate.swift; sourceTree = "<group>"; };
+		80A94C6D444C7AE1A0302ECBF157B996 /* Pods-FlareLaneNotificationServiceExtension.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-FlareLaneNotificationServiceExtension.release.xcconfig"; sourceTree = "<group>"; };
 		80F8E38BB63A1BFA758E7426E85AA8DA /* FlareLane */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = FlareLane; path = FlareLane.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		8F172F3C004CEE505D8BC4DAD2622485 /* FlareLane.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = FlareLane.modulemap; sourceTree = "<group>"; };
-		92747288093489151C0AC0FF19A26A3F /* ApsEnvironment.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ApsEnvironment.swift; path = FlareLane/Classes/ApsEnvironment.swift; sourceTree = "<group>"; };
+		8373D03A3CD72B99EE6B0B2FED1FE743 /* Pods-FlareLane_Example-frameworks.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-FlareLane_Example-frameworks.sh"; sourceTree = "<group>"; };
+		8420FA9B9BA565CB8CF52C29D521CCD3 /* Pods-FlareLaneNotificationServiceExtension-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-FlareLaneNotificationServiceExtension-acknowledgements.plist"; sourceTree = "<group>"; };
+		8C0F5E2B54D0CAF5F5963AF9BA8ECF63 /* Logger.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Logger.swift; path = FlareLane/Classes/Logger.swift; sourceTree = "<group>"; };
+		8E3F7FA89AFECFD6D708E4DEFCE28208 /* Pods-FlareLaneNotificationServiceExtension-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-FlareLaneNotificationServiceExtension-acknowledgements.markdown"; sourceTree = "<group>"; };
+		9280A48C8F83EFBCD11091B4E2A69C78 /* FlareLane+UIDevice.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = "FlareLane+UIDevice.swift"; path = "FlareLane/Classes/FlareLane+UIDevice.swift"; sourceTree = "<group>"; };
+		94A56E2059A672EBCEA3485B6947B5B7 /* Pods-FlareLane_Tests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-FlareLane_Tests.debug.xcconfig"; sourceTree = "<group>"; };
+		95A55B09021D7E8B7748F3D7E0A58920 /* Pods-FlareLaneNotificationServiceExtension-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-FlareLaneNotificationServiceExtension-Info.plist"; sourceTree = "<group>"; };
+		96087B787474E2DE8AF6A80EF1056BC7 /* ColdStartNotificationManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ColdStartNotificationManager.swift; path = FlareLane/Classes/ColdStartNotificationManager.swift; sourceTree = "<group>"; };
+		9AEA3939112827A7B2D42E16E82283E2 /* FlareLane.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = FlareLane.swift; path = FlareLane/Classes/FlareLane.swift; sourceTree = "<group>"; };
 		9D940727FF8FB9C785EB98E56350EF41 /* Podfile */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; indentWidth = 2; lastKnownFileType = text; name = Podfile; path = ../Podfile; sourceTree = SOURCE_ROOT; tabWidth = 2; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
-		9FC2A8785020583B910D8509CABEA7C4 /* Pods-FlareLane_Example-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-FlareLane_Example-acknowledgements.markdown"; sourceTree = "<group>"; };
-		A41E71B03B9D828BD6A4E3FE559A18EA /* NotifiationCenter.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = NotifiationCenter.swift; path = FlareLane/Classes/NotifiationCenter.swift; sourceTree = "<group>"; };
-		AD49F44CF30680E29CDCA5622BE37BE8 /* Pods-FlareLane_Tests-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Pods-FlareLane_Tests-umbrella.h"; sourceTree = "<group>"; };
-		AD72BB4032274BDC49A25627B2DBB918 /* Pods-FlareLane_Tests-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-FlareLane_Tests-Info.plist"; sourceTree = "<group>"; };
-		AE0C46836C4FD5F6F5C003D7479E01B8 /* PermissionState.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = PermissionState.swift; path = FlareLane/Classes/PermissionState.swift; sourceTree = "<group>"; };
-		AE86A184D5730E3FB4FF5E0266E83BA7 /* Pods-FlareLane_Example-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-FlareLane_Example-acknowledgements.plist"; sourceTree = "<group>"; };
-		AEA24205594956DBB4383BA458717AA9 /* Pods-FlareLane_Tests.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = "Pods-FlareLane_Tests.modulemap"; sourceTree = "<group>"; };
-		B15D98A307EF94B7D28973BA270F0B1E /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; path = LICENSE; sourceTree = "<group>"; };
-		BABC30FF20F1592C8C75ECA2116422D9 /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; path = README.md; sourceTree = "<group>"; };
-		CAF9B39B34D776C4BF92234ECA9FA04D /* FlareLaneNotification.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = FlareLaneNotification.swift; path = FlareLane/Classes/FlareLaneNotification.swift; sourceTree = "<group>"; };
-		CD640C4A32DA1C6FCB79BEF38007C841 /* FlareLane-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "FlareLane-Info.plist"; sourceTree = "<group>"; };
-		DDE693F1ECA24A48B77F313C8AAA1EA4 /* Logger.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Logger.swift; path = FlareLane/Classes/Logger.swift; sourceTree = "<group>"; };
-		E067EB0796B579E0C5F14B99616EC07B /* Pods-FlareLane_Tests-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-FlareLane_Tests-dummy.m"; sourceTree = "<group>"; };
-		E24DF8B610C17BF460D7BF4C1BE06B23 /* FlareLane.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = FlareLane.release.xcconfig; sourceTree = "<group>"; };
-		E7FEAE199BDF43BF998F2BF662878025 /* FlareLane+Date.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = "FlareLane+Date.swift"; path = "FlareLane/Classes/FlareLane+Date.swift"; sourceTree = "<group>"; };
-		E9A99BB1CB73C8F037155851630DACDF /* Pods-FlareLane_Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-FlareLane_Example.debug.xcconfig"; sourceTree = "<group>"; };
-		EABABB82A2E303D42443057BB6B16970 /* Pods-FlareLane_Tests-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-FlareLane_Tests-acknowledgements.markdown"; sourceTree = "<group>"; };
-		F260970CAD9A71F1E1A4FCA821B87E81 /* FlareLane.podspec */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; indentWidth = 2; lastKnownFileType = text; path = FlareLane.podspec; sourceTree = "<group>"; tabWidth = 2; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
-		F3952323C809329CB28B5ECFF11C6F4C /* FlareLane-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "FlareLane-umbrella.h"; sourceTree = "<group>"; };
-		F54543D60BE0155491A4472C8C1BD0A2 /* Pods-FlareLane_Example-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-FlareLane_Example-dummy.m"; sourceTree = "<group>"; };
-		F7D7E333C8FDB51E7607837646725795 /* Pods-FlareLane_Tests-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-FlareLane_Tests-acknowledgements.plist"; sourceTree = "<group>"; };
+		A46EB0847BF411FEEAFFEF67D5B99CA2 /* FlareLane.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = FlareLane.h; path = FlareLane/Classes/FlareLane.h; sourceTree = "<group>"; };
+		A5EECC80686F4014BC80C808E5F72F9C /* Pods-FlareLane_Tests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-FlareLane_Tests.release.xcconfig"; sourceTree = "<group>"; };
+		AC82A24CA2F748121A1E81AE45FC69FA /* FlareLaneExtensionHelper.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = FlareLaneExtensionHelper.swift; path = FlareLane/Classes/FlareLaneExtensionHelper.swift; sourceTree = "<group>"; };
+		BB988A2C12C349FD87138423A65E51EC /* FlareLaneNotification.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = FlareLaneNotification.swift; path = FlareLane/Classes/FlareLaneNotification.swift; sourceTree = "<group>"; };
+		C8398CF58A3C981BDE6EC05A460CE0BC /* FlareLane.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = FlareLane.modulemap; sourceTree = "<group>"; };
+		CCD8FDF902FD67E297108047A94CA0D6 /* Pods-FlareLaneNotificationServiceExtension-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Pods-FlareLaneNotificationServiceExtension-umbrella.h"; sourceTree = "<group>"; };
+		CDDB2A57087CC1FD1E1728431A71D92E /* Pods-FlareLane_Example-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-FlareLane_Example-acknowledgements.markdown"; sourceTree = "<group>"; };
+		DB730338E5B436583ACEDBF2CD1231DA /* Pods-FlareLane_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-FlareLane_Example.release.xcconfig"; sourceTree = "<group>"; };
+		E10AA3921B66E43BE8FB88E3B452C34D /* Pods-FlareLane_Example-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-FlareLane_Example-Info.plist"; sourceTree = "<group>"; };
+		E4386CECFFEE282BC6E872553A71919C /* FlareLane-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "FlareLane-dummy.m"; sourceTree = "<group>"; };
+		E677BF988C24CEBFCDE8B61C1B729C22 /* EventService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = EventService.swift; path = FlareLane/Classes/EventService.swift; sourceTree = "<group>"; };
+		E6F6A44C12DE5F12F97A5E835CB25EB0 /* FLNNotificationServiceExtension.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = FLNNotificationServiceExtension.h; path = FlareLane/Classes/FLNNotificationServiceExtension.h; sourceTree = "<group>"; };
+		EEADE60000C82251C19A7E551751AB38 /* FlareLane+Date.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = "FlareLane+Date.swift"; path = "FlareLane/Classes/FlareLane+Date.swift"; sourceTree = "<group>"; };
+		F142FD4A6EC245F228F7122B7F1E7DE7 /* FlareLane-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "FlareLane-prefix.pch"; sourceTree = "<group>"; };
+		F8C37711E0D8A00AE2AF3172F7B9555E /* Pods-FlareLane_Tests-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-FlareLane_Tests-dummy.m"; sourceTree = "<group>"; };
+		FA97882525A0B1DD0A36EDC5ED8F1567 /* NotifiationCenter.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = NotifiationCenter.swift; path = FlareLane/Classes/NotifiationCenter.swift; sourceTree = "<group>"; };
+		FED851A05531957D9D1CA9CBCAFEA8C6 /* Pods-FlareLane_Tests-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-FlareLane_Tests-acknowledgements.markdown"; sourceTree = "<group>"; };
+		FF51FA7B32E8D74FDFE81C7D545808AA /* FLNNotificationServiceExtension.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = FLNNotificationServiceExtension.m; path = FlareLane/Classes/FLNNotificationServiceExtension.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		0863DD70EA578B3907F0BBC74D97EA7E /* Frameworks */ = {
+		0F217A4ABC6F1B09CB9773972001F801 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B5A6CF0FC6F80D3B40CA1B7222EA47FD /* Foundation.framework in Frameworks */,
+				F5E2EDC92ED804B9CBEEB7D094CF0EF6 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3F9F965B4C6EE3B7FF21DDDD5048E75C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E5660AC9238D41E38514B6C8FBB47051 /* Foundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -132,81 +167,29 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		035A44D8573CF167AC779E39FC4566A0 /* FlareLane */ = {
+		162E00ED7EDF407522BEEE2D9414AFB6 /* Support Files */ = {
 			isa = PBXGroup;
 			children = (
-				4C9AF6286E53BC7F9C1C17DCD14A268B /* API.swift */,
-				92747288093489151C0AC0FF19A26A3F /* ApsEnvironment.swift */,
-				30D3649FD94AEE95DE1EB20C15DFE7DA /* ColdStartNotificationManager.swift */,
-				5F172CCB19D36866D6F97F523E0906CF /* DeviceService.swift */,
-				72AD2EEF1B16F6095ED0EB29CA99D783 /* EventHandlers.swift */,
-				2C886F9166F6C5D6288872BFB35C7E9C /* EventService.swift */,
-				56E61A416F33EC9C2981B37F75D5A0C7 /* FlareLane.h */,
-				806FC25A50ED3140626F171E046A5B0C /* FlareLane.swift */,
-				E7FEAE199BDF43BF998F2BF662878025 /* FlareLane+Date.swift */,
-				062BB0E85B8FB3A892FBA9F60131291C /* FlareLane+UIDevice.swift */,
-				28EF1607194A14069EF68ED8965AA20F /* FlareLaneAppDelegate.swift */,
-				CAF9B39B34D776C4BF92234ECA9FA04D /* FlareLaneNotification.swift */,
-				461A5933F7786220A70BC670E4A00B66 /* Globals.swift */,
-				DDE693F1ECA24A48B77F313C8AAA1EA4 /* Logger.swift */,
-				A41E71B03B9D828BD6A4E3FE559A18EA /* NotifiationCenter.swift */,
-				AE0C46836C4FD5F6F5C003D7479E01B8 /* PermissionState.swift */,
-				132F274F30C77DE22FDC1E1993F0D1C8 /* Request.swift */,
-				B1605A939C48798813B95B804A1930BE /* Pod */,
-				F52A385CF560BC9D069EB6CD44AB3829 /* Support Files */,
+				C8398CF58A3C981BDE6EC05A460CE0BC /* FlareLane.modulemap */,
+				E4386CECFFEE282BC6E872553A71919C /* FlareLane-dummy.m */,
+				1035E5B7DEF81FD77509ED0D0229A099 /* FlareLane-Info.plist */,
+				F142FD4A6EC245F228F7122B7F1E7DE7 /* FlareLane-prefix.pch */,
+				417A83C58E5CC734C07270B0CF945BB6 /* FlareLane-umbrella.h */,
+				35EB94C92C75196511219FC042453FC9 /* FlareLane.debug.xcconfig */,
+				28DD07C7B851C2C207365BC5D364571D /* FlareLane.release.xcconfig */,
 			);
-			name = FlareLane;
-			path = ../..;
+			name = "Support Files";
+			path = "Example/Pods/Target Support Files/FlareLane";
 			sourceTree = "<group>";
 		};
-		0D1E4D1C6732B7967147095774285772 /* Pods-FlareLane_Tests */ = {
+		4A0117B446D917816EB11BAF86C87FC2 /* Pod */ = {
 			isa = PBXGroup;
 			children = (
-				AEA24205594956DBB4383BA458717AA9 /* Pods-FlareLane_Tests.modulemap */,
-				EABABB82A2E303D42443057BB6B16970 /* Pods-FlareLane_Tests-acknowledgements.markdown */,
-				F7D7E333C8FDB51E7607837646725795 /* Pods-FlareLane_Tests-acknowledgements.plist */,
-				E067EB0796B579E0C5F14B99616EC07B /* Pods-FlareLane_Tests-dummy.m */,
-				AD72BB4032274BDC49A25627B2DBB918 /* Pods-FlareLane_Tests-Info.plist */,
-				AD49F44CF30680E29CDCA5622BE37BE8 /* Pods-FlareLane_Tests-umbrella.h */,
-				7131033F6B1F188DDBC88624C54F231C /* Pods-FlareLane_Tests.debug.xcconfig */,
-				66BAC2A61C0FB3FBFF7FD590CE8C6EFF /* Pods-FlareLane_Tests.release.xcconfig */,
+				4DAFCA1E6DA8B54840175CA30C0CC5AF /* FlareLane.podspec */,
+				6030192341341EDDA7CEF945870EAF9D /* LICENSE */,
+				087DCA2A32EADEEA522B2252EB9B93F1 /* README.md */,
 			);
-			name = "Pods-FlareLane_Tests";
-			path = "Target Support Files/Pods-FlareLane_Tests";
-			sourceTree = "<group>";
-		};
-		1E18B591714FA16478A8FA8DDB1310C6 /* Targets Support Files */ = {
-			isa = PBXGroup;
-			children = (
-				3C37479BEB5F26131A870659DDCAD036 /* Pods-FlareLane_Example */,
-				0D1E4D1C6732B7967147095774285772 /* Pods-FlareLane_Tests */,
-			);
-			name = "Targets Support Files";
-			sourceTree = "<group>";
-		};
-		26DA38D4B395AAEE240A4767DF6061DA /* Development Pods */ = {
-			isa = PBXGroup;
-			children = (
-				035A44D8573CF167AC779E39FC4566A0 /* FlareLane */,
-			);
-			name = "Development Pods";
-			sourceTree = "<group>";
-		};
-		3C37479BEB5F26131A870659DDCAD036 /* Pods-FlareLane_Example */ = {
-			isa = PBXGroup;
-			children = (
-				6DC2348F67F6190208F476FBE64813A4 /* Pods-FlareLane_Example.modulemap */,
-				9FC2A8785020583B910D8509CABEA7C4 /* Pods-FlareLane_Example-acknowledgements.markdown */,
-				AE86A184D5730E3FB4FF5E0266E83BA7 /* Pods-FlareLane_Example-acknowledgements.plist */,
-				F54543D60BE0155491A4472C8C1BD0A2 /* Pods-FlareLane_Example-dummy.m */,
-				57807418F68867992B28F66458E7C813 /* Pods-FlareLane_Example-frameworks.sh */,
-				1516095BBB34E45D38F8A79313EA7403 /* Pods-FlareLane_Example-Info.plist */,
-				14E60EDF8FF7C2C3BFF2009C6116FA6E /* Pods-FlareLane_Example-umbrella.h */,
-				E9A99BB1CB73C8F037155851630DACDF /* Pods-FlareLane_Example.debug.xcconfig */,
-				1070DEB544F05217D8A70614B46E86E0 /* Pods-FlareLane_Example.release.xcconfig */,
-			);
-			name = "Pods-FlareLane_Example";
-			path = "Target Support Files/Pods-FlareLane_Example";
+			name = Pod;
 			sourceTree = "<group>";
 		};
 		578452D2E740E91742655AC8F1636D1F /* iOS */ = {
@@ -217,34 +200,106 @@
 			name = iOS;
 			sourceTree = "<group>";
 		};
-		85A2618D3799568ACFC8360E5382E28B /* Products */ = {
+		7249B10FE76BAD3DE84AAA8D7D27C231 /* Targets Support Files */ = {
+			isa = PBXGroup;
+			children = (
+				FBFAF2AAB98FB4572BA7FCFDBEEB6E49 /* Pods-FlareLane_Example */,
+				A0984691DBF9B4D19B51803DCCDD504E /* Pods-FlareLane_Tests */,
+				C15A4BD3B95FA0DDA75753D54CA72491 /* Pods-FlareLaneNotificationServiceExtension */,
+			);
+			name = "Targets Support Files";
+			sourceTree = "<group>";
+		};
+		9797D62567AC986F645F2320D6066C60 /* Products */ = {
 			isa = PBXGroup;
 			children = (
 				80F8E38BB63A1BFA758E7426E85AA8DA /* FlareLane */,
 				3436617CD45C3D08C96029819753F35C /* Pods-FlareLane_Example */,
 				46EE48D057B7CF47EAE4F46C1F423018 /* Pods-FlareLane_Tests */,
+				15E92F42B703355FBE26B08849F0B7C0 /* Pods-FlareLaneNotificationServiceExtension */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		B1605A939C48798813B95B804A1930BE /* Pod */ = {
+		A0984691DBF9B4D19B51803DCCDD504E /* Pods-FlareLane_Tests */ = {
 			isa = PBXGroup;
 			children = (
-				F260970CAD9A71F1E1A4FCA821B87E81 /* FlareLane.podspec */,
-				B15D98A307EF94B7D28973BA270F0B1E /* LICENSE */,
-				BABC30FF20F1592C8C75ECA2116422D9 /* README.md */,
+				2825C49563E97B5A9E9BE0A1F1FF4457 /* Pods-FlareLane_Tests.modulemap */,
+				FED851A05531957D9D1CA9CBCAFEA8C6 /* Pods-FlareLane_Tests-acknowledgements.markdown */,
+				3F3207BCF09A3B9E8D8FAF6FC6C3DC33 /* Pods-FlareLane_Tests-acknowledgements.plist */,
+				F8C37711E0D8A00AE2AF3172F7B9555E /* Pods-FlareLane_Tests-dummy.m */,
+				51540F5D87032529E2A4333B89A0038F /* Pods-FlareLane_Tests-Info.plist */,
+				019DFD57A86B34650EB7BE464527D527 /* Pods-FlareLane_Tests-umbrella.h */,
+				94A56E2059A672EBCEA3485B6947B5B7 /* Pods-FlareLane_Tests.debug.xcconfig */,
+				A5EECC80686F4014BC80C808E5F72F9C /* Pods-FlareLane_Tests.release.xcconfig */,
 			);
-			name = Pod;
+			name = "Pods-FlareLane_Tests";
+			path = "Target Support Files/Pods-FlareLane_Tests";
+			sourceTree = "<group>";
+		};
+		C15A4BD3B95FA0DDA75753D54CA72491 /* Pods-FlareLaneNotificationServiceExtension */ = {
+			isa = PBXGroup;
+			children = (
+				70695346C27E23C1FD470F8FEF79B010 /* Pods-FlareLaneNotificationServiceExtension.modulemap */,
+				8E3F7FA89AFECFD6D708E4DEFCE28208 /* Pods-FlareLaneNotificationServiceExtension-acknowledgements.markdown */,
+				8420FA9B9BA565CB8CF52C29D521CCD3 /* Pods-FlareLaneNotificationServiceExtension-acknowledgements.plist */,
+				1996EC9F38B600A5B871713BF07B3438 /* Pods-FlareLaneNotificationServiceExtension-dummy.m */,
+				95A55B09021D7E8B7748F3D7E0A58920 /* Pods-FlareLaneNotificationServiceExtension-Info.plist */,
+				CCD8FDF902FD67E297108047A94CA0D6 /* Pods-FlareLaneNotificationServiceExtension-umbrella.h */,
+				7891C14772B205631DED39B2C308FCF1 /* Pods-FlareLaneNotificationServiceExtension.debug.xcconfig */,
+				80A94C6D444C7AE1A0302ECBF157B996 /* Pods-FlareLaneNotificationServiceExtension.release.xcconfig */,
+			);
+			name = "Pods-FlareLaneNotificationServiceExtension";
+			path = "Target Support Files/Pods-FlareLaneNotificationServiceExtension";
+			sourceTree = "<group>";
+		};
+		CB23C29344DACA835B1A76C5B8236D44 /* Development Pods */ = {
+			isa = PBXGroup;
+			children = (
+				CBBB3EFD45F23BE5DBCF1560B7B811DD /* FlareLane */,
+			);
+			name = "Development Pods";
+			sourceTree = "<group>";
+		};
+		CBBB3EFD45F23BE5DBCF1560B7B811DD /* FlareLane */ = {
+			isa = PBXGroup;
+			children = (
+				71137FC4FCD2E4175BD572A73EFD045A /* API.swift */,
+				790E2C6E56C18E0BB4793AE150946806 /* ApsEnvironment.swift */,
+				96087B787474E2DE8AF6A80EF1056BC7 /* ColdStartNotificationManager.swift */,
+				473A8047C0E1EA5B79D6F503C3EE8991 /* DeviceService.swift */,
+				58DCCBD19E6199304D7DF46D1E5344BC /* EventHandlers.swift */,
+				E677BF988C24CEBFCDE8B61C1B729C22 /* EventService.swift */,
+				A46EB0847BF411FEEAFFEF67D5B99CA2 /* FlareLane.h */,
+				9AEA3939112827A7B2D42E16E82283E2 /* FlareLane.swift */,
+				EEADE60000C82251C19A7E551751AB38 /* FlareLane+Date.swift */,
+				9280A48C8F83EFBCD11091B4E2A69C78 /* FlareLane+UIDevice.swift */,
+				7D0BB9361B1CED6ABAE8576D041EB3D2 /* FlareLaneAppDelegate.swift */,
+				AC82A24CA2F748121A1E81AE45FC69FA /* FlareLaneExtensionHelper.swift */,
+				BB988A2C12C349FD87138423A65E51EC /* FlareLaneNotification.swift */,
+				44AEFC3078ADC960C07D7380F212C844 /* FlareLaneNotificationServiceExtension.swift */,
+				E6F6A44C12DE5F12F97A5E835CB25EB0 /* FLNNotificationServiceExtension.h */,
+				FF51FA7B32E8D74FDFE81C7D545808AA /* FLNNotificationServiceExtension.m */,
+				79D8CCFC7525A9416A7971FDADA3D787 /* Globals.swift */,
+				8C0F5E2B54D0CAF5F5963AF9BA8ECF63 /* Logger.swift */,
+				FA97882525A0B1DD0A36EDC5ED8F1567 /* NotifiationCenter.swift */,
+				67A6665FBAE30D21C7A6438AC9ECB65A /* PermissionState.swift */,
+				7AB94388B906A688B7904AD2C78E320D /* Request.swift */,
+				4A0117B446D917816EB11BAF86C87FC2 /* Pod */,
+				162E00ED7EDF407522BEEE2D9414AFB6 /* Support Files */,
+			);
+			name = FlareLane;
+			path = ../..;
 			sourceTree = "<group>";
 		};
 		CF1408CF629C7361332E53B88F7BD30C = {
 			isa = PBXGroup;
 			children = (
 				9D940727FF8FB9C785EB98E56350EF41 /* Podfile */,
-				26DA38D4B395AAEE240A4767DF6061DA /* Development Pods */,
+				CB23C29344DACA835B1A76C5B8236D44 /* Development Pods */,
 				D210D550F4EA176C3123ED886F8F87F5 /* Frameworks */,
-				85A2618D3799568ACFC8360E5382E28B /* Products */,
-				1E18B591714FA16478A8FA8DDB1310C6 /* Targets Support Files */,
+				9797D62567AC986F645F2320D6066C60 /* Products */,
+				7249B10FE76BAD3DE84AAA8D7D27C231 /* Targets Support Files */,
 			);
 			sourceTree = "<group>";
 		};
@@ -256,38 +311,49 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		F52A385CF560BC9D069EB6CD44AB3829 /* Support Files */ = {
+		FBFAF2AAB98FB4572BA7FCFDBEEB6E49 /* Pods-FlareLane_Example */ = {
 			isa = PBXGroup;
 			children = (
-				8F172F3C004CEE505D8BC4DAD2622485 /* FlareLane.modulemap */,
-				599D2DDC7B10A60FC1840B795042CD0F /* FlareLane-dummy.m */,
-				CD640C4A32DA1C6FCB79BEF38007C841 /* FlareLane-Info.plist */,
-				3E598F3B21E2B95A638C499BBD9455FA /* FlareLane-prefix.pch */,
-				F3952323C809329CB28B5ECFF11C6F4C /* FlareLane-umbrella.h */,
-				1F60677F4B845BA57DDA7CBA178107F4 /* FlareLane.debug.xcconfig */,
-				E24DF8B610C17BF460D7BF4C1BE06B23 /* FlareLane.release.xcconfig */,
+				102FA4F57778E64DAB5CDDD3EAF464E0 /* Pods-FlareLane_Example.modulemap */,
+				CDDB2A57087CC1FD1E1728431A71D92E /* Pods-FlareLane_Example-acknowledgements.markdown */,
+				463E917961BB85ABC8BB2090644E33A4 /* Pods-FlareLane_Example-acknowledgements.plist */,
+				3A94FE1CA718B59A370AC969337E713B /* Pods-FlareLane_Example-dummy.m */,
+				8373D03A3CD72B99EE6B0B2FED1FE743 /* Pods-FlareLane_Example-frameworks.sh */,
+				E10AA3921B66E43BE8FB88E3B452C34D /* Pods-FlareLane_Example-Info.plist */,
+				3563DB129F807B705C15C10101A80123 /* Pods-FlareLane_Example-umbrella.h */,
+				14D6CE1C447A7DAF9B776AC430A10751 /* Pods-FlareLane_Example.debug.xcconfig */,
+				DB730338E5B436583ACEDBF2CD1231DA /* Pods-FlareLane_Example.release.xcconfig */,
 			);
-			name = "Support Files";
-			path = "Example/Pods/Target Support Files/FlareLane";
+			name = "Pods-FlareLane_Example";
+			path = "Target Support Files/Pods-FlareLane_Example";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
+		138E93FD3BE60FCEB20312CDD8805AE1 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F4CFA39F453088512E8885827C6BCFFD /* FlareLane.h in Headers */,
+				F8F4A45F163C505048965DFB51F84338 /* FlareLane-umbrella.h in Headers */,
+				C52786B22E83C885B8BE051A44C29BCF /* FLNNotificationServiceExtension.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B4168A7ABE523C4678A2313CBDB4085F /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				69280C50FF135EA26503AAC343B29686 /* Pods-FlareLaneNotificationServiceExtension-umbrella.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		C3B2567FC6AE1A519CA0F07A561AD642 /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				1F86E8504CA1F7746E95B9E79B72F10C /* Pods-FlareLane_Example-umbrella.h in Headers */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		EE20C220294BB321537845003926E60F /* Headers */ = {
-			isa = PBXHeadersBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				635058FF64C9879C84F07E723451311E /* FlareLane.h in Headers */,
-				1F51819DB4F7F9D1B3415A85068D1D9C /* FlareLane-umbrella.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -304,12 +370,12 @@
 /* Begin PBXNativeTarget section */
 		4F55632C78B657D8466AB296B2B37276 /* FlareLane */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = DE06769144078BBBBBA1DD5E62871429 /* Build configuration list for PBXNativeTarget "FlareLane" */;
+			buildConfigurationList = 4C139B2098E860C8A841940A40410460 /* Build configuration list for PBXNativeTarget "FlareLane" */;
 			buildPhases = (
-				EE20C220294BB321537845003926E60F /* Headers */,
-				FF2374E7B51D3CAA33AECF82042181A9 /* Sources */,
-				0863DD70EA578B3907F0BBC74D97EA7E /* Frameworks */,
-				90AB8C8211BBB837CA67B0615CA83DC9 /* Resources */,
+				138E93FD3BE60FCEB20312CDD8805AE1 /* Headers */,
+				AD3920AA5376A9579606FAD9240B91D0 /* Sources */,
+				0F217A4ABC6F1B09CB9773972001F801 /* Frameworks */,
+				304DF0AE0BA74EC6388350ED56A83F30 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -318,6 +384,25 @@
 			name = FlareLane;
 			productName = FlareLane;
 			productReference = 80F8E38BB63A1BFA758E7426E85AA8DA /* FlareLane */;
+			productType = "com.apple.product-type.framework";
+		};
+		847B6A9C7A6A255B8259961E515C4C1E /* Pods-FlareLaneNotificationServiceExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 0612CA61CD1E39DAE217983405E9BA9E /* Build configuration list for PBXNativeTarget "Pods-FlareLaneNotificationServiceExtension" */;
+			buildPhases = (
+				B4168A7ABE523C4678A2313CBDB4085F /* Headers */,
+				CFD59FB4193E598D96732981272396DD /* Sources */,
+				3F9F965B4C6EE3B7FF21DDDD5048E75C /* Frameworks */,
+				8BCF4E2153972626648F1D042B5CBDA2 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				950F09D0F12BB4DA999D3A30C4C73C55 /* PBXTargetDependency */,
+			);
+			name = "Pods-FlareLaneNotificationServiceExtension";
+			productName = Pods_FlareLaneNotificationServiceExtension;
+			productReference = 15E92F42B703355FBE26B08849F0B7C0 /* Pods-FlareLaneNotificationServiceExtension */;
 			productType = "com.apple.product-type.framework";
 		};
 		9C5E71E8B90FFB34112F70B7C498D4FC /* Pods-FlareLane_Example */ = {
@@ -332,7 +417,7 @@
 			buildRules = (
 			);
 			dependencies = (
-				58E0B5A96A65DACD34F9BA8DF8E4B933 /* PBXTargetDependency */,
+				D7ACF3AED3F9D71E6254F4DC70CCA3DE /* PBXTargetDependency */,
 			);
 			name = "Pods-FlareLane_Example";
 			productName = Pods_FlareLane_Example;
@@ -351,7 +436,7 @@
 			buildRules = (
 			);
 			dependencies = (
-				71A0EAFE31D2A4B8BCFEA398267A6A75 /* PBXTargetDependency */,
+				8D30B12272FAE26AE9617C1EF1E7C6AF /* PBXTargetDependency */,
 			);
 			name = "Pods-FlareLane_Tests";
 			productName = Pods_FlareLane_Tests;
@@ -376,18 +461,26 @@
 				en,
 			);
 			mainGroup = CF1408CF629C7361332E53B88F7BD30C;
-			productRefGroup = 85A2618D3799568ACFC8360E5382E28B /* Products */;
+			productRefGroup = 9797D62567AC986F645F2320D6066C60 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
 				4F55632C78B657D8466AB296B2B37276 /* FlareLane */,
 				9C5E71E8B90FFB34112F70B7C498D4FC /* Pods-FlareLane_Example */,
 				F6F633038042F8038DC9DC2DD08B4D66 /* Pods-FlareLane_Tests */,
+				847B6A9C7A6A255B8259961E515C4C1E /* Pods-FlareLaneNotificationServiceExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		304DF0AE0BA74EC6388350ED56A83F30 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		7DC4AD321EF2A4B63E319E0AFA45C074 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -395,7 +488,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		90AB8C8211BBB837CA67B0615CA83DC9 /* Resources */ = {
+		8BCF4E2153972626648F1D042B5CBDA2 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -428,51 +521,68 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		FF2374E7B51D3CAA33AECF82042181A9 /* Sources */ = {
+		AD3920AA5376A9579606FAD9240B91D0 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E321614AEFD2BAA0DA10E70B826E046C /* API.swift in Sources */,
-				99B30EEA3A55CC61066F7FB0F8682911 /* ApsEnvironment.swift in Sources */,
-				EC06F3C79AD3E0801215F0F583320DF5 /* ColdStartNotificationManager.swift in Sources */,
-				AE6778590E170C2A4EC5904C4794FA27 /* DeviceService.swift in Sources */,
-				50F5157AE736D3F226034CA7C74AB85F /* EventHandlers.swift in Sources */,
-				64CCF5C2C783FB45F6D9D6DBA0EA44B1 /* EventService.swift in Sources */,
-				0F82E6F6758AC41BB382AD67F9FBC217 /* FlareLane.swift in Sources */,
-				724E2E1B49BBE75D3A8638F6CC35BE39 /* FlareLane+Date.swift in Sources */,
-				48603101278768DB0BFA60348139FAA9 /* FlareLane+UIDevice.swift in Sources */,
-				0501A6E2DDF9CC561ADDEA9701F71A18 /* FlareLane-dummy.m in Sources */,
-				9CCBF676965A3A1043C2E4DA1CFA8308 /* FlareLaneAppDelegate.swift in Sources */,
-				E8791945F0BFC179D4E8FDB2F11CEEA7 /* FlareLaneNotification.swift in Sources */,
-				F34C9DFBE3C27449034506606A081E31 /* Globals.swift in Sources */,
-				2652984B258BEC0252C7758CF04B916A /* Logger.swift in Sources */,
-				AF7AB1CA762E8C2F0D739EA43794724B /* NotifiationCenter.swift in Sources */,
-				8F69C4FE124DD2F10DE72626CCFD63E0 /* PermissionState.swift in Sources */,
-				9D88BF8D85A86EEF9606B660F7F9F0EC /* Request.swift in Sources */,
+				F6D34C4FD1CD1604B75524B1104698ED /* API.swift in Sources */,
+				B1E4B2553D0CA8C61CAD6F038254D3E8 /* ApsEnvironment.swift in Sources */,
+				461C34ABB6F01BBFAF4D47948CBD68CF /* ColdStartNotificationManager.swift in Sources */,
+				0E284BD05CD7387150F1411C645FB761 /* DeviceService.swift in Sources */,
+				858529C2707C60351FE354AC2DB082D8 /* EventHandlers.swift in Sources */,
+				7CE16EF0D446E0F9570547B0D2D0E986 /* EventService.swift in Sources */,
+				6F45324ED604EBA4881D2D501432EDC0 /* FlareLane.swift in Sources */,
+				2BA28F4C2F2B8F8A84A4ED612719539B /* FlareLane+Date.swift in Sources */,
+				40AA7731DD55A5EDC0642C28991052A3 /* FlareLane+UIDevice.swift in Sources */,
+				A018B3006A594C0C985E54A7974921D4 /* FlareLane-dummy.m in Sources */,
+				D9737D91670CC6DF62020558E2462770 /* FlareLaneAppDelegate.swift in Sources */,
+				851CC6F609DF77C367207AB0F0611C39 /* FlareLaneExtensionHelper.swift in Sources */,
+				4B181C352594D74776A1499CB2F6DF8A /* FlareLaneNotification.swift in Sources */,
+				AA7961DD3DDA699BA6BC5B3E9FDBCFCD /* FlareLaneNotificationServiceExtension.swift in Sources */,
+				96AD177503A130478F795C25FCF15F2B /* FLNNotificationServiceExtension.m in Sources */,
+				0C3AA64C06FAAE1DA6AF8555695344F1 /* Globals.swift in Sources */,
+				3F36C4816FCE8B5C3BEEA96B06390B61 /* Logger.swift in Sources */,
+				46657C1A9BB56FDEB7FC3BFA2C5AFA42 /* NotifiationCenter.swift in Sources */,
+				6DF5E32EC52EDC199FC8F9B51295058A /* PermissionState.swift in Sources */,
+				1E47EB28815A5A09CB0017B3078A8CAE /* Request.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CFD59FB4193E598D96732981272396DD /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D913C76B1E36930DFCB58C91789C7839 /* Pods-FlareLaneNotificationServiceExtension-dummy.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		58E0B5A96A65DACD34F9BA8DF8E4B933 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = FlareLane;
-			target = 4F55632C78B657D8466AB296B2B37276 /* FlareLane */;
-			targetProxy = C931495FB2678677F907F0CABCE30D54 /* PBXContainerItemProxy */;
-		};
-		71A0EAFE31D2A4B8BCFEA398267A6A75 /* PBXTargetDependency */ = {
+		8D30B12272FAE26AE9617C1EF1E7C6AF /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = "Pods-FlareLane_Example";
 			target = 9C5E71E8B90FFB34112F70B7C498D4FC /* Pods-FlareLane_Example */;
-			targetProxy = A091FFD35BB97101811B2530BE0DFD10 /* PBXContainerItemProxy */;
+			targetProxy = 44D74459C868CCF7B30EC2B8D2FF6E05 /* PBXContainerItemProxy */;
+		};
+		950F09D0F12BB4DA999D3A30C4C73C55 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = FlareLane;
+			target = 4F55632C78B657D8466AB296B2B37276 /* FlareLane */;
+			targetProxy = DBBF6813DC01B72C8279CBB59F1DEF0F /* PBXContainerItemProxy */;
+		};
+		D7ACF3AED3F9D71E6254F4DC70CCA3DE /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = FlareLane;
+			target = 4F55632C78B657D8466AB296B2B37276 /* FlareLane */;
+			targetProxy = E813BC2D7883CAAA90DA3D574FE92A3F /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		04E5E5AD4CBDFBE35235E5113FE99CA4 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 66BAC2A61C0FB3FBFF7FD590CE8C6EFF /* Pods-FlareLane_Tests.release.xcconfig */;
+			baseConfigurationReference = A5EECC80686F4014BC80C808E5F72F9C /* Pods-FlareLane_Tests.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
@@ -507,7 +617,7 @@
 		};
 		366F8732CF6C3129EE8D90AE0F02CBD8 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = E9A99BB1CB73C8F037155851630DACDF /* Pods-FlareLane_Example.debug.xcconfig */;
+			baseConfigurationReference = 14D6CE1C447A7DAF9B776AC430A10751 /* Pods-FlareLane_Example.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
@@ -541,7 +651,7 @@
 		};
 		3B3E45BA3034BF9ABAAAFC82AD63A227 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 7131033F6B1F188DDBC88624C54F231C /* Pods-FlareLane_Tests.debug.xcconfig */;
+			baseConfigurationReference = 94A56E2059A672EBCEA3485B6947B5B7 /* Pods-FlareLane_Tests.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
@@ -572,71 +682,6 @@
 				VERSION_INFO_PREFIX = "";
 			};
 			name = Debug;
-		};
-		454281B71329093970C3C8646C50CB87 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 1F60677F4B845BA57DDA7CBA178107F4 /* FlareLane.debug.xcconfig */;
-			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
-				CLANG_ENABLE_OBJC_WEAK = NO;
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				CURRENT_PROJECT_VERSION = 1;
-				DEFINES_MODULE = YES;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				GCC_PREFIX_HEADER = "Target Support Files/FlareLane/FlareLane-prefix.pch";
-				INFOPLIST_FILE = "Target Support Files/FlareLane/FlareLane-Info.plist";
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				MODULEMAP_FILE = "Target Support Files/FlareLane/FlareLane.modulemap";
-				PRODUCT_MODULE_NAME = FlareLane;
-				PRODUCT_NAME = FlareLane;
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				VERSIONING_SYSTEM = "apple-generic";
-				VERSION_INFO_PREFIX = "";
-			};
-			name = Debug;
-		};
-		6780302B571AE3D23F946EFCE7E1233C /* Release */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = E24DF8B610C17BF460D7BF4C1BE06B23 /* FlareLane.release.xcconfig */;
-			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
-				CLANG_ENABLE_OBJC_WEAK = NO;
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				CURRENT_PROJECT_VERSION = 1;
-				DEFINES_MODULE = YES;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				GCC_PREFIX_HEADER = "Target Support Files/FlareLane/FlareLane-prefix.pch";
-				INFOPLIST_FILE = "Target Support Files/FlareLane/FlareLane-Info.plist";
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				MODULEMAP_FILE = "Target Support Files/FlareLane/FlareLane.modulemap";
-				PRODUCT_MODULE_NAME = FlareLane;
-				PRODUCT_NAME = FlareLane;
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				VALIDATE_PRODUCT = YES;
-				VERSIONING_SYSTEM = "apple-generic";
-				VERSION_INFO_PREFIX = "";
-			};
-			name = Release;
 		};
 		903A0004D3E6651EFD5D2E16214D101B /* Release */ = {
 			isa = XCBuildConfiguration;
@@ -699,6 +744,38 @@
 				SYMROOT = "${SRCROOT}/../build";
 			};
 			name = Release;
+		};
+		96E45E6AB341A30352A3503778E7C4CD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 35EB94C92C75196511219FC042453FC9 /* FlareLane.debug.xcconfig */;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				GCC_PREFIX_HEADER = "Target Support Files/FlareLane/FlareLane-prefix.pch";
+				INFOPLIST_FILE = "Target Support Files/FlareLane/FlareLane-Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MODULEMAP_FILE = "Target Support Files/FlareLane/FlareLane.modulemap";
+				PRODUCT_MODULE_NAME = FlareLane;
+				PRODUCT_NAME = FlareLane;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
 		};
 		B4EFE046ACF8F37157F6E322C7FCFC28 /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -766,9 +843,78 @@
 			};
 			name = Debug;
 		};
+		C378E7CE14284F65A8CC7C3011624A0A /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 80A94C6D444C7AE1A0302ECBF157B996 /* Pods-FlareLaneNotificationServiceExtension.release.xcconfig */;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				INFOPLIST_FILE = "Target Support Files/Pods-FlareLaneNotificationServiceExtension/Pods-FlareLaneNotificationServiceExtension-Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MACH_O_TYPE = staticlib;
+				MODULEMAP_FILE = "Target Support Files/Pods-FlareLaneNotificationServiceExtension/Pods-FlareLaneNotificationServiceExtension.modulemap";
+				OTHER_LDFLAGS = "";
+				OTHER_LIBTOOLFLAGS = "";
+				PODS_ROOT = "$(SRCROOT)";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
+		C7255CFDFDAAD73D618ED10092366875 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7891C14772B205631DED39B2C308FCF1 /* Pods-FlareLaneNotificationServiceExtension.debug.xcconfig */;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				INFOPLIST_FILE = "Target Support Files/Pods-FlareLaneNotificationServiceExtension/Pods-FlareLaneNotificationServiceExtension-Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MACH_O_TYPE = staticlib;
+				MODULEMAP_FILE = "Target Support Files/Pods-FlareLaneNotificationServiceExtension/Pods-FlareLaneNotificationServiceExtension.modulemap";
+				OTHER_LDFLAGS = "";
+				OTHER_LIBTOOLFLAGS = "";
+				PODS_ROOT = "$(SRCROOT)";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
 		D86625033DD09A04271CFF0CE1882054 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 1070DEB544F05217D8A70614B46E86E0 /* Pods-FlareLane_Example.release.xcconfig */;
+			baseConfigurationReference = DB730338E5B436583ACEDBF2CD1231DA /* Pods-FlareLane_Example.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
@@ -801,9 +947,51 @@
 			};
 			name = Release;
 		};
+		E7627BE7F51764004290D26879D68003 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 28DD07C7B851C2C207365BC5D364571D /* FlareLane.release.xcconfig */;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				GCC_PREFIX_HEADER = "Target Support Files/FlareLane/FlareLane-prefix.pch";
+				INFOPLIST_FILE = "Target Support Files/FlareLane/FlareLane-Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MODULEMAP_FILE = "Target Support Files/FlareLane/FlareLane.modulemap";
+				PRODUCT_MODULE_NAME = FlareLane;
+				PRODUCT_NAME = FlareLane;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		0612CA61CD1E39DAE217983405E9BA9E /* Build configuration list for PBXNativeTarget "Pods-FlareLaneNotificationServiceExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C7255CFDFDAAD73D618ED10092366875 /* Debug */,
+				C378E7CE14284F65A8CC7C3011624A0A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		3A6561027F0E0994E8B0C14793DACC68 /* Build configuration list for PBXNativeTarget "Pods-FlareLane_Tests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -822,20 +1010,20 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		4C139B2098E860C8A841940A40410460 /* Build configuration list for PBXNativeTarget "FlareLane" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				96E45E6AB341A30352A3503778E7C4CD /* Debug */,
+				E7627BE7F51764004290D26879D68003 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		A1013297529BF897A35D02F53C307A9C /* Build configuration list for PBXNativeTarget "Pods-FlareLane_Example" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				366F8732CF6C3129EE8D90AE0F02CBD8 /* Debug */,
 				D86625033DD09A04271CFF0CE1882054 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		DE06769144078BBBBBA1DD5E62871429 /* Build configuration list for PBXNativeTarget "FlareLane" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				454281B71329093970C3C8646C50CB87 /* Debug */,
-				6780302B571AE3D23F946EFCE7E1233C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

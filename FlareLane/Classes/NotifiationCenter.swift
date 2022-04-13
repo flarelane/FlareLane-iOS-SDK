@@ -7,6 +7,7 @@
 
 import UserNotifications
 
+@available(iOSApplicationExtension, unavailable)
 class NotificationCenter: NSObject, UNUserNotificationCenterDelegate {
   static let shared = NotificationCenter()
   
@@ -16,7 +17,7 @@ class NotificationCenter: NSObject, UNUserNotificationCenterDelegate {
   func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
     Logger.verbose("Converted user notification.")
     
-    if let notification = FlareLaneNotification.getFlareLaneNotificationFromUNNotification(notification: response.notification) {
+    if let notification = FlareLaneNotification.getFlareLaneNotificationFromUNNotificationContent(response.notification.request.content) {
       if (ColdStartNotificationManager.coldStartNotification?.id == notification.id) {
         Logger.verbose("ColdStartNotification is exists. skip didReceive")
         // If the id of coldStartNotification is the same as notificationId, it stops to avoid duplicate execution
@@ -33,7 +34,8 @@ class NotificationCenter: NSObject, UNUserNotificationCenterDelegate {
   func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
     Logger.verbose("Presented user notification.")
     
-    if let flarelaneNotification = FlareLaneNotification.getFlareLaneNotificationFromUNNotification(notification: notification) {
+    if let flarelaneNotification = FlareLaneNotification.getFlareLaneNotificationFromUNNotificationContent(notification.request.content) {
+      Logger.verbose("notification received: \(flarelaneNotification.toDictionary())")
       EventService.createForegroundReceived(notificationId: flarelaneNotification.id)
     }
     

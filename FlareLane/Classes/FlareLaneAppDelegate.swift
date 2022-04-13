@@ -7,6 +7,7 @@
 
 import UIKit
 
+@available(iOSApplicationExtension, unavailable)
 class FlareLaneAppDelegate {
   
   static let shared = FlareLaneAppDelegate()
