@@ -17,16 +17,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
-      
+
       // Initialize by setting logLevel and projectId.
       FlareLane.setLogLevel(level: .verbose)
       FlareLane.initWithLaunchOptions(launchOptions, projectId: "INPUT_YOUR_PROJECT_ID")
-      
+
       // Executes a handler with notification data when notification is converted.
       FlareLane.setNotificationConvertedHandler() { payload in
         // Do something...
       }
-       
+
         return true
     }
 

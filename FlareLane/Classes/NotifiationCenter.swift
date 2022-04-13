@@ -7,6 +7,7 @@
 
 import UserNotifications
 
+@available(iOSApplicationExtension, unavailable)
 class NotificationCenter: NSObject, UNUserNotificationCenterDelegate {
   static let shared = NotificationCenter()
   
@@ -15,17 +16,16 @@ class NotificationCenter: NSObject, UNUserNotificationCenterDelegate {
   /// To handle notification converted
   func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
     Logger.verbose("Converted user notification.")
-    guard let notification = FlareLaneNotification.getFlareLaneNotificationFromUNNotification(notification: response.notification) else {
-      return
-    }
     
-    if (ColdStartNotificationManager.coldStartNotification?.id == notification.id) {
-      Logger.verbose("ColdStartNotification is exists. skip didReceive")
-      // If the id of coldStartNotification is the same as notificationId, it stops to avoid duplicate execution
-      return
+    if let notification = FlareLaneNotification.getFlareLaneNotificationFromUNNotificationContent(response.notification.request.content) {
+      if (ColdStartNotificationManager.coldStartNotification?.id == notification.id) {
+        Logger.verbose("ColdStartNotification is exists. skip didReceive")
+        // If the id of coldStartNotification is the same as notificationId, it stops to avoid duplicate execution
+        return
+      }
+      
+      EventService.createConverted(notification: notification)
     }
-    
-    EventService.createConverted(notification: notification)
     
     completionHandler()
   }
@@ -34,11 +34,10 @@ class NotificationCenter: NSObject, UNUserNotificationCenterDelegate {
   func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
     Logger.verbose("Presented user notification.")
     
-    guard let flarelaneNotification = FlareLaneNotification.getFlareLaneNotificationFromUNNotification(notification: notification) else {
-      return
+    if let flarelaneNotification = FlareLaneNotification.getFlareLaneNotificationFromUNNotificationContent(notification.request.content) {
+      Logger.verbose("notification received: \(flarelaneNotification.toDictionary())")
+      EventService.createForegroundReceived(notificationId: flarelaneNotification.id)
     }
-    
-    EventService.createForegroundReceived(notificationId: flarelaneNotification.id)
     
     completionHandler([.alert, .sound])
   }

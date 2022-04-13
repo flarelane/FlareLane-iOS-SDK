@@ -1,6 +1,5 @@
-use_frameworks!
-
 platform :ios, '11.0'
+use_frameworks!
 
 target 'FlareLane_Example' do
   pod 'FlareLane', :path => '../'
@@ -10,4 +9,8 @@ target 'FlareLane_Example' do
 
     
   end
+end
+
+target 'FlareLaneNotificationServiceExtension' do
+  pod 'FlareLane', :path => '../'
 end

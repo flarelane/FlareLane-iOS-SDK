@@ -7,18 +7,16 @@
 
 import Foundation
 
+@available(iOSApplicationExtension, unavailable)
 class ColdStartNotificationManager {
   static var coldStartNotification: FlareLaneNotification?
   
   /// Set coldStartNotification in launchOptions
   /// - Parameter launchOptions: AppDelegate didFinishLaunchingWithOptions
   static func setColdStartNotification(launchOptions: [UIApplication.LaunchOptionsKey: Any]?) {
-    guard let flarelaneNotification = FlareLaneNotification.getFlareLaneNotificationFromLaunchOptions(launchOptions: launchOptions) else {
-      self.coldStartNotification = nil
-      return
+    if let flarelaneNotification = FlareLaneNotification.getFlareLaneNotificationFromLaunchOptions(launchOptions: launchOptions) {
+      self.coldStartNotification = flarelaneNotification
     }
-    
-    self.coldStartNotification = flarelaneNotification
   }
   
   /// Check and execute coldStartNotification

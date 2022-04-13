@@ -7,6 +7,7 @@
 
 import UIKit
 
+@available(iOSApplicationExtension, unavailable)
 @objc open class FlareLane: NSObject {
   static private var permissionState = PermissionState()
   static private var appDelegate = FlareLaneAppDelegate()
@@ -106,7 +107,7 @@ import UIKit
   }
   
   /// Update isSubscribe of device
-  /// - Parameter subscribed: subscribed or not
+  /// - Parameter isSubscribed: subscribed or not
   @objc public static func setIsSubscribed(isSubscribed: Bool) {
     guard let deviceId = Globals.deviceIdInUserDefaults else {
       return
