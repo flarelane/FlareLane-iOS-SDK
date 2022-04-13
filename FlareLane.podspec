@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'FlareLane'
-  s.version          = '1.0.5'
+  s.version          = '1.0.6'
   s.summary          = 'FlareLane iOS SDK'
 
 # This description is used to generate tags and improve search results.
@@ -31,10 +31,10 @@ FlareLane iOS SDK
   s.ios.deployment_target = '11.0'
 
   s.source_files = 'FlareLane/Classes/**/*'
-  
+
   # by default
   s.swift_versions = '5.0'
-  
+
   # s.resource_bundles = {
   #   'FlareLane' => ['FlareLane/Assets/*.png']
   # }
