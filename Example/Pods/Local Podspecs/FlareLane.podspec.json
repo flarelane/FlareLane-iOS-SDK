@@ -1,8 +1,7 @@
 {
   "name": "FlareLane",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "summary": "FlareLane iOS SDK",
-  "description": "FlareLane iOS SDK",
   "homepage": "https://github.com/flarelane/FlareLane-iOS-SDK",
   "license": {
     "type": "MIT",
@@ -13,7 +12,7 @@
   },
   "source": {
     "git": "https://github.com/flarelane/FlareLane-iOS-SDK.git",
-    "tag": "1.0.6"
+    "tag": "1.0.7"
   },
   "platforms": {
     "ios": "11.0"
