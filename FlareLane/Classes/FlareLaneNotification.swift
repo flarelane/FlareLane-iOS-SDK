@@ -27,7 +27,7 @@ import Foundation
   }
   
   open override var description: String {
-    return "id:\(id)\nbody:\(body)\ntitle:\(title)\nurl:\(url)\nimageUrl:\(imageUrl)\ndata:\(data)"
+    return "id:\(id)\nbody:\(body)\ntitle:\(String(describing: title))\nurl:\(String(describing: url))\nimageUrl:\(String(describing: imageUrl))\ndata:\(String(describing: data))"
   }
   
   static func getFlareLaneNotificationFromUserInfo(userInfo: [AnyHashable: Any]) -> FlareLaneNotification? {
