@@ -35,7 +35,7 @@ class NotificationCenter: NSObject, UNUserNotificationCenterDelegate {
     Logger.verbose("Presented user notification.")
     
     if let flarelaneNotification = FlareLaneNotification.getFlareLaneNotificationFromUNNotificationContent(notification.request.content) {
-      Logger.verbose("notification received: \(flarelaneNotification.toDictionary())")
+      Logger.verbose("notification received: \(flarelaneNotification)")
       EventService.createForegroundReceived(notificationId: flarelaneNotification.id)
     }
     

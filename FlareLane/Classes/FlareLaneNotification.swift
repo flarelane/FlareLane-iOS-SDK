@@ -14,24 +14,20 @@ import Foundation
   public var title: String?
   public var url: String?
   public var imageUrl: String?
+  public var data: Dictionary<String, Any>?
   
-  public init(id: String, body: String, title: String?, url: String?, imageUrl: String?) {
+  public init(id: String, body: String, title: String?, url: String?, imageUrl: String?, data: Dictionary<String, Any>?) {
     self.id = id;
     self.body = body;
+    self.data = data;
     // To avoid unexpected blank lines in place of titles
     self.title = title == "" ? nil : title;
     self.url = url == "" ? nil : url;
     self.imageUrl = imageUrl == "" ? nil : imageUrl;
   }
   
-  public func toDictionary () -> [String: Optional<String>] {
-    let data = ["id": self.id,
-                "title": self.title,
-                "body": self.body,
-                "url": self.url,
-                "imageUrl": self.imageUrl]
-    
-    return data
+  open override var description: String {
+    return "id:\(id)\nbody:\(body)\ntitle:\(title)\nurl:\(url)\nimageUrl:\(imageUrl)\ndata:\(data)"
   }
   
   static func getFlareLaneNotificationFromUserInfo(userInfo: [AnyHashable: Any]) -> FlareLaneNotification? {
@@ -53,7 +49,9 @@ import Foundation
                                              body:body,
                                              title:alert["title"] as? String,
                                              url: userInfo["url"] as? String,
-                                             imageUrl: userInfo["imageUrl"] as? String)
+                                             imageUrl: userInfo["imageUrl"] as? String,
+                                             data: userInfo["data"] as? Dictionary<String, Any>
+    )
     
     return notification
   }
