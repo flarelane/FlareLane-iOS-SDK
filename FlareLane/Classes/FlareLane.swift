@@ -116,6 +116,11 @@ import UIKit
     DeviceService.update(deviceId: deviceId, key: "isSubscribed", value: isSubscribed)
   }
   
+  /// Get id of device
+  @objc public static func getDeviceId() -> String? {
+    return Globals.deviceIdInUserDefaults
+  }
+  
   // MARK: - Private Methods
   
   /// To get notification permission

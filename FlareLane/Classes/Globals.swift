@@ -14,7 +14,7 @@ public enum SdkType: String {
 }
 
 final class Globals {
-  static var sdkVersion = "1.0.7"
+  static var sdkVersion = "1.0.8"
   static var sdkType: SdkType = .native
 
   /// projectId before initialization succeeds
