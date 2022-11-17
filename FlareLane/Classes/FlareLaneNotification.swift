@@ -31,6 +31,13 @@ import Foundation
   }
   
   static func getFlareLaneNotificationFromUserInfo(userInfo: [AnyHashable: Any]) -> FlareLaneNotification? {
+    
+    let isFlareLane = userInfo["isFlareLane"] as? Bool
+    if (isFlareLane != true) {
+      Logger.error("Not a notification from FlareLane.")
+      return nil
+    }
+    
     guard let aps = userInfo["aps"] as? Dictionary<String, Any>,
           let alert = aps["alert"] as? Dictionary<String, Any>,
           let notificationId = userInfo["notificationId"] as? String,
@@ -38,12 +45,6 @@ import Foundation
             Logger.error("Failed to get FlareLaneNotification: Missing required keys")
             return nil
           }
-    
-    let isFlareLane = userInfo["isFlareLane"] as? Bool
-    if (isFlareLane != true) {
-      Logger.error("Not a notification from FlareLane.")
-      return nil
-    }
     
     let notification = FlareLaneNotification(id: notificationId,
                                              body:body,

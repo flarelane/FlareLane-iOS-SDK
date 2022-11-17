@@ -1,6 +1,0 @@
-framework module FlareLane {
-  umbrella header "FlareLane-umbrella.h"
-
-  export *
-  module * { export * }
-}

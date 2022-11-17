@@ -13,27 +13,15 @@
 #endif
 
 @implementation FLNNotificationServiceExtension
-{
-  FlareLaneExtensionHelper *_extensionHelper;
-}
-
-- (instancetype)init
-{
-  self = [super init];
-  if (self) {
-    _extensionHelper = [FlareLaneExtensionHelper new];
-  }
-  return self;
-}
 
 - (void)didReceiveNotificationRequest:(UNNotificationRequest *)request withContentHandler:(void (^)(UNNotificationContent *contentToDeliver))contentHandler
 {
-  [_extensionHelper didReceive:request withContentHandler:contentHandler];
+  [[FlareLaneNotificationServiceExtensionHelper shared] didReceive:request withContentHandler:contentHandler];
 }
 
 - (void)serviceExtensionTimeWillExpire
 {
-    [_extensionHelper serviceExtensionTimeWillExpire];
+  [[FlareLaneNotificationServiceExtensionHelper shared] serviceExtensionTimeWillExpire];
 }
 
 @end

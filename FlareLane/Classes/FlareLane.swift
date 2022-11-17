@@ -11,6 +11,7 @@ import UIKit
 @objc open class FlareLane: NSObject {
   static private var permissionState = PermissionState()
   static private var appDelegate = FlareLaneAppDelegate()
+  static private let swizzlingEnabledKey = "FlareLaneSwizzlingEnabled"
   
   // MARK: - Public Methods
   
@@ -49,9 +50,12 @@ import UIKit
     
     ColdStartNotificationManager.setColdStartNotification(launchOptions: launchOptions)
     
-    UNUserNotificationCenter.current().delegate = NotificationCenter.shared
-    
-    appDelegate.swizzle()
+    let swizzlingEnabled = Bundle.main.object(forInfoDictionaryKey: swizzlingEnabledKey) as? Bool
+    Logger.verbose("FlareLaneSwizzlingEnabled: \(String(describing: swizzlingEnabled))")
+    if swizzlingEnabled != false {
+      UNUserNotificationCenter.current().delegate = FlareLaneNotificationCenter.shared
+      appDelegate.swizzle()
+    }
     
     ColdStartNotificationManager.process()
     

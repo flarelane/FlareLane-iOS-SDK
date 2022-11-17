@@ -1,16 +1,96 @@
 PODS:
-  - FlareLane (1.0.8)
+  - FirebaseCore (10.1.0):
+    - FirebaseCoreInternal (~> 10.0)
+    - GoogleUtilities/Environment (~> 7.8)
+    - GoogleUtilities/Logger (~> 7.8)
+  - FirebaseCoreInternal (10.1.0):
+    - "GoogleUtilities/NSData+zlib (~> 7.8)"
+  - FirebaseInstallations (10.1.0):
+    - FirebaseCore (~> 10.0)
+    - GoogleUtilities/Environment (~> 7.8)
+    - GoogleUtilities/UserDefaults (~> 7.8)
+    - PromisesObjC (~> 2.1)
+  - FirebaseMessaging (10.1.0):
+    - FirebaseCore (~> 10.0)
+    - FirebaseInstallations (~> 10.0)
+    - GoogleDataTransport (~> 9.2)
+    - GoogleUtilities/AppDelegateSwizzler (~> 7.8)
+    - GoogleUtilities/Environment (~> 7.8)
+    - GoogleUtilities/Reachability (~> 7.8)
+    - GoogleUtilities/UserDefaults (~> 7.8)
+    - nanopb (< 2.30910.0, >= 2.30908.0)
+  - FlareLane (1.1.0)
+  - GoogleDataTransport (9.2.0):
+    - GoogleUtilities/Environment (~> 7.7)
+    - nanopb (< 2.30910.0, >= 2.30908.0)
+    - PromisesObjC (< 3.0, >= 1.2)
+  - GoogleUtilities/AppDelegateSwizzler (7.10.0):
+    - GoogleUtilities/Environment
+    - GoogleUtilities/Logger
+    - GoogleUtilities/Network
+  - GoogleUtilities/Environment (7.10.0):
+    - PromisesObjC (< 3.0, >= 1.2)
+  - GoogleUtilities/Logger (7.10.0):
+    - GoogleUtilities/Environment
+  - GoogleUtilities/Network (7.10.0):
+    - GoogleUtilities/Logger
+    - "GoogleUtilities/NSData+zlib"
+    - GoogleUtilities/Reachability
+  - "GoogleUtilities/NSData+zlib (7.10.0)"
+  - GoogleUtilities/Reachability (7.10.0):
+    - GoogleUtilities/Logger
+  - GoogleUtilities/UserDefaults (7.10.0):
+    - GoogleUtilities/Logger
+  - nanopb (2.30909.0):
+    - nanopb/decode (= 2.30909.0)
+    - nanopb/encode (= 2.30909.0)
+  - nanopb/decode (2.30909.0)
+  - nanopb/encode (2.30909.0)
+  - OneSignalXCFramework (3.11.5):
+    - OneSignalXCFramework/OneSignalCore (= 3.11.5)
+    - OneSignalXCFramework/OneSignalExtension (= 3.11.5)
+    - OneSignalXCFramework/OneSignalOutcomes (= 3.11.5)
+  - OneSignalXCFramework/OneSignalCore (3.11.5)
+  - OneSignalXCFramework/OneSignalExtension (3.11.5):
+    - OneSignalXCFramework/OneSignalCore
+    - OneSignalXCFramework/OneSignalOutcomes
+  - OneSignalXCFramework/OneSignalOutcomes (3.11.5):
+    - OneSignalXCFramework/OneSignalCore
+  - PromisesObjC (2.1.1)
 
 DEPENDENCIES:
+  - FirebaseMessaging
   - FlareLane (from `../`)
+  - OneSignalXCFramework (< 4.0, >= 3.0.0)
+
+SPEC REPOS:
+  trunk:
+    - FirebaseCore
+    - FirebaseCoreInternal
+    - FirebaseInstallations
+    - FirebaseMessaging
+    - GoogleDataTransport
+    - GoogleUtilities
+    - nanopb
+    - OneSignalXCFramework
+    - PromisesObjC
 
 EXTERNAL SOURCES:
   FlareLane:
     :path: "../"
 
 SPEC CHECKSUMS:
-  FlareLane: 338d6c44a0466f20704a5cb8826f0c8ee20cd7f5
+  FirebaseCore: 55e7ae35991ccca4db03ff8d8df6ed5f17a3e4c7
+  FirebaseCoreInternal: 96d75228e10fd369564da51bd898414eb0f54df5
+  FirebaseInstallations: 99d24bac0243cf8b0e96cf5426340d211f0bcc80
+  FirebaseMessaging: 4487bbff9b9b927ba1dd3ea40d1ceb58e4ee3cb5
+  FlareLane: c1f30b437c12ddf7cd82fa88e86476a528f7dd33
+  GoogleDataTransport: 1c8145da7117bd68bbbed00cf304edb6a24de00f
+  GoogleUtilities: bad72cb363809015b1f7f19beb1f1cd23c589f95
+  nanopb: b552cce312b6c8484180ef47159bc0f65a1f0431
+  OneSignalXCFramework: 080b8f31bf0fb571dd5f4d83c02e2b5f9d5c8b04
+  PromisesObjC: ab77feca74fa2823e7af4249b8326368e61014cb
 
-PODFILE CHECKSUM: 8bf4f9a343b71e8897e8747d8cb2b5e58573f656
+PODFILE CHECKSUM: b329fad43dac024c48bf6d6786ecb5dc83182aea
 
 COCOAPODS: 1.11.3

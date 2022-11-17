@@ -8,14 +8,14 @@
 import UserNotifications
 
 @available(iOSApplicationExtension, unavailable)
-class NotificationCenter: NSObject, UNUserNotificationCenterDelegate {
-  static let shared = NotificationCenter()
+public class FlareLaneNotificationCenter: NSObject, UNUserNotificationCenterDelegate {
+  static public let shared = FlareLaneNotificationCenter()
   
   // MARK: - Delegate Methods
   
   /// To handle notification converted
-  func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
-    Logger.verbose("Converted user notification.")
+  public func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+    Logger.verbose("INVOKED")
     
     if let notification = FlareLaneNotification.getFlareLaneNotificationFromUNNotificationContent(response.notification.request.content) {
       if (ColdStartNotificationManager.coldStartNotification?.id == notification.id) {
@@ -23,16 +23,15 @@ class NotificationCenter: NSObject, UNUserNotificationCenterDelegate {
         // If the id of coldStartNotification is the same as notificationId, it stops to avoid duplicate execution
         return
       }
-      
+      Logger.verbose("Converted user notification.")
       EventService.createConverted(notification: notification)
     }
-    
     completionHandler()
   }
   
   /// To handle notification foreground received
-  func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
-    Logger.verbose("Presented user notification.")
+  public func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+    Logger.verbose("INVOKED")
     
     if let flarelaneNotification = FlareLaneNotification.getFlareLaneNotificationFromUNNotificationContent(notification.request.content) {
       Logger.verbose("notification received: \(flarelaneNotification)")

@@ -8,9 +8,9 @@
 import UIKit
 
 @available(iOSApplicationExtension, unavailable)
-class FlareLaneAppDelegate {
+public class FlareLaneAppDelegate {
   
-  static let shared = FlareLaneAppDelegate()
+  public static let shared = FlareLaneAppDelegate()
   
   func swizzle() {
     guard Globals.swizzled == false else {
@@ -20,8 +20,6 @@ class FlareLaneAppDelegate {
     
     Logger.verbose("Start swizzle UIApplicationDelegate.")
     self.swizzleDidRegisterForRemoteNotificationsWithDeviceToken()
-    self.swizzleDidFailToRegisterForRemoteNotificationsWithError()
-    self.swizzleDidReceiveRemoteNotification()
     Logger.verbose("Succeed swizzling")
   }
   
@@ -34,7 +32,7 @@ class FlareLaneAppDelegate {
     
     let originalSelector = #selector(UIApplicationDelegate.application(_:didRegisterForRemoteNotificationsWithDeviceToken:))
     let swizzledSelector = #selector(
-      FlareLaneAppDelegate.self.flarelane_application(_:didRegisterForRemoteNotificationsWithDeviceToken:))
+      FlareLaneAppDelegate.self.application(_:didRegisterForRemoteNotificationsWithDeviceToken:))
     
     guard let swizzledMethod = class_getInstanceMethod(
             FlareLaneAppDelegate.self, swizzledSelector) else {
@@ -49,57 +47,13 @@ class FlareLaneAppDelegate {
     }
   }
   
-  private func swizzleDidReceiveRemoteNotification() {
-    Logger.verbose("Start swizzleDidReceiveRemoteNotification")
-    let appDelegate = UIApplication.shared.delegate
-    let appDelegateClass: AnyClass? = object_getClass(appDelegate)
-    
-    let originalSelector = #selector(UIApplicationDelegate.application(_:didReceiveRemoteNotification:fetchCompletionHandler:))
-    let swizzledSelector = #selector(
-      FlareLaneAppDelegate.self.flarelane_application(_:didReceiveRemoteNotification:fetchCompletionHandler:))
-    
-    guard let swizzledMethod = class_getInstanceMethod(
-            FlareLaneAppDelegate.self, swizzledSelector) else {
-      Logger.error("Failed swizzleDidReceiveRemoteNotification")
-      return
-    }
-    
-    if let originalMethod = class_getInstanceMethod(appDelegateClass, originalSelector)  {
-      method_exchangeImplementations(originalMethod, swizzledMethod)
-    } else {
-      class_addMethod(appDelegateClass, originalSelector, method_getImplementation(swizzledMethod), method_getTypeEncoding(swizzledMethod))
-    }
-  }
-  
-  private func swizzleDidFailToRegisterForRemoteNotificationsWithError() {
-    Logger.verbose("Start swizzleDidFailToRegisterForRemoteNotificationsWithError")
-    let appDelegate = UIApplication.shared.delegate
-    let appDelegateClass: AnyClass? = object_getClass(appDelegate)
-    
-    let originalSelector = #selector(UIApplicationDelegate.application(_:didFailToRegisterForRemoteNotificationsWithError:))
-    let swizzledSelector = #selector(
-      FlareLaneAppDelegate.self.flarelane_application(_:didFailToRegisterForRemoteNotificationsWithError:))
-    
-    guard let swizzledMethod = class_getInstanceMethod(
-            FlareLaneAppDelegate.self, swizzledSelector) else {
-      Logger.error("Failed swizzleDidFailToRegisterForRemoteNotificationsWithError")
-      return
-    }
-    
-    if let originalMethod = class_getInstanceMethod(appDelegateClass, originalSelector)  {
-      method_exchangeImplementations(originalMethod, swizzledMethod)
-    } else {
-      class_addMethod(appDelegateClass, originalSelector, method_getImplementation(swizzledMethod), method_getTypeEncoding(swizzledMethod))
-    }
-  }
-  
   // MARK: - Swizzle Methods
   
-  @objc func flarelane_application(
+  @objc public func application(
     _ application: UIApplication,
     didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
   ) {
-    Logger.verbose("Start register for remote notifications.")
+    Logger.verbose("INVOKED")
     
     // Convert token to string
     let pushToken = deviceToken.reduce("", {$0 + String(format: "%02X", $1)})
@@ -115,19 +69,6 @@ class FlareLaneAppDelegate {
     } else {
       DeviceService.register(projectId: projectId, pushToken: pushToken)
     }
-  }
-  
-  @objc func flarelane_application(_ application: UIApplication,
-                                   didReceiveRemoteNotification userInfo: [AnyHashable : Any],
-                                   fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
-    // From version 10 or later, notificationCenter has a higher priority
-    completionHandler(UIBackgroundFetchResult.newData)
-  }
-  
-  @objc func flarelane_application(
-    _ application: UIApplication,
-    didFailToRegisterForRemoteNotificationsWithError error: Error) {
-    Logger.error("Failed to register for remote notifications: \(error.localizedDescription)")
   }
   
 }

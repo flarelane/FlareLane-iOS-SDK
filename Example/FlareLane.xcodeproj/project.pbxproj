@@ -3,21 +3,23 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 46;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0474FE1E292393A90074029E /* OneSignalCore.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 04E5BE952923820D0082F18F /* OneSignalCore.xcframework */; };
+		0474FE1F292393A90074029E /* OneSignalCore.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 04E5BE952923820D0082F18F /* OneSignalCore.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		04938C102803D3AD00CED062 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04938C0F2803D3AD00CED062 /* NotificationService.swift */; };
 		04938C142803D3AD00CED062 /* FlareLaneNotificationServiceExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 04938C0D2803D3AD00CED062 /* FlareLaneNotificationServiceExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		262F9413106C54226C632E8A /* Pods_FlareLaneNotificationServiceExtension.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 77652E81821EEC4B40A0B587 /* Pods_FlareLaneNotificationServiceExtension.framework */; };
-		48152E5927150BCA5857D1A2 /* Pods_FlareLane_Tests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 225596D4A3ADBCE066DF2596 /* Pods_FlareLane_Tests.framework */; };
+		1D56987808B3E53EB9560115 /* Pods_FlareLane_Tests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 83B662CB5E220FDBE962EF6D /* Pods_FlareLane_Tests.framework */; };
 		607FACD61AFB9204008FA782 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACD51AFB9204008FA782 /* AppDelegate.swift */; };
 		607FACD81AFB9204008FA782 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACD71AFB9204008FA782 /* ViewController.swift */; };
 		607FACDB1AFB9204008FA782 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 607FACD91AFB9204008FA782 /* Main.storyboard */; };
 		607FACDD1AFB9204008FA782 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDC1AFB9204008FA782 /* Images.xcassets */; };
 		607FACE01AFB9204008FA782 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDE1AFB9204008FA782 /* LaunchScreen.xib */; };
 		607FACEC1AFB9204008FA782 /* Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACEB1AFB9204008FA782 /* Tests.swift */; };
-		CCD2827DFCC17D5268D2BFE2 /* Pods_FlareLane_Example.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 87660AB30D3A7FA1DA06A73E /* Pods_FlareLane_Example.framework */; };
+		BA88108E3B15993871EE8712 /* Pods_FlareLaneNotificationServiceExtension.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA677D5FA1551573661A6E25 /* Pods_FlareLaneNotificationServiceExtension.framework */; };
+		BD7FFA11CD464F6BB64AD279 /* Pods_FlareLane_Example.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BD9AE6FE433B517D47C15AC8 /* Pods_FlareLane_Example.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -38,6 +40,17 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		0474FE20292393A90074029E /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				0474FE1F292393A90074029E /* OneSignalCore.xcframework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		04938C152803D3AD00CED062 /* Embed App Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -56,8 +69,9 @@
 		04938C0D2803D3AD00CED062 /* FlareLaneNotificationServiceExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = FlareLaneNotificationServiceExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		04938C0F2803D3AD00CED062 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 		04938C112803D3AD00CED062 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		049DEF5129226A52000A5572 /* OneSignal.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = OneSignal.xcframework; path = Pods/OneSignalXCFramework/iOS_SDK/OneSignalSDK/OneSignal_XCFramework/OneSignal.xcframework; sourceTree = "<group>"; };
+		04E5BE952923820D0082F18F /* OneSignalCore.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = OneSignalCore.xcframework; path = Pods/OneSignalXCFramework/iOS_SDK/OneSignalSDK/OneSignal_Core/OneSignalCore.xcframework; sourceTree = "<group>"; };
 		07B08EAB0A0BA231908BA6B8 /* Pods-FlareLane_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-FlareLane_Example.release.xcconfig"; path = "Target Support Files/Pods-FlareLane_Example/Pods-FlareLane_Example.release.xcconfig"; sourceTree = "<group>"; };
-		225596D4A3ADBCE066DF2596 /* Pods_FlareLane_Tests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_FlareLane_Tests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		238EC773F386DEF04ED3A6E3 /* Pods-FlareLaneNotificationServiceExtension.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-FlareLaneNotificationServiceExtension.release.xcconfig"; path = "Target Support Files/Pods-FlareLaneNotificationServiceExtension/Pods-FlareLaneNotificationServiceExtension.release.xcconfig"; sourceTree = "<group>"; };
 		2A78EC333C72CB06474C9053 /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
 		35DF8215F94521ADC5AFFD8D /* FlareLane.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = FlareLane.podspec; path = ../FlareLane.podspec; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
@@ -74,10 +88,11 @@
 		607FACE51AFB9204008FA782 /* FlareLane_Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FlareLane_Tests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		607FACEA1AFB9204008FA782 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		607FACEB1AFB9204008FA782 /* Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tests.swift; sourceTree = "<group>"; };
-		77652E81821EEC4B40A0B587 /* Pods_FlareLaneNotificationServiceExtension.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_FlareLaneNotificationServiceExtension.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		87660AB30D3A7FA1DA06A73E /* Pods_FlareLane_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_FlareLane_Example.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		83B662CB5E220FDBE962EF6D /* Pods_FlareLane_Tests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_FlareLane_Tests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		9511FD1E8E1810A517AAB13A /* Pods-FlareLaneNotificationServiceExtension.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-FlareLaneNotificationServiceExtension.debug.xcconfig"; path = "Target Support Files/Pods-FlareLaneNotificationServiceExtension/Pods-FlareLaneNotificationServiceExtension.debug.xcconfig"; sourceTree = "<group>"; };
 		95DFC016F4610FE615804B9F /* Pods-FlareLane_Tests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-FlareLane_Tests.debug.xcconfig"; path = "Target Support Files/Pods-FlareLane_Tests/Pods-FlareLane_Tests.debug.xcconfig"; sourceTree = "<group>"; };
+		AA677D5FA1551573661A6E25 /* Pods_FlareLaneNotificationServiceExtension.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_FlareLaneNotificationServiceExtension.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		BD9AE6FE433B517D47C15AC8 /* Pods_FlareLane_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_FlareLane_Example.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -85,7 +100,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				262F9413106C54226C632E8A /* Pods_FlareLaneNotificationServiceExtension.framework in Frameworks */,
+				BA88108E3B15993871EE8712 /* Pods_FlareLaneNotificationServiceExtension.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -93,7 +108,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CCD2827DFCC17D5268D2BFE2 /* Pods_FlareLane_Example.framework in Frameworks */,
+				BD7FFA11CD464F6BB64AD279 /* Pods_FlareLane_Example.framework in Frameworks */,
+				0474FE1E292393A90074029E /* OneSignalCore.xcframework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -101,7 +117,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				48152E5927150BCA5857D1A2 /* Pods_FlareLane_Tests.framework in Frameworks */,
+				1D56987808B3E53EB9560115 /* Pods_FlareLane_Tests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -120,9 +136,11 @@
 		2D1C35BB5AA4EDC64987414C /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				87660AB30D3A7FA1DA06A73E /* Pods_FlareLane_Example.framework */,
-				225596D4A3ADBCE066DF2596 /* Pods_FlareLane_Tests.framework */,
-				77652E81821EEC4B40A0B587 /* Pods_FlareLaneNotificationServiceExtension.framework */,
+				04E5BE952923820D0082F18F /* OneSignalCore.xcframework */,
+				049DEF5129226A52000A5572 /* OneSignal.xcframework */,
+				AA677D5FA1551573661A6E25 /* Pods_FlareLaneNotificationServiceExtension.framework */,
+				BD9AE6FE433B517D47C15AC8 /* Pods_FlareLane_Example.framework */,
+				83B662CB5E220FDBE962EF6D /* Pods_FlareLane_Tests.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -244,6 +262,7 @@
 				607FACCE1AFB9204008FA782 /* Resources */,
 				7C86EA079A3FCDD76C25F0D5 /* [CP] Embed Pods Frameworks */,
 				04938C152803D3AD00CED062 /* Embed App Extensions */,
+				0474FE20292393A90074029E /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -358,11 +377,33 @@
 			);
 			inputPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-FlareLane_Example/Pods-FlareLane_Example-frameworks.sh",
+				"${BUILT_PRODUCTS_DIR}/FirebaseCore/FirebaseCore.framework",
+				"${BUILT_PRODUCTS_DIR}/FirebaseCoreInternal/FirebaseCoreInternal.framework",
+				"${BUILT_PRODUCTS_DIR}/FirebaseInstallations/FirebaseInstallations.framework",
+				"${BUILT_PRODUCTS_DIR}/FirebaseMessaging/FirebaseMessaging.framework",
 				"${BUILT_PRODUCTS_DIR}/FlareLane/FlareLane.framework",
+				"${BUILT_PRODUCTS_DIR}/GoogleDataTransport/GoogleDataTransport.framework",
+				"${BUILT_PRODUCTS_DIR}/GoogleUtilities/GoogleUtilities.framework",
+				"${BUILT_PRODUCTS_DIR}/PromisesObjC/FBLPromises.framework",
+				"${BUILT_PRODUCTS_DIR}/nanopb/nanopb.framework",
+				"${PODS_XCFRAMEWORKS_BUILD_DIR}/OneSignalXCFramework/OneSignal.framework/OneSignal",
+				"${PODS_XCFRAMEWORKS_BUILD_DIR}/OneSignalXCFramework/OneSignalExtension/OneSignalExtension.framework/OneSignalExtension",
+				"${PODS_XCFRAMEWORKS_BUILD_DIR}/OneSignalXCFramework/OneSignalOutcomes/OneSignalOutcomes.framework/OneSignalOutcomes",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FirebaseCore.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FirebaseCoreInternal.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FirebaseInstallations.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FirebaseMessaging.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FlareLane.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/GoogleDataTransport.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/GoogleUtilities.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FBLPromises.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/nanopb.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/OneSignal.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/OneSignalExtension.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/OneSignalOutcomes.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -521,7 +562,11 @@
 				INFOPLIST_KEY_CFBundleDisplayName = FlareLaneNotificationServiceExtension;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2022 CocoaPods. All rights reserved.";
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
 				MARKETING_VERSION = 1.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -557,7 +602,11 @@
 				INFOPLIST_KEY_CFBundleDisplayName = FlareLaneNotificationServiceExtension;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2022 CocoaPods. All rights reserved.";
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
 				MARKETING_VERSION = 1.0;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.flarelane.example.FlareLaneNotificationServiceExtension;
@@ -663,7 +712,8 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
-				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
@@ -677,7 +727,10 @@
 				CODE_SIGN_ENTITLEMENTS = FlareLane_Example.entitlements;
 				DEVELOPMENT_TEAM = KH6M9J7Q97;
 				INFOPLIST_FILE = FlareLane/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
 				MODULE_NAME = ExampleApp;
 				PRODUCT_BUNDLE_IDENTIFIER = com.flarelane.example;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -695,7 +748,10 @@
 				CODE_SIGN_ENTITLEMENTS = FlareLane_Example.entitlements;
 				DEVELOPMENT_TEAM = KH6M9J7Q97;
 				INFOPLIST_FILE = FlareLane/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
 				MODULE_NAME = ExampleApp;
 				PRODUCT_BUNDLE_IDENTIFIER = com.flarelane.example;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -718,7 +774,11 @@
 					"$(inherited)",
 				);
 				INFOPLIST_FILE = Tests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
@@ -737,7 +797,11 @@
 					"$(inherited)",
 				);
 				INFOPLIST_FILE = Tests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
