@@ -21,13 +21,13 @@ enum LogEvent: String {
 final class Logger {
   static func error( _ object: Any, filename: String = #file, line: Int = #line, column: Int = #column, funcName: String = #function) {
     if Globals.logLevel.rawValue >= LogLevel.error.rawValue {
-      print("\(Date().toString()) \(LogEvent.error.rawValue)[\(sourceFileName(filePath: filename))]:\(line) \(column) \(funcName) -> \(object)")
+      print("\(Date().toString()) [FlareLaneLogger]\(LogEvent.error.rawValue)[\(sourceFileName(filePath: filename))]:\(line) \(column) \(funcName) -> \(object)")
     }
   }
   
   static func verbose( _ object: Any, filename: String = #file, line: Int = #line, column: Int = #column, funcName: String = #function) {
     if Globals.logLevel.rawValue >= LogLevel.verbose.rawValue {
-      print("\(Date().toString()) \(LogEvent.verbose.rawValue)[\(sourceFileName(filePath: filename))]:\(line) \(column) \(funcName) -> \(object)")
+      print("\(Date().toString()) [FlareLaneLogger]\(LogEvent.verbose.rawValue)[\(sourceFileName(filePath: filename))]:\(line) \(column) \(funcName) -> \(object)")
     }
   }
   

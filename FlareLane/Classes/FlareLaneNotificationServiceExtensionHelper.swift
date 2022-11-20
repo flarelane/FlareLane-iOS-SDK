@@ -8,11 +8,15 @@
 import UserNotifications
 import MobileCoreServices
 
-@objc public class FlareLaneExtensionHelper: NSObject {
+@objc public class FlareLaneNotificationServiceExtensionHelper: NSObject {
+  @objc public static let shared = FlareLaneNotificationServiceExtensionHelper()
+  
   var contentHandler: ((UNNotificationContent) -> Void)?
   var bestAttemptContent: UNMutableNotificationContent?
   
   @objc public func didReceive(_ request: UNNotificationRequest, withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void) {
+    Logger.verbose("INVOKED")
+    
     self.contentHandler = contentHandler
     bestAttemptContent = (request.content.mutableCopy() as? UNMutableNotificationContent)
     
@@ -42,8 +46,20 @@ import MobileCoreServices
   }
   
   @objc public func serviceExtensionTimeWillExpire() {
+    Logger.verbose("INVOKED")
+    
     if let contentHandler = contentHandler, let bestAttemptContent =  bestAttemptContent {
       contentHandler(bestAttemptContent)
     }
+  }
+  
+  @objc public func isFlareLaneNotification(_ request: UNNotificationRequest) -> Bool {
+    let copyContent = (request.content.mutableCopy() as? UNMutableNotificationContent)
+    
+    if let _ = FlareLaneNotification.getFlareLaneNotificationFromUNNotificationContent(request.content) {
+      return true;
+    }
+    
+    return false;
   }
 }

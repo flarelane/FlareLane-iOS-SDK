@@ -1,16 +1,21 @@
 platform :ios, '11.0'
 use_frameworks!
 
-target 'FlareLane_Example' do
+def example_pods
+#  pod 'FirebaseAnalytics'
+  pod 'FirebaseMessaging'
+  pod 'OneSignalXCFramework', '>= 3.0.0', '< 4.0'
   pod 'FlareLane', :path => '../'
+end
+
+target 'FlareLane_Example' do
+  example_pods
 
   target 'FlareLane_Tests' do
     inherit! :search_paths
-
-    
   end
 end
 
 target 'FlareLaneNotificationServiceExtension' do
-  pod 'FlareLane', :path => '../'
+  example_pods
 end

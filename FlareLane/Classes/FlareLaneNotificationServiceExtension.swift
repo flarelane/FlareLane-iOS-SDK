@@ -8,13 +8,11 @@
 import UserNotifications
 
 open class FlareLaneNotificationServiceExtension: UNNotificationServiceExtension {
-  let extensionHelper = FlareLaneExtensionHelper()
-
   override open func didReceive(_ request: UNNotificationRequest, withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void) {
-    extensionHelper.didReceive(request, withContentHandler: contentHandler)
+    FlareLaneNotificationServiceExtensionHelper.shared.didReceive(request, withContentHandler: contentHandler)
   }
 
   override open func serviceExtensionTimeWillExpire() {
-    extensionHelper.serviceExtensionTimeWillExpire()
+    FlareLaneNotificationServiceExtensionHelper.shared.serviceExtensionTimeWillExpire()
   }
 }
