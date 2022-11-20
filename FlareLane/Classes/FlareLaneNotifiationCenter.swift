@@ -8,29 +8,32 @@
 import UserNotifications
 
 @available(iOSApplicationExtension, unavailable)
-public class FlareLaneNotificationCenter: NSObject, UNUserNotificationCenterDelegate {
-  static public let shared = FlareLaneNotificationCenter()
+@objc public class FlareLaneNotificationCenter: NSObject, UNUserNotificationCenterDelegate {
+  @objc static public let shared = FlareLaneNotificationCenter()
   
   // MARK: - Delegate Methods
   
   /// To handle notification converted
-  public func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+  @objc public func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
     Logger.verbose("INVOKED")
     
     if let notification = FlareLaneNotification.getFlareLaneNotificationFromUNNotificationContent(response.notification.request.content) {
-      if (ColdStartNotificationManager.coldStartNotification?.id == notification.id) {
-        Logger.verbose("ColdStartNotification is exists. skip didReceive")
+      if Globals.projectId == nil {
+        Logger.verbose("projectId is nil. Too early clicked? process later when cold start.")
+        ColdStartNotificationManager.coldStartNotification = notification
+      } else if (ColdStartNotificationManager.coldStartNotification?.id == notification.id) {
         // If the id of coldStartNotification is the same as notificationId, it stops to avoid duplicate execution
-        return
+        Logger.verbose("ColdStartNotification is exists. skip didReceive")
+      } else {
+        Logger.verbose("Converted user notification.")
+        EventService.createConverted(notification: notification)
       }
-      Logger.verbose("Converted user notification.")
-      EventService.createConverted(notification: notification)
     }
     completionHandler()
   }
   
   /// To handle notification foreground received
-  public func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+  @objc public func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
     Logger.verbose("INVOKED")
     
     if let flarelaneNotification = FlareLaneNotification.getFlareLaneNotificationFromUNNotificationContent(notification.request.content) {
