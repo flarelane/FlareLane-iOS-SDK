@@ -127,6 +127,9 @@ import UIKit
   }
   
   // Track event
+  /// - Parameters:
+  ///   - type: event type
+  ///   - data: event data
   @objc public static func trackEvent(type: String, data: [String: Any]?) {
     guard let deviceId = Globals.deviceIdInUserDefaults else {
       return
