@@ -87,4 +87,20 @@ class EventService {
       Logger.verbose("Succeed send event request.")
     }
   }
+  
+  /// Track device event
+  /// - Parameters:
+  ///   - deviceId: FlareLane deviceId
+  ///   - type: event type
+  ///   - data: event data
+  static func trackEvent(deviceId: String, type: String , data: [String: Any]?) {
+    API.shared.trackEvent(deviceId: deviceId, type: type, data: data) { (error) in
+      if error != nil {
+        Logger.error("Failed send event request. \(type)")
+        return
+      }
+      
+      Logger.verbose("Succeed send event request. \(type)")
+    }
+  }
 }

@@ -66,7 +66,7 @@ final class API {
     }
   }
   
-  /// API that sends an event to FlareKit when a notification is received
+  /// API that sends an event to FlareLane when a notification is received
   /// - Parameters:
   ///   - deviceId: FlareLane deviceId
   ///   - type: Notification event type
@@ -82,6 +82,28 @@ final class API {
     ]
     
     request.post(path: "/events", body: body) { (response, error) in
+      completion(error)
+    }
+  }
+  
+  /// API that sends an event to FlareLane when a user event occurs.
+  /// - Parameters:
+  ///   - deviceId: FlareLane deviceId
+  ///   - type: event type
+  ///   - data: event data
+  func trackEvent(deviceId: String, type: String, data: [String: Any]?, completion: @escaping (Error?) -> Void) {
+    var event: [String: Any] = [
+      "subjectType": "device",
+      "subjectId": deviceId,
+      "type": type,
+      "createdAt": Date().toString(),
+    ]
+    
+    if (data != nil) {
+      event["data"] = data
+    }
+    
+    request.post(path: "/events-v2", body: ["events": [event]]) { (response, error) in
       completion(error)
     }
   }
