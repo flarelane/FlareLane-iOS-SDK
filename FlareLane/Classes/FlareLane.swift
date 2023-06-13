@@ -131,11 +131,7 @@ import UIKit
   ///   - type: event type
   ///   - data: event data
   @objc public static func trackEvent(type: String, data: [String: Any]?) {
-    guard let deviceId = Globals.deviceIdInUserDefaults else {
-      return
-    }
-    
-    EventService.trackEvent(deviceId: deviceId, type: type, data: data)
+    EventService.trackEvent(type: type, data: data)
   }
 
   // MARK: - Private Methods

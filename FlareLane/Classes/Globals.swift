@@ -43,6 +43,18 @@ final class Globals {
       UserDefaults.standard.string(forKey: deviceIdKey)
     }
   }
+  
+  /// Save userId in local storage
+  private static var userIdKey = "flarelane_userIdKey"
+  static var userIdInUserDefaults: String? {
+    set {
+      UserDefaults.standard.set(newValue, forKey: userIdKey)
+    }
+
+    get {
+      UserDefaults.standard.string(forKey: userIdKey)
+    }
+  }
 
   /// Current logLevel
   static var logLevel: LogLevel = .verbose

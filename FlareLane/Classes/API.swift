@@ -34,7 +34,7 @@ final class API {
   /// - Parameters:
   ///   - body: Body params
   ///   - completion: Completion callback
-  func updateDevice(deviceId: String, body: [String:Any?], completion: @escaping (String?, Error?) -> Void) {
+  func updateDevice(deviceId: String, body: [String:Any?], completion: @escaping ([String:Any?]?, Error?) -> Void) {
     
     request.patch(path: "/devices/\(deviceId)", body: body) { (response, error) in
       if (error != nil) {
@@ -42,9 +42,8 @@ final class API {
         return
       }
       
-      let data = response?["data"] as? [String:Any]
-      let deviceId = data?["id"] as? String
-      completion(deviceId, error)
+      let device = response?["data"] as? [String:Any?]
+      completion(device, error)
     }
   }
   
@@ -91,10 +90,10 @@ final class API {
   ///   - deviceId: FlareLane deviceId
   ///   - type: event type
   ///   - data: event data
-  func trackEvent(deviceId: String, type: String, data: [String: Any]?, completion: @escaping (Error?) -> Void) {
+  func trackEvent(subjectType: String, subjectId: String, type: String, data: [String: Any]?, completion: @escaping (Error?) -> Void) {
     var event: [String: Any] = [
-      "subjectType": "device",
-      "subjectId": deviceId,
+      "subjectType": subjectType,
+      "subjectId": subjectId,
       "type": type,
       "createdAt": Date().toString(),
     ]

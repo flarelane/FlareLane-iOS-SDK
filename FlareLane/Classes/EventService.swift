@@ -90,11 +90,19 @@ class EventService {
   
   /// Track device event
   /// - Parameters:
-  ///   - deviceId: FlareLane deviceId
   ///   - type: event type
   ///   - data: event data
-  static func trackEvent(deviceId: String, type: String , data: [String: Any]?) {
-    API.shared.trackEvent(deviceId: deviceId, type: type, data: data) { (error) in
+  static func trackEvent(type: String , data: [String: Any]?) {
+    guard let deviceId = Globals.deviceIdInUserDefaults else {
+      return
+    }
+    
+    let userId = Globals.userIdInUserDefaults
+    
+    let subjectType = userId != nil ? "user": "device"
+    let subjectId = userId ?? deviceId
+    
+    API.shared.trackEvent(subjectType: subjectType, subjectId: subjectId, type: type, data: data) { (error) in
       if error != nil {
         Logger.error("Failed send event request. \(type)")
         return
