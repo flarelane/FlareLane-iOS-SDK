@@ -87,7 +87,8 @@ final class API {
   
   /// API that sends an event to FlareLane when a user event occurs.
   /// - Parameters:
-  ///   - deviceId: FlareLane deviceId
+  ///   - subjectType: device | userId
+  ///   - subjectId: string
   ///   - type: event type
   ///   - data: event data
   func trackEvent(subjectType: String, subjectId: String, type: String, data: [String: Any]?, completion: @escaping (Error?) -> Void) {

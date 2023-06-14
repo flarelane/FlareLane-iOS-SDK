@@ -15,16 +15,9 @@ class ViewController: UIViewController {
   var isSetTags = false
   let tags: [String: Any] = ["age": 27, "gender": "men"]
   let userId = "myuser@flarelane.com"
-  @IBOutlet weak var textField: UITextField!
   
   override func viewDidLoad() {
     super.viewDidLoad()
-    let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
-    view.addGestureRecognizer(tapGesture)
-  }
-  
-  @objc func dismissKeyboard() {
-      view.endEditing(true)
   }
   
   @IBAction func ToggleUserID(_ sender: Any) {
@@ -53,35 +46,8 @@ class ViewController: UIViewController {
     }
   }
   
-  @IBAction func trackEvent(_ sender: UIButton) {
-    let jsonString = textField.text
-    
-    if (jsonString == nil || jsonString == "") {
-      return
-    }
-    
-    guard let jsonData = jsonString?.data(using: .utf8) else {
-      print("Failed to convert JSON string to Data.")
-      return
-    }
-    
-    do {
-      if let jsonObject = try JSONSerialization.jsonObject(with: jsonData, options: []) as? [String: Any] {
-        guard let type = jsonObject["type"] as? String else {
-          print("Event must have a type.")
-          return
-        }
-        
-        let data = jsonObject["data"] as? [String: Any]
-        
-        FlareLane.trackEvent(type: type, data: data)
-      }
-    } catch {
-      print("Failed to json decode.");
-    }
-    
-    textField.text = ""
-    dismissKeyboard()
+  @IBAction func TrackEvent(_ sender: Any) {
+    FlareLane.trackEvent("test_event", data: ["test": "1234"])
   }
   
   override func didReceiveMemoryWarning() {

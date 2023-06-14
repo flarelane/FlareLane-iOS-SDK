@@ -130,7 +130,7 @@ import UIKit
   /// - Parameters:
   ///   - type: event type
   ///   - data: event data
-  @objc public static func trackEvent(type: String, data: [String: Any]?) {
+  @objc public static func trackEvent(_ type: String, data: [String: Any]? = nil) {
     EventService.trackEvent(type: type, data: data)
   }
 

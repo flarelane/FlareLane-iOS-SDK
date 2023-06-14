@@ -116,12 +116,14 @@ final class DeviceService {
     }
   }
   
-  // Synchronize to send userId to the event.
+  // Save userId to the local storage.
   private static func saveUserId(device: [String: Any?]?) {
-    if let userIdValue = device?["userId"], !(userIdValue is NSNull) {
-      Globals.userIdInUserDefaults = userIdValue as? String
-    } else {
-      Globals.userIdInUserDefaults = nil
+    if let userIdValue = device?["userId"] {
+      if let validUserId = userIdValue as? String  {
+        Globals.userIdInUserDefaults = validUserId
+      } else {
+        Globals.userIdInUserDefaults = nil
+      }
     }
   }
 }
