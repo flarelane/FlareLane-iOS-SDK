@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="18122" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="vXZ-lx-hvc">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="21701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="vXZ-lx-hvc">
     <device id="retina4_7" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="18093"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21679"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -20,27 +20,34 @@
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <subviews>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" translatesAutoresizingMaskIntoConstraints="NO" id="EA4-u1-1Cd">
-                                <rect key="frame" x="16" y="200" width="343" height="267"/>
+                                <rect key="frame" x="16" y="220" width="343" height="247"/>
                                 <subviews>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Xed-2g-mLL">
-                                        <rect key="frame" x="0.0" y="0.0" width="343" height="89"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="343" height="62"/>
                                         <state key="normal" title="Toggle User ID"/>
                                         <connections>
                                             <action selector="ToggleUserID:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="O0q-sy-chR"/>
                                         </connections>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="sTr-Zp-h7o">
-                                        <rect key="frame" x="0.0" y="89" width="343" height="89"/>
+                                        <rect key="frame" x="0.0" y="62" width="343" height="61.5"/>
                                         <state key="normal" title="Toggle IsSubscribed"/>
                                         <connections>
                                             <action selector="ToggleIsSubscribed:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="vAz-HT-FfE"/>
                                         </connections>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="wEE-nl-Zn1">
-                                        <rect key="frame" x="0.0" y="178" width="343" height="89"/>
+                                        <rect key="frame" x="0.0" y="123.5" width="343" height="62"/>
                                         <state key="normal" title="Toggle Tags"/>
                                         <connections>
                                             <action selector="ToggleTags:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="m6F-j3-M58"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="gWf-ff-Chm">
+                                        <rect key="frame" x="0.0" y="185.5" width="343" height="61.5"/>
+                                        <state key="normal" title="Track Event (test_event)"/>
+                                        <connections>
+                                            <action selector="TrackEvent:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="oJz-bS-n1N"/>
                                         </connections>
                                     </button>
                                 </subviews>

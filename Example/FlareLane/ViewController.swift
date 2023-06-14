@@ -18,7 +18,6 @@ class ViewController: UIViewController {
   
   override func viewDidLoad() {
     super.viewDidLoad()
-    // Do any additional setup after loading the view, typically from a nib.
   }
   
   @IBAction func ToggleUserID(_ sender: Any) {
@@ -45,6 +44,10 @@ class ViewController: UIViewController {
       FlareLane.deleteTags(keys: Array(tags.keys))
       isSetTags = false
     }
+  }
+  
+  @IBAction func TrackEvent(_ sender: Any) {
+    FlareLane.trackEvent("test_event", data: ["test": "1234"])
   }
   
   override func didReceiveMemoryWarning() {

@@ -34,7 +34,7 @@ final class API {
   /// - Parameters:
   ///   - body: Body params
   ///   - completion: Completion callback
-  func updateDevice(deviceId: String, body: [String:Any?], completion: @escaping (String?, Error?) -> Void) {
+  func updateDevice(deviceId: String, body: [String:Any?], completion: @escaping ([String:Any?]?, Error?) -> Void) {
     
     request.patch(path: "/devices/\(deviceId)", body: body) { (response, error) in
       if (error != nil) {
@@ -42,9 +42,8 @@ final class API {
         return
       }
       
-      let data = response?["data"] as? [String:Any]
-      let deviceId = data?["id"] as? String
-      completion(deviceId, error)
+      let device = response?["data"] as? [String:Any?]
+      completion(device, error)
     }
   }
   
@@ -66,7 +65,7 @@ final class API {
     }
   }
   
-  /// API that sends an event to FlareKit when a notification is received
+  /// API that sends an event to FlareLane when a notification is received
   /// - Parameters:
   ///   - deviceId: FlareLane deviceId
   ///   - type: Notification event type
@@ -82,6 +81,29 @@ final class API {
     ]
     
     request.post(path: "/events", body: body) { (response, error) in
+      completion(error)
+    }
+  }
+  
+  /// API that sends an event to FlareLane when a user event occurs.
+  /// - Parameters:
+  ///   - subjectType: device | userId
+  ///   - subjectId: string
+  ///   - type: event type
+  ///   - data: event data
+  func trackEvent(subjectType: String, subjectId: String, type: String, data: [String: Any]?, completion: @escaping (Error?) -> Void) {
+    var event: [String: Any] = [
+      "subjectType": subjectType,
+      "subjectId": subjectId,
+      "type": type,
+      "createdAt": Date().toString(),
+    ]
+    
+    if (data != nil) {
+      event["data"] = data
+    }
+    
+    request.post(path: "/events-v2", body: ["events": [event]]) { (response, error) in
       completion(error)
     }
   }

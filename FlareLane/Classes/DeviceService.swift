@@ -63,11 +63,13 @@ final class DeviceService {
     // Save recent activations of the device
     body["lastActiveAt"] = Date().toString()
     
-    API.shared.updateDevice(deviceId: deviceId, body: body) { (_, error) in
+    API.shared.updateDevice(deviceId: deviceId, body: body) { (device, error) in
       if error != nil {
         Logger.error("Failed update device request.")
         return
       }
+      
+      self.saveUserId(device: device)
       
       Logger.verbose("Succeed update device request.")
     }
@@ -81,11 +83,13 @@ final class DeviceService {
   static func update(deviceId: String, key: String , value: Any?) {
     let body = [key: value]
     
-    API.shared.updateDevice(deviceId: deviceId, body: body) { (_, error) in
+    API.shared.updateDevice(deviceId: deviceId, body: body) { (device, error) in
       if error != nil {
         Logger.error("Failed update \(key) request.")
         return
       }
+      
+      self.saveUserId(device: device)
       
       Logger.verbose("Succeed update \(key) request.")
     }
@@ -109,6 +113,17 @@ final class DeviceService {
       }
       
       Logger.verbose("Succeed delete tags")
+    }
+  }
+  
+  // Save userId to the local storage.
+  private static func saveUserId(device: [String: Any?]?) {
+    if let userIdValue = device?["userId"] {
+      if let validUserId = userIdValue as? String  {
+        Globals.userIdInUserDefaults = validUserId
+      } else {
+        Globals.userIdInUserDefaults = nil
+      }
     }
   }
 }

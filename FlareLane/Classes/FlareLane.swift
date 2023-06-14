@@ -125,6 +125,14 @@ import UIKit
   @objc public static func getDeviceId() -> String? {
     return Globals.deviceIdInUserDefaults
   }
+  
+  // Track event
+  /// - Parameters:
+  ///   - type: event type
+  ///   - data: event data
+  @objc public static func trackEvent(_ type: String, data: [String: Any]? = nil) {
+    EventService.trackEvent(type: type, data: data)
+  }
 
   // MARK: - Private Methods
 

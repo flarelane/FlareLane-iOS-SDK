@@ -14,7 +14,7 @@ public enum SdkType: String {
 }
 
 final class Globals {
-  static var sdkVersion = "1.1.0"
+  static var sdkVersion = "1.2.0"
   static var sdkType: SdkType = .native
 
   /// projectId before initialization succeeds
@@ -41,6 +41,18 @@ final class Globals {
 
     get {
       UserDefaults.standard.string(forKey: deviceIdKey)
+    }
+  }
+  
+  /// Save userId in local storage
+  private static var userIdKey = "flarelane_userIdKey"
+  static var userIdInUserDefaults: String? {
+    set {
+      UserDefaults.standard.set(newValue, forKey: userIdKey)
+    }
+
+    get {
+      UserDefaults.standard.string(forKey: userIdKey)
     }
   }
 
