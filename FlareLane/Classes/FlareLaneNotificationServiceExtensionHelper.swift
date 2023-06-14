@@ -54,8 +54,6 @@ import MobileCoreServices
   }
   
   @objc public func isFlareLaneNotification(_ request: UNNotificationRequest) -> Bool {
-    let copyContent = (request.content.mutableCopy() as? UNMutableNotificationContent)
-    
     if let _ = FlareLaneNotification.getFlareLaneNotificationFromUNNotificationContent(request.content) {
       return true;
     }
