@@ -50,6 +50,12 @@ class ViewController: UIViewController {
     FlareLane.trackEvent("test_event", data: ["test": "1234"])
   }
   
+  @IBAction func getTags() {
+    FlareLane.getTags() { tags in
+      print(tags ?? "nil")
+    }
+  }
+  
   override func didReceiveMemoryWarning() {
     super.didReceiveMemoryWarning()
     // Dispose of any resources that can be recreated.
