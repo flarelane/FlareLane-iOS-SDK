@@ -99,16 +99,9 @@ final class DeviceService {
   /// - Parameters:
   ///   - deviceId: FlareLane deviceId
   ///   - completion: Completion callback
-  static func getTags(deviceId: String, completion: @escaping ([String: Any]?) -> Void) {
+  static func getTags(deviceId: String, completion: @escaping ([String: Any]?, Error?) -> Void) {
     API.shared.getTags(deviceId: deviceId) { (tags, error) in
-      if error != nil {
-        Logger.error("Failed get tags")
-        completion(nil)
-        return
-      }
-      
-      Logger.verbose("Succeed get tags")
-      completion(tags)
+      completion(tags, error)
     }
   }
   

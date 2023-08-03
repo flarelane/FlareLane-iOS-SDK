@@ -51,7 +51,8 @@ class ViewController: UIViewController {
   }
   
   @IBAction func getTags() {
-    FlareLane.getTags() { tags in
+    FlareLane.getTags() { tags, error in
+      print(error ?? "nil")
       print(tags ?? "nil")
     }
   }

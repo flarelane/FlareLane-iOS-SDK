@@ -94,7 +94,7 @@ import UIKit
   /// Get tags of device
   ///  - Parameters:
   ///    - completion: Completion callback
-  @objc public static func getTags(completion: @escaping ([String: Any]?) -> Void) {
+  @objc public static func getTags(completion: @escaping ([String: Any]?, Error?) -> Void) {
     guard let deviceId = Globals.deviceIdInUserDefaults else {
       return
     }
