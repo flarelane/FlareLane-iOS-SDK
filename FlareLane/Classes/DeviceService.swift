@@ -95,6 +95,17 @@ final class DeviceService {
     }
   }
   
+  /// Get tags of device
+  /// - Parameters:
+  ///   - deviceId: FlareLane deviceId
+  ///   - completion: Completion callback
+  static func getTags(deviceId: String, completion: @escaping ([String: Any]?, Error?) -> Void) {
+    API.shared.getTags(deviceId: deviceId) { (tags, error) in
+      completion(tags, error)
+    }
+  }
+  
+  
   /// Delete tags of device
   /// - Parameters:
   ///   - deviceId: FlareLane deviceId

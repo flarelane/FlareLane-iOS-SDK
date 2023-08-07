@@ -73,7 +73,7 @@ final class Request {
       return
     }
 
-    Logger.verbose("GET Request - path:\(path) body:\(parameters.description))")
+    Logger.verbose("GET Request - path:\(path) parameters:\(parameters.description))")
 
     let task = URLSession.shared.dataTask(with: request) { (data, response, error) in
       guard let data = data,

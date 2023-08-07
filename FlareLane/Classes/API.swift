@@ -47,8 +47,26 @@ final class API {
     }
   }
   
+  /// API to get tags of device
+  /// - Parameters:
+  ///   - deviceId: FlareLane deviceId
+  ///   - completion: Completion callback
+  func getTags(deviceId: String, completion: @escaping ([String: Any]?, Error?) -> Void) {
+    request.get(path: "/devices/\(deviceId)/tags", parameters: [:]) { (response, error) in
+      if (error != nil) {
+        completion(nil, error)
+        return
+      }
+      
+      let data = response?["data"] as? [String:Any]
+      let tags = data?["tags"] as? [String: Any]
+      completion(tags, error)
+    }
+  }
+  
   /// API to delete tags of device
   /// - Parameters:
+  ///   - deviceId: FlareLane deviceId
   ///   - body: Tags to delete
   ///   - completion: Completion callback
   func deleteTags(deviceId: String, body: [String:Any?], completion: @escaping (String?, Error?) -> Void) {
