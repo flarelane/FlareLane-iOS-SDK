@@ -94,12 +94,14 @@ import UIKit
   /// Get tags of device
   ///  - Parameters:
   ///    - completion: Completion callback
-  @objc public static func getTags(completion: @escaping ([String: Any]?, Error?) -> Void) {
+  @objc public static func getTags(completion: @escaping ([String: Any]?) -> Void) {
     guard let deviceId = Globals.deviceIdInUserDefaults else {
       return
     }
     
-    DeviceService.getTags(deviceId: deviceId, completion:completion)
+    DeviceService.getTags(deviceId: deviceId) { tags in
+      completion(tags);
+    }
   }
   
   /// Set tags of device
