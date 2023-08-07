@@ -99,9 +99,13 @@ final class DeviceService {
   /// - Parameters:
   ///   - deviceId: FlareLane deviceId
   ///   - completion: Completion callback
-  static func getTags(deviceId: String, completion: @escaping ([String: Any]?, Error?) -> Void) {
+  static func getTags(deviceId: String, completion: @escaping ([String: Any]?) -> Void) {
     API.shared.getTags(deviceId: deviceId) { (tags, error) in
-      completion(tags, error)
+      if (error != nil) {
+        Logger.error("Failed fetching tags.")
+        return
+      }
+      completion(tags)
     }
   }
   
@@ -119,11 +123,11 @@ final class DeviceService {
     
     API.shared.deleteTags(deviceId: deviceId, body: body) { (_, error) in
       if error != nil {
-        Logger.error("Failed delete tags")
+        Logger.error("Failed delete tags.")
         return
       }
       
-      Logger.verbose("Succeed delete tags")
+      Logger.verbose("Succeed delete tags.")
     }
   }
   
