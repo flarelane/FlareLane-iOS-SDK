@@ -5,6 +5,7 @@
 //  Copyright © 2021 FlareLabs. All rights reserved.
 //
 
+#if canImport(UIKit)
 import UIKit
 
 @available(iOSApplicationExtension, unavailable)
@@ -165,3 +166,4 @@ import UIKit
     }
   }
 }
+#endif
