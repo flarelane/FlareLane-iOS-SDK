@@ -7,6 +7,7 @@
 
 import UserNotifications
 
+@available(macOS 10.14, *)
 @available(iOSApplicationExtension, unavailable)
 @objc public class FlareLaneNotificationCenter: NSObject, UNUserNotificationCenterDelegate {
   @objc static public let shared = FlareLaneNotificationCenter()

@@ -7,6 +7,7 @@
 
 import UserNotifications
 
+@available(macOS 10.14, *)
 open class FlareLaneNotificationServiceExtension: UNNotificationServiceExtension {
   override open func didReceive(_ request: UNNotificationRequest, withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void) {
     FlareLaneNotificationServiceExtensionHelper.shared.didReceive(request, withContentHandler: contentHandler)
