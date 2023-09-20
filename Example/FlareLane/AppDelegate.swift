@@ -8,7 +8,7 @@
 
 import UIKit
 import FlareLane
-import OneSignal
+//import OneSignal
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterDelegate {
@@ -27,14 +27,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
       print(payload)
     }
 
-    OneSignal.setLogLevel(.LL_VERBOSE, visualLevel: .LL_NONE)
-    OneSignal.initWithLaunchOptions(launchOptions)
-    OneSignal.setAppId(ONESIGNAL_APP_ID)
-    OneSignal.promptForPushNotifications(userResponse: { accepted in
-      print("User accepted notifications: \(accepted)")
-    })
-
-    UNUserNotificationCenter.current().delegate = self
+//    OneSignal.setLogLevel(.LL_VERBOSE, visualLevel: .LL_NONE)
+//    OneSignal.initWithLaunchOptions(launchOptions)
+//    OneSignal.setAppId(ONESIGNAL_APP_ID)
+//    OneSignal.promptForPushNotifications(userResponse: { accepted in
+//      print("User accepted notifications: \(accepted)")
+//    })
+//
+//    UNUserNotificationCenter.current().delegate = self
 
     return true
   }

@@ -2,7 +2,7 @@
 //  FLNNotificationServiceExtension.h
 //  FlareLane
 //
-//  Created by MinHyeok Kim on 2022/04/12.
+//  Copyright © 2021 FlareLabs. All rights reserved.
 //
 
 #import <UserNotifications/UserNotifications.h>

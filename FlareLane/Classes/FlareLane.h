@@ -1,5 +1,5 @@
 //
-//  FlareKit.h
+//  FlareLane.h
 //  FlareLane
 //
 //  Copyright © 2021 FlareLabs. All rights reserved.
