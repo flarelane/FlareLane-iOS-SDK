@@ -61,4 +61,7 @@ final class Globals {
 
   /// Swizzled or not
   static var swizzled: Bool = false
+  
+  /// options
+  static var disableInitialPrompt: Bool = false
 }

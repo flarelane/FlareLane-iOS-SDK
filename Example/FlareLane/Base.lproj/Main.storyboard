@@ -23,28 +23,28 @@
                                 <rect key="frame" x="16" y="220" width="343" height="247"/>
                                 <subviews>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Xed-2g-mLL">
-                                        <rect key="frame" x="0.0" y="0.0" width="343" height="49.5"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="343" height="41"/>
                                         <state key="normal" title="Toggle User ID"/>
                                         <connections>
                                             <action selector="ToggleUserID:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="O0q-sy-chR"/>
                                         </connections>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="sTr-Zp-h7o">
-                                        <rect key="frame" x="0.0" y="49.5" width="343" height="49.5"/>
+                                        <rect key="frame" x="0.0" y="41" width="343" height="41.5"/>
                                         <state key="normal" title="Toggle IsSubscribed"/>
                                         <connections>
                                             <action selector="ToggleIsSubscribed:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="vAz-HT-FfE"/>
                                         </connections>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="wEE-nl-Zn1">
-                                        <rect key="frame" x="0.0" y="99" width="343" height="49"/>
+                                        <rect key="frame" x="0.0" y="82.5" width="343" height="41"/>
                                         <state key="normal" title="Toggle Tags"/>
                                         <connections>
                                             <action selector="ToggleTags:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="m6F-j3-M58"/>
                                         </connections>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="56c-4e-ecC">
-                                        <rect key="frame" x="0.0" y="148" width="343" height="49.5"/>
+                                        <rect key="frame" x="0.0" y="123.5" width="343" height="41"/>
                                         <state key="normal" title="Button"/>
                                         <buttonConfiguration key="configuration" style="plain" title="Get Tags"/>
                                         <connections>
@@ -52,10 +52,18 @@
                                         </connections>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="gWf-ff-Chm">
-                                        <rect key="frame" x="0.0" y="197.5" width="343" height="49.5"/>
+                                        <rect key="frame" x="0.0" y="164.5" width="343" height="41.5"/>
                                         <state key="normal" title="Track Event (test_event)"/>
                                         <connections>
                                             <action selector="TrackEvent:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="oJz-bS-n1N"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="EWS-kE-5ej">
+                                        <rect key="frame" x="0.0" y="206" width="343" height="41"/>
+                                        <state key="normal" title="Button"/>
+                                        <buttonConfiguration key="configuration" style="plain" title="prompt for notifications"/>
+                                        <connections>
+                                            <action selector="promptForNotifications:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="HNq-bg-f7A"/>
                                         </connections>
                                     </button>
                                 </subviews>

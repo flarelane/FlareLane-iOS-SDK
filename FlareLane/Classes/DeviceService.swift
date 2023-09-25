@@ -31,11 +31,14 @@ final class DeviceService {
   /// - Parameters:
   ///   - projectId: FlareLane projectId
   ///   - pushToken: PushToken from Swizzled delegate
-  static func register(projectId:String, pushToken: String) {
+  static func register(projectId:String, pushToken: String?) {
     Logger.verbose("Start create device request.")
     
     var body = self.getSystemInfo()
-    body["pushToken"] = pushToken
+    
+    if let pushToken {
+      body["pushToken"] = pushToken
+    }
     
     API.shared.createDevice(body: body) { (deviceId, error) in
       if error != nil {

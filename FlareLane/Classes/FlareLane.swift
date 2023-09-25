@@ -37,7 +37,7 @@ import UIKit
   /// - Parameters:
   ///   - projectId: FlareLane projectId
   ///   - launchOptions: AppDelegate didFinishLaunchingWithOptions
-  @objc public static func initWithLaunchOptions(_ launchOptions: [UIApplication.LaunchOptionsKey: Any]?, projectId: String) {
+  @objc public static func initWithLaunchOptions(_ launchOptions: [UIApplication.LaunchOptionsKey: Any]?, projectId: String, disableInitialPrompt: Bool = false) {
     Logger.verbose("Initialize FlareLane")
     
     
@@ -48,6 +48,10 @@ import UIKit
     
     // Set projectId before device is registered
     Globals.projectId = projectId
+    
+    // Set disableInitialPrompt
+    // The parameter was set to Bool = false for @objc compatibility because an optional Bool cannot be used.
+    Globals.disableInitialPrompt = disableInitialPrompt;
     
     ColdStartNotificationManager.setColdStartNotification(launchOptions: launchOptions)
     
@@ -60,11 +64,35 @@ import UIKit
     
     ColdStartNotificationManager.process()
     
-    self.promptForNotifications(completion: { granted in
-      if granted {
-        UIApplication.shared.registerForRemoteNotifications()
+    
+    self.permissionState.initialized = true
+    
+    if (Globals.disableInitialPrompt) {
+      Logger.verbose("Initial prompt has been disabled")
+      // if it's the first device registration, initially create the device
+      if (Globals.deviceIdInUserDefaults == nil) {
+        if (self.permissionState.calledPromptForNotificationsBeforeIntialized) {
+          self.promptForNotifications()
+          self.permissionState.calledPromptForNotificationsBeforeIntialized = false
+        } else {
+          DeviceService.register(projectId: projectId, pushToken: nil)
+        }
+      } else {
+        Logger.verbose("Notification allowed. updating device")
+        // Update the device only when push notifications are allowed
+        UNUserNotificationCenter.current().getNotificationSettings { settings in
+          if settings.authorizationStatus == .authorized {
+              self.promptForNotifications()
+          } else if #available(iOS 12, *), settings.authorizationStatus == .provisional {
+              self.promptForNotifications()
+          } else if #available(iOS 14, *), settings.authorizationStatus == .ephemeral {
+              self.promptForNotifications()
+          }
+        }
       }
-    })
+    } else {
+      self.promptForNotifications()
+    }
   }
   
   /// Set the handler when notification is converted
@@ -147,12 +175,16 @@ import UIKit
     EventService.trackEvent(type: type, data: data)
   }
   
-  // MARK: - Private Methods
-  
   /// To get notification permission
   /// - Parameter completion: Completion callback
-  private static func promptForNotifications(completion: @escaping (Bool) -> Void) {
+  @objc public static func promptForNotifications() {
     Logger.verbose("Start request user notification authorization.")
+    
+    if (!self.permissionState.initialized) {
+      Logger.verbose("promptForNotifications: Called before Initialize. will execute after Initialize")
+      self.permissionState.calledPromptForNotificationsBeforeIntialized = true;
+      return;
+    }
     
     let options: UNAuthorizationOptions = [.badge, .alert, .sound]
     
@@ -160,7 +192,10 @@ import UIKit
       DispatchQueue.main.async {
         self.permissionState.accepted = granted
         self.permissionState.answeredPrompt = true
-        completion(granted)
+        
+        if granted {
+          UIApplication.shared.registerForRemoteNotifications()
+        }
       }
     }
   }
