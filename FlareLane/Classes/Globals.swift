@@ -55,13 +55,22 @@ final class Globals {
       UserDefaults.standard.string(forKey: userIdKey)
     }
   }
+  
+  /// Save pushToken in local storage
+  private static var pushTokenKey = "flarelane_pushTokenKey"
+  static var pushTokenInUserDefaults: String? {
+    set {
+      UserDefaults.standard.set(newValue, forKey: pushTokenKey)
+    }
+
+    get {
+      UserDefaults.standard.string(forKey: pushTokenKey)
+    }
+  }
 
   /// Current logLevel
   static var logLevel: LogLevel = .verbose
 
   /// Swizzled or not
   static var swizzled: Bool = false
-  
-  /// options
-  static var disableInitialPrompt: Bool = false
 }
