@@ -31,14 +31,10 @@ final class DeviceService {
   /// - Parameters:
   ///   - projectId: FlareLane projectId
   ///   - pushToken: PushToken from Swizzled delegate
-  static func register(projectId:String, pushToken: String?) {
+  static func register(projectId: String, completion: @escaping (() -> Void) = {}) {
     Logger.verbose("Start create device request.")
     
-    var body = self.getSystemInfo()
-    
-    if let pushToken {
-      body["pushToken"] = pushToken
-    }
+    let body = self.getSystemInfo()
     
     API.shared.createDevice(body: body) { (deviceId, error) in
       if error != nil {
@@ -48,21 +44,19 @@ final class DeviceService {
       
       Globals.deviceIdInUserDefaults = deviceId
       Globals.projectIdInUserDefaults = projectId
-      
+          
       Logger.verbose("Succeed create device request.")
+      completion()
     }
   }
   
   /// Update device information to the latest
   /// - Parameters:
-  ///   - projectId: FlareLane projectId
   ///   - deviceId: FlareLane deviceId
-  ///   - pushToken: PushToken from Swizzled delegate
-  static func activate(deviceId: String, pushToken: String) {
+  static func activate(deviceId: String, completion: @escaping (() -> Void) = {}) {
     Logger.verbose("Start update device request.")
     
     var body = self.getSystemInfo()
-    body["pushToken"] = pushToken
     // Save recent activations of the device
     body["lastActiveAt"] = Date().toString()
     
@@ -71,10 +65,9 @@ final class DeviceService {
         Logger.error("Failed update device request.")
         return
       }
-      
-      self.saveUserId(device: device)
-      
+          
       Logger.verbose("Succeed update device request.")
+      completion()
     }
   }
   
@@ -83,7 +76,7 @@ final class DeviceService {
   ///   - deviceId: FlareLane deviceId
   ///   - key: Data key
   ///   - value: Data value
-  static func update(deviceId: String, key: String , value: Any?) {
+  static func update(deviceId: String, key: String, value: Any?) {
     let body = [key: value]
     
     API.shared.updateDevice(deviceId: deviceId, body: body) { (device, error) in
@@ -92,7 +85,7 @@ final class DeviceService {
         return
       }
       
-      self.saveUserId(device: device)
+      self.saveData(body: body)
       
       Logger.verbose("Succeed update \(key) request.")
     }
@@ -134,13 +127,21 @@ final class DeviceService {
     }
   }
   
-  // Save userId to the local storage.
-  private static func saveUserId(device: [String: Any?]?) {
-    if let userIdValue = device?["userId"] {
-      if let validUserId = userIdValue as? String  {
-        Globals.userIdInUserDefaults = validUserId
+  // Save data to the local storage.
+  private static func saveData(body: [String: Any?]?) {
+    if let userIdValue = body?["userId"] {
+      if let valid = userIdValue as? String  {
+        Globals.userIdInUserDefaults = valid
       } else {
         Globals.userIdInUserDefaults = nil
+      }
+    }
+    
+    if let pushTokenValue = body?["pushToken"] {
+      if let valid = pushTokenValue as? String  {
+        Globals.pushTokenInUserDefaults = valid
+      } else {
+        Globals.pushTokenInUserDefaults = nil
       }
     }
   }
