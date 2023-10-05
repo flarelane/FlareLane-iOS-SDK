@@ -144,5 +144,13 @@ final class DeviceService {
         Globals.pushTokenInUserDefaults = nil
       }
     }
+    
+    if let isSubscribedValue = body?["isSubscribed"] {
+      if let valid = isSubscribedValue as? Bool  {
+        Globals.isSubscribedInUserDefaults = valid
+      } else {
+        Globals.isSubscribedInUserDefaults = nil
+      }
+    }
   }
 }

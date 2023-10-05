@@ -9,7 +9,6 @@ import UIKit
 
 @available(iOSApplicationExtension, unavailable)
 @objc open class FlareLane: NSObject {
-  static private var permissionState = PermissionState()
   static private var appDelegate = FlareLaneAppDelegate()
   static private let swizzlingEnabledKey = "FlareLaneSwizzlingEnabled"
   
@@ -37,7 +36,8 @@ import UIKit
   /// - Parameters:
   ///   - projectId: FlareLane projectId
   ///   - launchOptions: AppDelegate didFinishLaunchingWithOptions
-  @objc public static func initWithLaunchOptions(_ launchOptions: [UIApplication.LaunchOptionsKey: Any]?, projectId: String, disableInitialPrompt: Bool = false) {
+  ///   - requestPermissionOnLaunch: Request permission for notifications on launch
+  @objc public static func initWithLaunchOptions(_ launchOptions: [UIApplication.LaunchOptionsKey: Any]?, projectId: String, requestPermissionOnLaunch: Bool = true) {
     Logger.verbose("Initialize FlareLane")
     
     
@@ -60,15 +60,18 @@ import UIKit
     }
     
     ColdStartNotificationManager.process()
-    
-    
+      
     if let deviceId = Globals.deviceIdInUserDefaults {
       DeviceService.activate(deviceId: deviceId) {
-        internalPromptForNotifications(disableInitialPrompt: disableInitialPrompt)
+        if (requestPermissionOnLaunch) {
+          requestPermissionForNotifications()
+        }
       }
     } else {
       DeviceService.register(projectId: projectId) {
-        internalPromptForNotifications(disableInitialPrompt: disableInitialPrompt)
+        if (requestPermissionOnLaunch) {
+          requestPermissionForNotifications()
+        }
       }
     }
   }
@@ -153,15 +156,49 @@ import UIKit
     EventService.trackEvent(type: type, data: data)
   }
   
-  /// To get notification permission
-  /// - Parameter completion: Completion callback
-  @objc public static func promptForNotifications() {
-    Logger.verbose("Start request user notification authorization.")
-    
+  /// Request a permission and subscribe for notifications
+  @objc public static func isSubscribed(completion: @escaping (Bool) -> Void) {
+    self.hasPermissionForNotifications() { hasPermission in
+      if hasPermission == true, Globals.isSubscribedInUserDefaults == true {
+        completion(true)
+      } else {
+        // For stability, default return true
+        completion(false)
+      }
+    }
+  }
+  
+  /// Request a permission and subscribe for notifications
+  @objc public static func subscribe(fallbackToSettings: Bool = true) {
+    UNUserNotificationCenter.current().getNotificationSettings { settings in
+      if settings.authorizationStatus == .notDetermined {
+        self.requestPermissionForNotifications()
+      } else if settings.authorizationStatus == .denied {
+        if fallbackToSettings {
+          DispatchQueue.main.async {
+            if #available(iOSApplicationExtension 16.0, *), let url = URL(string: UIApplication.openNotificationSettingsURLString) {
+              UIApplication.shared.open(url)
+            } else if #available(iOSApplicationExtension 15.4, *), let url = URL(string: UIApplicationOpenNotificationSettingsURLString) {
+              UIApplication.shared.open(url)
+            }
+          }
+        }
+      } else {
+        self.setIsSubscribed(isSubscribed: true)
+      }
+    }
+  }
+  
+  /// Unsubscribe for notifications
+  @objc public static func unsubscribe() {
+    self.setIsSubscribed(isSubscribed: false)
+  }
+  
+  private static func requestPermissionForNotifications() {
     let options: UNAuthorizationOptions = [.badge, .alert, .sound]
     
     UNUserNotificationCenter.current().requestAuthorization(options: options) { (granted, error) in
-      DispatchQueue.main.async {        
+      DispatchQueue.main.async {
         if granted {
           UIApplication.shared.registerForRemoteNotifications()
         }
@@ -169,19 +206,14 @@ import UIKit
     }
   }
   
-  private static func internalPromptForNotifications(disableInitialPrompt: Bool) {
-    if (disableInitialPrompt) {
-      UNUserNotificationCenter.current().getNotificationSettings { settings in
-        if settings.authorizationStatus == .authorized {
-          Logger.verbose("Prompted: Already authorized.")
-          self.promptForNotifications()
-        } else {
-          Logger.verbose("Not prompted: disableInitialPrompt is true.")
-        }
+  private static func hasPermissionForNotifications(completion: @escaping (Bool) -> Void) {
+    UNUserNotificationCenter.current().getNotificationSettings { settings in
+      if settings.authorizationStatus == .notDetermined || settings.authorizationStatus == .denied {
+        completion(false)
+      } else {
+        // For stability, default return true
+        completion(true)
       }
-    } else {
-      Logger.verbose("Prompted: disableInitialPrompt is false")
-      self.promptForNotifications()
     }
   }
 }

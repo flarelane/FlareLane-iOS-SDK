@@ -25,14 +25,7 @@ class ViewController: UIViewController {
     FlareLane.setUserId(userId: isSetUserId ? nil : userId)
     isSetUserId = !isSetUserId
   }
-  
-  @IBAction func ToggleIsSubscribed(_ sender: Any) {
-    // Set subscribed or not
-    // Even if notifications are turned on in the system, no notifications are sent if the subscription is false.
-    FlareLane.setIsSubscribed(isSubscribed: isSubscribed)
-    isSubscribed = !isSubscribed
-  }
-  
+   
   @IBAction func ToggleTags(_ sender: Any) {
     if (isSetTags == false) {
       // Set tags
@@ -56,8 +49,19 @@ class ViewController: UIViewController {
     }
   }
   
-  @IBAction func promptForNotifications(_ sender: Any) {
-    FlareLane.promptForNotifications()
+  @IBAction func isSubscribed(_ sender: Any) {
+    FlareLane.isSubscribed() { isSubscribed in
+      print("FlareLane.isSubscribed() - \(isSubscribed)")
+    }
+    
+  }
+  
+  @IBAction func subscribe(_ sender: Any) {
+    FlareLane.subscribe()
+  }
+  
+  @IBAction func unsubscribe(_ sender: Any) {
+    FlareLane.unsubscribe()
   }
   
   override func didReceiveMemoryWarning() {

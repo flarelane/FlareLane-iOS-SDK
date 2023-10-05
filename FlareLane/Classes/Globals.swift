@@ -67,6 +67,18 @@ final class Globals {
       UserDefaults.standard.string(forKey: pushTokenKey)
     }
   }
+  
+  /// Save isSubscribed in local storage
+  private static var isSubscribedKey = "flarelane_isSubscribedKey"
+  static var isSubscribedInUserDefaults: Bool? {
+    set {
+      UserDefaults.standard.set(newValue, forKey: isSubscribedKey)
+    }
+
+    get {
+      UserDefaults.standard.bool(forKey: isSubscribedKey)
+    }
+  }
 
   /// Current logLevel
   static var logLevel: LogLevel = .verbose

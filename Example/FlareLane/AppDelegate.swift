@@ -21,7 +21,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
 
     // Initialize by setting logLevel and projectId.
     FlareLane.setLogLevel(level: .verbose)
-    FlareLane.initWithLaunchOptions(launchOptions, projectId: FLARELANE_PROJECT_ID)
+    FlareLane.initWithLaunchOptions(launchOptions, projectId: FLARELANE_PROJECT_ID, requestPermissionOnLaunch: false)
     FlareLane.setNotificationConvertedHandler() { payload in
       // Do something...
       print(payload)
