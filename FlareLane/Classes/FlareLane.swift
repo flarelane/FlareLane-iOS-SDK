@@ -143,7 +143,9 @@ import UIKit
     }
     
     DeviceService.update(deviceId: deviceId, key: "isSubscribed", value: isSubscribed) {
-      completion?(isSubscribed)
+      DispatchQueue.main.sync {
+        completion?(isSubscribed)
+      }
     }
   }
   
