@@ -60,9 +60,9 @@ import UIKit
 
     Logger.verbose("registerTokenInvoked: \(registerTokenInvoked)")
     if registerTokenInvoked {
-      return;
+      return
     }
-    registerTokenInvoked = true;
+    registerTokenInvoked = true
 
     // Convert token to string
     let prevPushToken = Globals.pushTokenInUserDefaults

@@ -43,7 +43,7 @@ import UIKit
     
     if (Globals.projectIdInUserDefaults != projectId) {
       // If the previous projectId and the current projectId are not the same, set deviceId to nil for device creation
-      Globals.deviceIdInUserDefaults = nil;
+      Globals.deviceIdInUserDefaults = nil
     }
     
     // Set projectId before device is registered
@@ -60,7 +60,7 @@ import UIKit
     }
     
     ColdStartNotificationManager.process()
-      
+    
     if let deviceId = Globals.deviceIdInUserDefaults {
       DeviceService.activate(deviceId: deviceId) {
         if (requestPermissionOnLaunch) {
@@ -109,7 +109,9 @@ import UIKit
     }
     
     DeviceService.getTags(deviceId: deviceId) { tags in
-      completion(tags);
+      DispatchQueue.main.async {
+        completion(tags)
+      }
     }
   }
   
@@ -135,12 +137,16 @@ import UIKit
   
   /// Update isSubscribe of device
   /// - Parameter isSubscribed: subscribed or not
-  @objc public static func setIsSubscribed(isSubscribed: Bool) {
+  @objc public static func setIsSubscribed(isSubscribed: Bool, completion: ((Bool) -> Void)? = nil) {
     guard let deviceId = Globals.deviceIdInUserDefaults else {
       return
     }
     
-    DeviceService.update(deviceId: deviceId, key: "isSubscribed", value: isSubscribed)
+    DeviceService.update(deviceId: deviceId, key: "isSubscribed", value: isSubscribed) {
+      DispatchQueue.main.sync {
+        completion?(isSubscribed)
+      }
+    }
   }
   
   /// Get id of device
@@ -159,20 +165,22 @@ import UIKit
   /// Request a permission and subscribe for notifications
   @objc public static func isSubscribed(completion: @escaping (Bool) -> Void) {
     self.hasPermissionForNotifications() { hasPermission in
-      if hasPermission == true, Globals.isSubscribedInUserDefaults == true {
-        completion(true)
-      } else {
-        // For stability, default return true
-        completion(false)
+      DispatchQueue.main.async {
+        if hasPermission == true, Globals.isSubscribedInUserDefaults == true {
+          completion(true)
+        } else {
+          // For stability, default return true
+          completion(false)
+        }
       }
     }
   }
   
   /// Request a permission and subscribe for notifications
-  @objc public static func subscribe(fallbackToSettings: Bool = true) {
+  @objc public static func subscribe(fallbackToSettings: Bool = true, completion: ((Bool) -> Void)? = nil) {
     UNUserNotificationCenter.current().getNotificationSettings { settings in
       if settings.authorizationStatus == .notDetermined {
-        self.requestPermissionForNotifications()
+        self.requestPermissionForNotifications(completion: completion)
       } else if settings.authorizationStatus == .denied {
         if fallbackToSettings {
           DispatchQueue.main.async {
@@ -180,27 +188,45 @@ import UIKit
               UIApplication.shared.open(url)
             } else if #available(iOSApplicationExtension 15.4, *), let url = URL(string: UIApplicationOpenNotificationSettingsURLString) {
               UIApplication.shared.open(url)
+            } else {
+              // 10.0 to 15.4
+              if let url = URL(string: "App-Prefs:root=NOTIFICATIONS_ID") {
+                UIApplication.shared.open(url)
+              }
             }
           }
         }
       } else {
-        self.setIsSubscribed(isSubscribed: true)
+        // Synchronize as much as possible to prevent cases where the token is absent in the DB
+        self.requestPermissionForNotifications()
+        self.setIsSubscribed(isSubscribed: true) { isSubscribed in
+          DispatchQueue.main.async {
+            completion?(isSubscribed)
+          }
+        }
       }
     }
   }
   
   /// Unsubscribe for notifications
-  @objc public static func unsubscribe() {
-    self.setIsSubscribed(isSubscribed: false)
+  @objc public static func unsubscribe(completion: ((Bool) -> Void)? = nil) {
+    self.setIsSubscribed(isSubscribed: false) { isSubscribed in
+      DispatchQueue.main.async {
+        completion?(isSubscribed)
+      }
+    }
   }
   
-  private static func requestPermissionForNotifications() {
+  private static func requestPermissionForNotifications(completion: ((Bool) -> Void)? = nil) {
     let options: UNAuthorizationOptions = [.badge, .alert, .sound]
     
     UNUserNotificationCenter.current().requestAuthorization(options: options) { (granted, error) in
       DispatchQueue.main.async {
         if granted {
           UIApplication.shared.registerForRemoteNotifications()
+          completion?(true)
+        } else {
+          completion?(false)
         }
       }
     }

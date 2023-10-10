@@ -2,7 +2,7 @@
 //  FlareLaneExtensionHelper.swift
 //  FlareLane
 //
-//  Created by MinHyeok Kim on 2022/04/11.
+//  Copyright © 2021 FlareLabs. All rights reserved.
 //
 
 import UserNotifications
@@ -55,9 +55,9 @@ import MobileCoreServices
   
   @objc public func isFlareLaneNotification(_ request: UNNotificationRequest) -> Bool {
     if let _ = FlareLaneNotification.getFlareLaneNotificationFromUNNotificationContent(request.content) {
-      return true;
+      return true
     }
     
-    return false;
+    return false
   }
 }

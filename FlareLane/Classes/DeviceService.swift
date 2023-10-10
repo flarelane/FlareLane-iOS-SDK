@@ -76,7 +76,7 @@ final class DeviceService {
   ///   - deviceId: FlareLane deviceId
   ///   - key: Data key
   ///   - value: Data value
-  static func update(deviceId: String, key: String, value: Any?) {
+  static func update(deviceId: String, key: String, value: Any?, completion: (()->())? = nil) {
     let body = [key: value]
     
     API.shared.updateDevice(deviceId: deviceId, body: body) { (device, error) in
@@ -85,9 +85,11 @@ final class DeviceService {
         return
       }
       
-      self.saveData(body: body)
+      self.saveData(body: device)
       
       Logger.verbose("Succeed update \(key) request.")
+      
+      completion?()
     }
   }
   

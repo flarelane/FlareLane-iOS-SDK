@@ -17,13 +17,13 @@ import Foundation
   public var data: Dictionary<String, Any>?
   
   public init(id: String, body: String, title: String?, url: String?, imageUrl: String?, data: Dictionary<String, Any>?) {
-    self.id = id;
-    self.body = body;
-    self.data = data;
+    self.id = id
+    self.body = body
+    self.data = data
     // To avoid unexpected blank lines in place of titles
-    self.title = title == "" ? nil : title;
-    self.url = url == "" ? nil : url;
-    self.imageUrl = imageUrl == "" ? nil : imageUrl;
+    self.title = title == "" ? nil : title
+    self.url = url == "" ? nil : url
+    self.imageUrl = imageUrl == "" ? nil : imageUrl
   }
   
   open override var description: String {
@@ -63,7 +63,7 @@ import Foundation
             return nil
           }
     
-    return notification;
+    return notification
   }
   
   public static func getFlareLaneNotificationFromUNNotificationContent(_ notificationContent: UNNotificationContent) -> FlareLaneNotification? {
