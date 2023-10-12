@@ -11,7 +11,6 @@ import UIKit
 @objc public class FlareLaneAppDelegate: NSObject {
 
   @objc public static let shared = FlareLaneAppDelegate()
-  private var registerTokenInvoked = false
 
   func swizzle() {
     guard Globals.swizzled == false else {
@@ -57,12 +56,6 @@ import UIKit
     guard let _ = Globals.projectId else {
       return
     }
-
-    Logger.verbose("registerTokenInvoked: \(registerTokenInvoked)")
-    if registerTokenInvoked {
-      return
-    }
-    registerTokenInvoked = true
 
     // Convert token to string
     let prevPushToken = Globals.pushTokenInUserDefaults
