@@ -139,14 +139,6 @@ final class DeviceService {
       }
     }
     
-    if let pushTokenValue = body?["pushToken"] {
-      if let valid = pushTokenValue as? String  {
-        Globals.pushTokenInUserDefaults = valid
-      } else {
-        Globals.pushTokenInUserDefaults = nil
-      }
-    }
-    
     if let isSubscribedValue = body?["isSubscribed"] {
       if let valid = isSubscribedValue as? Bool  {
         Globals.isSubscribedInUserDefaults = valid
