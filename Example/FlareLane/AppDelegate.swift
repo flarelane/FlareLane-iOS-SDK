@@ -8,33 +8,25 @@
 
 import UIKit
 import FlareLane
-import OneSignal
+import FirebaseCore
+import FirebaseMessaging
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterDelegate {
 
   var window: UIWindow?
   private let FLARELANE_PROJECT_ID = "FLARELANE_PROJECT_ID"
-  private let ONESIGNAL_APP_ID = "ONESIGNAL_APP_ID"
 
   func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
-
-    // Initialize by setting logLevel and projectId.
-    FlareLane.setLogLevel(level: .verbose)
-    FlareLane.initWithLaunchOptions(launchOptions, projectId: FLARELANE_PROJECT_ID)
+    // FlareLane
+    FlareLane.initWithLaunchOptions(launchOptions, projectId: FLARELANE_PROJECT_ID, requestPermissionOnLaunch: false)
     FlareLane.setNotificationConvertedHandler() { payload in
-      // Do something...
       print(payload)
     }
-
-    OneSignal.setLogLevel(.LL_VERBOSE, visualLevel: .LL_NONE)
-    OneSignal.initWithLaunchOptions(launchOptions)
-    OneSignal.setAppId(ONESIGNAL_APP_ID)
-    OneSignal.promptForPushNotifications(userResponse: { accepted in
-      print("User accepted notifications: \(accepted)")
-    })
-
+    
+    // Test with FCM
     UNUserNotificationCenter.current().delegate = self
+    FirebaseApp.configure()
 
     return true
   }
@@ -42,6 +34,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
   // If you are not swizzled, must input this matched methods.
   func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
     FlareLaneAppDelegate.shared.application(application, didRegisterForRemoteNotificationsWithDeviceToken: deviceToken)
+    
+    // Test with FCM
+    Messaging.messaging().apnsToken = deviceToken
+    Messaging.messaging().token { token, error in
+      if let error = error {
+        print("Error fetching FCM registration token: \(error)")
+      } else if let token = token {
+        print("FCM registration token: \(token)")
+      }
+    }
   }
 
   func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {

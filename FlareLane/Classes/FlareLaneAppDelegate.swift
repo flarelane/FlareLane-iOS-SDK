@@ -11,7 +11,6 @@ import UIKit
 @objc public class FlareLaneAppDelegate: NSObject {
 
   @objc public static let shared = FlareLaneAppDelegate()
-  private var registerTokenInvoked = false
 
   func swizzle() {
     guard Globals.swizzled == false else {
@@ -54,25 +53,20 @@ import UIKit
     _ application: UIApplication,
     didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
   ) {
-    guard let projectId = Globals.projectId else {
+    guard let _ = Globals.projectId else {
       return
     }
 
-    Logger.verbose("registerTokenInvoked: \(registerTokenInvoked)")
-    if registerTokenInvoked {
-      return;
-    }
-    registerTokenInvoked = true;
-
     // Convert token to string
+    let prevPushToken = Globals.pushTokenInUserDefaults
     let pushToken = deviceToken.reduce("", {$0 + String(format: "%02X", $1)})
     Logger.verbose("APNs device token: \(pushToken)")
-
+    
     // It is divided into activate and register depending on the presence of deviceId
-    if let deviceId = Globals.deviceIdInUserDefaults {
-      DeviceService.activate(deviceId: deviceId, pushToken: pushToken)
-    } else {
-      DeviceService.register(projectId: projectId, pushToken: pushToken)
+    if let deviceId = Globals.deviceIdInUserDefaults, pushToken != prevPushToken {
+      DeviceService.update(deviceId: deviceId, key: "pushToken", value: pushToken) {
+        Globals.pushTokenInUserDefaults = pushToken
+      }
     }
   }
 

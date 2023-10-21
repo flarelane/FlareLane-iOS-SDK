@@ -2,9 +2,6 @@
 //  ViewController.swift
 //  FlareLane
 //
-//  Created by 62019543 on 09/24/2021.
-//  Copyright (c) 2021 62019543. All rights reserved.
-//
 
 import UIKit
 import FlareLane
@@ -25,14 +22,7 @@ class ViewController: UIViewController {
     FlareLane.setUserId(userId: isSetUserId ? nil : userId)
     isSetUserId = !isSetUserId
   }
-  
-  @IBAction func ToggleIsSubscribed(_ sender: Any) {
-    // Set subscribed or not
-    // Even if notifications are turned on in the system, no notifications are sent if the subscription is false.
-    FlareLane.setIsSubscribed(isSubscribed: isSubscribed)
-    isSubscribed = !isSubscribed
-  }
-  
+   
   @IBAction func ToggleTags(_ sender: Any) {
     if (isSetTags == false) {
       // Set tags
@@ -52,7 +42,25 @@ class ViewController: UIViewController {
   
   @IBAction func getTags() {
     FlareLane.getTags() { tags in
-      print(tags ?? "nil")
+      print(tags ?? "nil", ", isMainThread: \(Thread.isMainThread)")
+    }
+  }
+  
+  @IBAction func isSubscribed(_ sender: Any) {
+    FlareLane.isSubscribed() { isSubscribed in
+      print("FlareLane.isSubscribed() - \(isSubscribed), isMainThread: \(Thread.isMainThread)")
+    }
+  }
+  
+  @IBAction func subscribe(_ sender: Any) {
+    FlareLane.subscribe() { isSubscribed in
+      print("FlareLane.subscribe() - \(isSubscribed), isMainThread: \(Thread.isMainThread)")
+    }
+  }
+  
+  @IBAction func unsubscribe(_ sender: Any) {
+    FlareLane.unsubscribe() { isSubscribed in
+      print("FlareLane.unsubscribe() - \(isSubscribed), isMainThread: \(Thread.isMainThread)")
     }
   }
   
