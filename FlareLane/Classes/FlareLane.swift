@@ -184,12 +184,15 @@ import UIKit
       } else if settings.authorizationStatus == .denied {
         if fallbackToSettings {
           DispatchQueue.main.async {
-            if #available(iOSApplicationExtension 16.0, *), let url = URL(string: UIApplication.openNotificationSettingsURLString) {
-              UIApplication.shared.open(url)
-            } else if #available(iOSApplicationExtension 15.4, *), let url = URL(string: UIApplicationOpenNotificationSettingsURLString) {
-              UIApplication.shared.open(url)
+            if #available(iOS 16.0, *) {
+              if let url = URL(string: UIApplication.openNotificationSettingsURLString) {
+                UIApplication.shared.open(url)
+              }
+            } else if #available(iOS 15.4, *) {
+              if let url = URL(string: UIApplicationOpenNotificationSettingsURLString) {
+                UIApplication.shared.open(url)
+              }
             } else {
-              // 10.0 to 15.4
               if let url = URL(string: "App-Prefs:root=NOTIFICATIONS_ID") {
                 UIApplication.shared.open(url)
               }
