@@ -19,7 +19,7 @@ PODS:
     - GoogleUtilities/Reachability (~> 7.8)
     - GoogleUtilities/UserDefaults (~> 7.8)
     - nanopb (< 2.30910.0, >= 2.30908.0)
-  - FlareLane (1.3.2)
+  - FlareLane (1.4.0)
   - GoogleDataTransport (9.2.5):
     - GoogleUtilities/Environment (~> 7.7)
     - nanopb (< 2.30910.0, >= 2.30908.0)
@@ -46,22 +46,11 @@ PODS:
     - nanopb/encode (= 2.30909.0)
   - nanopb/decode (2.30909.0)
   - nanopb/encode (2.30909.0)
-  - OneSignalXCFramework (3.12.7):
-    - OneSignalXCFramework/OneSignalCore (= 3.12.7)
-    - OneSignalXCFramework/OneSignalExtension (= 3.12.7)
-    - OneSignalXCFramework/OneSignalOutcomes (= 3.12.7)
-  - OneSignalXCFramework/OneSignalCore (3.12.7)
-  - OneSignalXCFramework/OneSignalExtension (3.12.7):
-    - OneSignalXCFramework/OneSignalCore
-    - OneSignalXCFramework/OneSignalOutcomes
-  - OneSignalXCFramework/OneSignalOutcomes (3.12.7):
-    - OneSignalXCFramework/OneSignalCore
   - PromisesObjC (2.3.1)
 
 DEPENDENCIES:
   - FirebaseMessaging
   - FlareLane (from `../`)
-  - OneSignalXCFramework (< 4.0, >= 3.0.0)
 
 SPEC REPOS:
   trunk:
@@ -72,7 +61,6 @@ SPEC REPOS:
     - GoogleDataTransport
     - GoogleUtilities
     - nanopb
-    - OneSignalXCFramework
     - PromisesObjC
 
 EXTERNAL SOURCES:
@@ -84,13 +72,12 @@ SPEC CHECKSUMS:
   FirebaseCoreInternal: 26233f705cc4531236818a07ac84d20c333e505a
   FirebaseInstallations: b822f91a61f7d1ba763e5ccc9d4f2e6f2ed3b3ee
   FirebaseMessaging: 80b4a086d20ed4fd385a702f4bfa920e14f5064d
-  FlareLane: 93cdce1496e1bcb349a36867c543d0b75b5702d8
+  FlareLane: 63b9ae6705d3d666408d033c0c5bc6fee1517a96
   GoogleDataTransport: 54dee9d48d14580407f8f5fbf2f496e92437a2f2
   GoogleUtilities: 13e2c67ede716b8741c7989e26893d151b2b2084
   nanopb: b552cce312b6c8484180ef47159bc0f65a1f0431
-  OneSignalXCFramework: 0fca311799488cb50419c0b96594aa8df4300115
   PromisesObjC: c50d2056b5253dadbd6c2bea79b0674bd5a52fa4
 
-PODFILE CHECKSUM: b329fad43dac024c48bf6d6786ecb5dc83182aea
+PODFILE CHECKSUM: 8cfebe9bce3f4868e8c23fd8b7afe43895389612
 
 COCOAPODS: 1.13.0

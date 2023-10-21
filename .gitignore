@@ -37,3 +37,5 @@ Carthage/Build
 #
 Pods/
 Example/Pods/
+
+GoogleService-Info.plist
