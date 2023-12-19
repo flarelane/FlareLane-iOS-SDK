@@ -76,18 +76,24 @@ import UIKit
     }
   }
   
-  /// Set the handler when notification is converted
+  /// Set the handler when notification is clicked
   /// - Parameter callback: Handler callback
-  @objc public static func setNotificationConvertedHandler(callback: @escaping (FlareLaneNotification) -> Void) {
-    Logger.verbose("Set notification converted handler.")
-    EventHandlers.notificationConverted = callback
+  @objc public static func setNotificationClickedHandler(callback: @escaping (FlareLaneNotification) -> Void) {
+    Logger.verbose("Set notification clicked handler.")
+    EventHandlers.notificationClicked = callback
     
     if let unhandledNotification = EventHandlers.unhandledNotification {
       Logger.verbose("found unhandledNotification and execute handler")
-      // If the notification is converted before the handler is set, execute the callback once with unhandledNotification and set unhandledNotification to nil.
+      // If the notification is clicked before the handler is set, execute the callback once with unhandledNotification and set unhandledNotification to nil.
       callback(unhandledNotification)
       EventHandlers.unhandledNotification = nil
     }
+  }
+  
+  /// Set the handler when notification foreground received
+  /// - Parameter callback: Handler callback
+  @objc public static func setNotificationForegroundReceivedHandler(callback: @escaping (FlareLaneNotificationReceivedEvent) -> Void) {
+    EventHandlers.notificationForegroundReceived = callback
   }
   
   /// Set userId of device
