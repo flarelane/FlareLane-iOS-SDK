@@ -42,7 +42,7 @@ import UserNotifications
         return
       }
       
-      let event = FlareLaneNotificationReceivedEvent(notification: flarelaneNotification, completionHandler: completionHandler)
+      let event = FlareLaneNotificationReceivedEvent(UIApplication.shared, notification: flarelaneNotification, completionHandler: completionHandler)
       
       if let handler = EventHandlers.notificationForegroundReceived {
         Logger.verbose("notificationForegroundReceivedHandler exists, you can control the display timing.")

@@ -9,18 +9,23 @@ import Foundation
 
 @objc open class FlareLaneNotificationReceivedEvent: NSObject {
   public var notification: FlareLaneNotification
+  private var application: UIApplication
   private var completionHandler: (UNNotificationPresentationOptions) -> Void
   
-  init(notification: FlareLaneNotification, completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+  init(_ application: UIApplication, notification: FlareLaneNotification, completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+    self.application = application
     self.notification = notification
     self.completionHandler = completionHandler
   }
   
   @objc public func display() {
-    completionHandler([.alert, .sound])
     Logger.verbose("notification received: \(self.notification)")
+    completionHandler([.alert, .sound])
     
-    // TODO: How to know am i background?
-    EventService.createForegroundReceived(notificationId: self.notification.id)
+    if application.applicationState == .active {
+      EventService.createForegroundReceived(notificationId: self.notification.id)
+    } else {
+      // TODO: Needs EventService.createBackgroundReceived
+    }
   }
 }
