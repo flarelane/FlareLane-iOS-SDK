@@ -147,28 +147,6 @@ import UIKit
     DeviceService.deleteTags(deviceId: deviceId, keys: keys)
   }
   
-  /// Update isSubscribe of device
-  /// - Parameter isSubscribed: subscribed or not
-  @objc public static func setIsSubscribed(isSubscribed: Bool, completion: ((Bool) -> Void)? = nil) {
-    guard let deviceId = Globals.deviceIdInUserDefaults else {
-      return
-    }
-    
-    var body: [String: Any?] = [
-      "isSubscribed": isSubscribed
-    ]
-    
-    if isSubscribed == true {
-      body["pushToken"] = Globals.pushTokenInUserDefaults
-    }
-    
-    DeviceService.update(deviceId: deviceId, body: body) { device in
-      DispatchQueue.main.sync {
-        completion?(device.isSubscribed)
-      }
-    }
-  }
-  
   /// Get id of device
   @objc public static func getDeviceId() -> String? {
     return Globals.deviceIdInUserDefaults
@@ -240,6 +218,8 @@ import UIKit
     }
   }
   
+  // MARK: Private Methods
+  
   private static func requestPermissionForNotifications(completion: ((Bool) -> Void)? = nil) {
     let options: UNAuthorizationOptions = [.badge, .alert, .sound]
     
@@ -262,6 +242,28 @@ import UIKit
       } else {
         // For stability, default return true
         completion(true)
+      }
+    }
+  }
+  
+  /// Update isSubscribe of device
+  /// - Parameter isSubscribed: subscribed or not
+  private static func setIsSubscribed(isSubscribed: Bool, completion: ((Bool) -> Void)? = nil) {
+    guard let deviceId = Globals.deviceIdInUserDefaults else {
+      return
+    }
+    
+    var body: [String: Any?] = [
+      "isSubscribed": isSubscribed
+    ]
+    
+    if isSubscribed == true {
+      body["pushToken"] = Globals.pushTokenInUserDefaults
+    }
+    
+    DeviceService.update(deviceId: deviceId, body: body) { device in
+      DispatchQueue.main.sync {
+        completion?(device.isSubscribed)
       }
     }
   }
