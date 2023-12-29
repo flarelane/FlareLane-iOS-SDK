@@ -16,7 +16,11 @@ import Foundation
     self.completionHandler = completionHandler
   }
   
-  public func display() {
+  @objc public func display() {
     completionHandler([.alert, .sound])
+    Logger.verbose("notification received: \(self.notification)")
+    
+    // TODO: How to know am i background?
+    EventService.createForegroundReceived(notificationId: self.notification.id)
   }
 }

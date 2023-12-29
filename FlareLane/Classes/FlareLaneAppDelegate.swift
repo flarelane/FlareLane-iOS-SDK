@@ -64,10 +64,11 @@ import UIKit
     
     // It is divided into activate and register depending on the presence of deviceId
     if let deviceId = Globals.deviceIdInUserDefaults, pushToken != prevPushToken {
-      DeviceService.update(deviceId: deviceId, key: "pushToken", value: pushToken) {
+      let body = ["pushToken": pushToken]
+      
+      DeviceService.update(deviceId: deviceId, body: body) { _ in
         Globals.pushTokenInUserDefaults = pushToken
       }
     }
   }
-
 }

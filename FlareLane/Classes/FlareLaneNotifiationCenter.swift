@@ -42,18 +42,14 @@ import UserNotifications
         return
       }
       
-      Logger.verbose("notification received: \(flarelaneNotification)")
-      EventService.createForegroundReceived(notificationId: flarelaneNotification.id)
-      
+      let event = FlareLaneNotificationReceivedEvent(notification: flarelaneNotification, completionHandler: completionHandler)
       
       if let handler = EventHandlers.notificationForegroundReceived {
         Logger.verbose("notificationForegroundReceivedHandler exists, you can control the display timing.")
-        handler(FlareLaneNotificationReceivedEvent(notification: flarelaneNotification, completionHandler: completionHandler))
-        return
+        handler(event)
+      } else {
+        event.display()
       }
-      
-      completionHandler([.alert, .sound])
     }
   }
-  
 }

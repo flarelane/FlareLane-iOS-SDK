@@ -73,4 +73,17 @@ import Foundation
     
     return flarelaneNotification
   }
+  
+  public func toDictionary() -> [String: Optional<Any>] {
+    let dict: [String: Optional<Any>] = [
+      "id": id,
+      "title": title,
+      "body": body,
+      "url": url,
+      "imageUrl": imageUrl,
+      "data": data
+    ]
+    
+    return dict
+  }
 }
