@@ -9,5 +9,6 @@ import Foundation
 
 final class EventHandlers {
   static var unhandledNotification: FlareLaneNotification?
-  static var notificationConverted: ((FlareLaneNotification) -> Void)? = nil
+  static var notificationClicked: ((FlareLaneNotification) -> Void)? = nil
+  static var notificationForegroundReceived: ((FlareLaneNotificationReceivedEvent) -> Void)? = nil
 }

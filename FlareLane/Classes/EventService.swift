@@ -8,9 +8,9 @@
 import Foundation
 
 class EventService {
-  /// Processed when notification is converted
+  /// Processed when notification is clicked
   /// - Parameter notification: Received notification
-  static func createConverted(notification: FlareLaneNotification) {
+  static func createClicked(notification: FlareLaneNotification) {
     guard let deviceId = Globals.deviceIdInUserDefaults else {
       Logger.error("deviceId does not set.")
       return
@@ -18,7 +18,7 @@ class EventService {
     
     API.shared.sendEvent(   
       deviceId: deviceId,
-      type: "CONVERTED",
+      type: "CLICKED",
       notificationId: notification.id
     ) { error in
       if error != nil {
@@ -29,15 +29,15 @@ class EventService {
       Logger.verbose("Succeed send event request.")
     }
     
-    guard let convertedHandler = EventHandlers.notificationConverted else {
+    guard let clickedHandler = EventHandlers.notificationClicked else {
       Logger.verbose("unhandledNotification saved")
-      // If notificationConverted handler is nil, the last notification is saved and executed when the handler is registered.
+      // If notificationClicked handler is nil, the last notification is saved and executed when the handler is registered.
       EventHandlers.unhandledNotification = notification
       return
     }
     
-    Logger.verbose("convertedHandler found, execute handler")
-    convertedHandler(notification)
+    Logger.verbose("clickedHandler found, execute handler")
+    clickedHandler(notification)
   }
   
   /// Processed when notification background received

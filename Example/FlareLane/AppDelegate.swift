@@ -20,8 +20,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
   func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
     // FlareLane
     FlareLane.initWithLaunchOptions(launchOptions, projectId: FLARELANE_PROJECT_ID, requestPermissionOnLaunch: false)
-    FlareLane.setNotificationConvertedHandler() { payload in
+    FlareLane.setNotificationClickedHandler() { payload in
       print(payload)
+    }
+    
+    FlareLane.setNotificationForegroundReceivedHandler { event in
+      if let dismissData = event.notification.data?["dismiss_foreground_notification"] as? String,
+         dismissData == "true" {
+        return
+      }
+      
+      event.display()
     }
     
     // Test with FCM

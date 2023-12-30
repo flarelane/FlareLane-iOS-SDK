@@ -76,20 +76,22 @@ final class DeviceService {
   ///   - deviceId: FlareLane deviceId
   ///   - key: Data key
   ///   - value: Data value
-  static func update(deviceId: String, key: String, value: Any?, completion: (()->())? = nil) {
-    let body = [key: value]
-    
-    API.shared.updateDevice(deviceId: deviceId, body: body) { (device, error) in
+  static func update(deviceId: String, body: [String:Any?], completion: ((FlareLaneDevice)->())? = nil) {
+    API.shared.updateDevice(deviceId: deviceId, body: body) { (response, error) in
       if error != nil {
-        Logger.error("Failed update \(key) request.")
+        Logger.error("Failed update request. - \(body)")
         return
       }
       
-      self.saveData(body: device)
-      
-      Logger.verbose("Succeed update \(key) request.")
-      
-      completion?()
+      if let id = response?["id"] as? String,
+         let isSubscribed = response?["isSubscribed"] as? Bool {
+        
+        let device = FlareLaneDevice(id: id, isSubscribed: isSubscribed)
+        self.saveData(body: response)
+        Logger.verbose("Succeed update request. - \(body)")
+        
+        completion?(device)
+      }
     }
   }
   

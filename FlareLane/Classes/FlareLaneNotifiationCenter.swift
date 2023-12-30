@@ -13,7 +13,7 @@ import UserNotifications
   
   // MARK: - Delegate Methods
   
-  /// To handle notification converted
+  /// To handle notification clicked
   @objc public func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
     Logger.verbose("INVOKED")
     
@@ -25,8 +25,8 @@ import UserNotifications
         // If the id of coldStartNotification is the same as notificationId, it stops to avoid duplicate execution
         Logger.verbose("ColdStartNotification is exists. skip didReceive")
       } else {
-        Logger.verbose("Converted user notification.")
-        EventService.createConverted(notification: notification)
+        Logger.verbose("Clicked user notification.")
+        EventService.createClicked(notification: notification)
       }
     }
     completionHandler()
@@ -34,14 +34,22 @@ import UserNotifications
   
   /// To handle notification foreground received
   @objc public func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
-    Logger.verbose("INVOKED")
-    
     if let flarelaneNotification = FlareLaneNotification.getFlareLaneNotificationFromUNNotificationContent(notification.request.content) {
-      Logger.verbose("notification received: \(flarelaneNotification)")
-      EventService.createForegroundReceived(notificationId: flarelaneNotification.id)
+      if let flarelane_dismiss_foreground_notification = flarelaneNotification.data?["flarelane_dismiss_foreground_notification"] as? String,
+         flarelane_dismiss_foreground_notification == "true" {
+        
+        Logger.verbose("notification dismissed cause flarelane_dismiss_foreground_notification is true.")
+        return
+      }
+      
+      let event = FlareLaneNotificationReceivedEvent(UIApplication.shared, notification: flarelaneNotification, completionHandler: completionHandler)
+      
+      if let handler = EventHandlers.notificationForegroundReceived {
+        Logger.verbose("notificationForegroundReceivedHandler exists, you can control the display timing.")
+        handler(event)
+      } else {
+        event.display()
+      }
     }
-    
-    completionHandler([.alert, .sound])
   }
-  
 }

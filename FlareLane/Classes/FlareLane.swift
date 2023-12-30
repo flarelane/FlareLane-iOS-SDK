@@ -44,6 +44,7 @@ import UIKit
     if (Globals.projectIdInUserDefaults != projectId) {
       // If the previous projectId and the current projectId are not the same, set deviceId to nil for device creation
       Globals.deviceIdInUserDefaults = nil
+      Globals.isSubscribedInUserDefaults = nil
     }
     
     // Set projectId before device is registered
@@ -76,18 +77,25 @@ import UIKit
     }
   }
   
-  /// Set the handler when notification is converted
+  /// Set the handler when notification is clicked
   /// - Parameter callback: Handler callback
-  @objc public static func setNotificationConvertedHandler(callback: @escaping (FlareLaneNotification) -> Void) {
-    Logger.verbose("Set notification converted handler.")
-    EventHandlers.notificationConverted = callback
+  @objc public static func setNotificationClickedHandler(callback: @escaping (FlareLaneNotification) -> Void) {
+    EventHandlers.notificationClicked = callback
+    Logger.verbose("NotificationClickedHandler has been registered.")
     
     if let unhandledNotification = EventHandlers.unhandledNotification {
       Logger.verbose("found unhandledNotification and execute handler")
-      // If the notification is converted before the handler is set, execute the callback once with unhandledNotification and set unhandledNotification to nil.
+      // If the notification is clicked before the handler is set, execute the callback once with unhandledNotification and set unhandledNotification to nil.
       callback(unhandledNotification)
       EventHandlers.unhandledNotification = nil
     }
+  }
+  
+  /// Set the handler when notification foreground received
+  /// - Parameter callback: Handler callback
+  @objc public static func setNotificationForegroundReceivedHandler(callback: @escaping (FlareLaneNotificationReceivedEvent) -> Void) {
+    EventHandlers.notificationForegroundReceived = callback
+    Logger.verbose("NotificationForegroundReceivedHandler has been registered.")
   }
   
   /// Set userId of device
@@ -97,7 +105,9 @@ import UIKit
       return
     }
     
-    DeviceService.update(deviceId: deviceId, key: "userId", value: userId)
+    let body = ["userId": userId]
+    
+    DeviceService.update(deviceId: deviceId, body: body)
   }
   
   /// Get tags of device
@@ -122,7 +132,9 @@ import UIKit
       return
     }
     
-    DeviceService.update(deviceId: deviceId, key: "tags", value: tags)
+    let body = ["tags": tags]
+    
+    DeviceService.update(deviceId: deviceId, body: body)
   }
   
   /// Delete tags of device
@@ -133,20 +145,6 @@ import UIKit
     }
     
     DeviceService.deleteTags(deviceId: deviceId, keys: keys)
-  }
-  
-  /// Update isSubscribe of device
-  /// - Parameter isSubscribed: subscribed or not
-  @objc public static func setIsSubscribed(isSubscribed: Bool, completion: ((Bool) -> Void)? = nil) {
-    guard let deviceId = Globals.deviceIdInUserDefaults else {
-      return
-    }
-    
-    DeviceService.update(deviceId: deviceId, key: "isSubscribed", value: isSubscribed) {
-      DispatchQueue.main.sync {
-        completion?(isSubscribed)
-      }
-    }
   }
   
   /// Get id of device
@@ -163,7 +161,7 @@ import UIKit
   }
   
   /// Request a permission and subscribe for notifications
-  @objc public static func isSubscribed(completion: @escaping (Bool) -> Void) {
+  @objc public static func isSubscribed(completion: @escaping (Bool) -> Void) {    
     self.hasPermissionForNotifications() { hasPermission in
       DispatchQueue.main.async {
         if hasPermission == true, Globals.isSubscribedInUserDefaults == true {
@@ -220,6 +218,8 @@ import UIKit
     }
   }
   
+  // MARK: Private Methods
+  
   private static func requestPermissionForNotifications(completion: ((Bool) -> Void)? = nil) {
     let options: UNAuthorizationOptions = [.badge, .alert, .sound]
     
@@ -242,6 +242,28 @@ import UIKit
       } else {
         // For stability, default return true
         completion(true)
+      }
+    }
+  }
+  
+  /// Update isSubscribe of device
+  /// - Parameter isSubscribed: subscribed or not
+  private static func setIsSubscribed(isSubscribed: Bool, completion: ((Bool) -> Void)? = nil) {
+    guard let deviceId = Globals.deviceIdInUserDefaults else {
+      return
+    }
+    
+    var body: [String: Any?] = [
+      "isSubscribed": isSubscribed
+    ]
+    
+    if isSubscribed == true {
+      body["pushToken"] = Globals.pushTokenInUserDefaults
+    }
+    
+    DeviceService.update(deviceId: deviceId, body: body) { device in
+      DispatchQueue.main.sync {
+        completion?(device.isSubscribed)
       }
     }
   }
