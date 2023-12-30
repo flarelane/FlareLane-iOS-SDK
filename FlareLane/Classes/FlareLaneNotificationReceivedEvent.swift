@@ -8,7 +8,7 @@
 import Foundation
 
 @objc open class FlareLaneNotificationReceivedEvent: NSObject {
-  public var notification: FlareLaneNotification
+  @objc public var notification: FlareLaneNotification
   private var application: UIApplication
   private var completionHandler: (UNNotificationPresentationOptions) -> Void
   
