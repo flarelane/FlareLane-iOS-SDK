@@ -1,6 +1,7 @@
 //
 //  FlareLaneJavascriptInterface.swift
 //  FlareLane
+//  Created by jp on 1/24/24.
 //
 
 import WebKit
@@ -12,18 +13,12 @@ import WebKit
         FlareLane.setUserId(userId: userId)
     }
     
-    private func setTags(jsonString: String) {
-        if let jsonData = jsonString.data(using: .utf8),
-           let tags = try? JSONSerialization.jsonObject(with: jsonData, options: []) as? [String: Any] {
-            FlareLane.setTags(tags: tags)
-        }
+    private func setTags(tags: [String: Any]) {
+        FlareLane.setTags(tags: tags)
     }
     
-    private func trackEvent(type: String, jsonString: String) {
-        if let jsonData = jsonString.data(using: .utf8),
-           let data = try? JSONSerialization.jsonObject(with: jsonData, options: []) as? [String: Any] {
-            FlareLane.trackEvent(type, data: data)
-        }
+    private func trackEvent(type: String, data: [String: Any]) {
+        FlareLane.trackEvent(type, data: data)
     }
     
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
@@ -38,13 +33,13 @@ import WebKit
                 setUserId(userId: userId)
             }
         case "setTags":
-            if let jsonString = body["jsonString"] as? String {
-                setTags(jsonString: jsonString)
+            if let tags = body["tags"] as? [String: Any] {
+                setTags(tags: tags)
             }
         case "trackEvent":
             if let type = body["type"] as? String,
-               let jsonString = body["jsonString"] as? String {
-                trackEvent(type: type, jsonString: jsonString)
+               let data = body["data"] as? [String: Any] {
+                trackEvent(type: type, data: data)
             }
         default:
             break
