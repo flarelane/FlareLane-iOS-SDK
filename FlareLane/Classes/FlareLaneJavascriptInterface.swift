@@ -8,17 +8,12 @@ import WebKit
 
 @available(iOSApplicationExtension, unavailable)
 @objc class FlareLaneJavascriptInterface: NSObject, WKScriptMessageHandler {
-    
-    private func setUserId(userId: String) {
-        FlareLane.setUserId(userId: userId)
-    }
-    
-    private func setTags(tags: [String: Any]) {
-        FlareLane.setTags(tags: tags)
-    }
-    
-    private func trackEvent(type: String, data: [String: Any]) {
-        FlareLane.trackEvent(type, data: data)
+
+    private let webView: WKWebView
+
+    @objc init(webView: WKWebView) {
+        self.webView = webView
+        super.init()
     }
     
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
@@ -44,5 +39,17 @@ import WebKit
         default:
             break
         }
+    }
+    
+    private func setUserId(userId: String) {
+        FlareLane.setUserId(userId: userId)
+    }
+    
+    private func setTags(tags: [String: Any]) {
+        FlareLane.setTags(tags: tags)
+    }
+    
+    private func trackEvent(type: String, data: [String: Any]) {
+        FlareLane.trackEvent(type, data: data)
     }
 }
