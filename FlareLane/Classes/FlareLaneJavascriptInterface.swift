@@ -25,28 +25,34 @@ import WebKit
         case "trackEvent":
             trackEvent(body: body)
         default:
+            Logger.error("userContentController() method not found")
             break
         }
     }
     
     private func setUserId(body: [String: Any]) {
-        let userId = body["userId"] as? String
-        Logger.verbose("setUserId() userId=\(userId ?? "nil")")
-        FlareLane.setUserId(userId: body["userId"] as? String)
+        if (body.keys.contains("userId")) {
+            let userId = body["userId"] as? String
+            FlareLane.setUserId(userId: userId)
+        } else {
+            Logger.error("setUserId() userId not found")
+        }
     }
     
     private func setTags(body: [String: Any]) {
         if let tags = body["tags"] as? [String: Any] {
-            Logger.verbose("setTags() tags=\(tags)")
             FlareLane.setTags(tags: tags)
+        } else {
+            Logger.error("setTags() tags not found")
         }
     }
     
     private func trackEvent(body: [String: Any]) {
         if let type = body["type"] as? String {
             let data = body["data"] as? [String: Any]
-            Logger.verbose("trackEvent() type=\(type), data=\(data != nil ? "\(data!)" : "nil")")
             FlareLane.trackEvent(type, data: data)
+        } else {
+            Logger.error("trackEvent() type not found")
         }
     }
 }
