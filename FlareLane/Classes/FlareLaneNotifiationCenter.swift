@@ -28,6 +28,16 @@ import UserNotifications
         Logger.verbose("Clicked user notification.")
         EventService.createClicked(notification: notification)
       }
+        
+      if let urlString = notification.url, let url = URL(string: urlString), let scheme = url.scheme {
+        switch scheme {
+        case "http", "https":
+            presentWebView(url: url)
+        default:
+            presentApplication(url: url)
+        }
+      }
+      
     }
     completionHandler()
   }
@@ -52,4 +62,49 @@ import UserNotifications
       }
     }
   }
+}
+
+extension FlareLaneNotificationCenter {
+    
+    func presentWebView(url: URL) {
+        guard let topViewController = getTopViewController() else {
+            return
+        }
+        
+        UIApplication.shared.open(url, options: [.universalLinksOnly: true]) { hasApp in
+            if hasApp == false {
+                let webViewController = UINavigationController(rootViewController: WebViewController(url: url))
+                webViewController.modalPresentationStyle = .pageSheet
+                topViewController.present(webViewController, animated: true, completion: nil)
+            }
+        }
+    }
+    
+    private func getTopViewController(_ baseViewController: UIViewController? = UIApplication.shared.keyWindow?.rootViewController) -> UIViewController? {
+        
+        if let navigationController = baseViewController as? UINavigationController {
+            return getTopViewController(navigationController.visibleViewController)
+        }
+        
+        if let tabBarController = baseViewController as? UITabBarController {
+            if let selectedViewController = tabBarController.selectedViewController {
+                return getTopViewController(selectedViewController)
+            }
+        }
+        
+        if let presentedViewController = baseViewController?.presentedViewController {
+            return getTopViewController(presentedViewController)
+        }
+        
+        return baseViewController
+    }
+
+}
+
+extension FlareLaneNotificationCenter {
+    
+    func presentApplication(url: URL) {
+        UIApplication.shared.open(url, options: [:])
+    }
+    
 }
