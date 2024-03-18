@@ -17,6 +17,10 @@ import UserNotifications
   @objc public func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
     Logger.verbose("INVOKED")
     
+    defer {
+      completionHandler()
+    }
+    
     if let notification = FlareLaneNotification.getFlareLaneNotificationFromUNNotificationContent(response.notification.request.content) {
       if Globals.projectId == nil {
         Logger.verbose("projectId is nil. Too early clicked? process later when cold start.")
@@ -29,6 +33,17 @@ import UserNotifications
         EventService.createClicked(notification: notification)
       }
       
+      if let infoDictionary = Bundle.main.infoDictionary,
+         let flarelane_dismiss_launch_url = infoDictionary["flarelane_dismiss_launch_url"] as? Bool, flarelane_dismiss_launch_url == true {
+        Logger.verbose("launch url dismissed cause flarelane_dismiss_launch_url in Info.plist is YES.")
+        return
+      }
+      
+      if let flarelane_dismiss_launch_url = notification.data?["flarelane_dismiss_launch_url"] as? String, flarelane_dismiss_launch_url == "true" {
+        Logger.verbose("launch url dismissed cause flarelane_dismiss_launch_url is true.")
+        return
+      }
+      
       if let urlString = notification.url, let url = URL(string: urlString), let scheme = url.scheme {
         switch scheme {
         case "http", "https":
@@ -39,7 +54,6 @@ import UserNotifications
       }
       
     }
-    completionHandler()
   }
   
   /// To handle notification foreground received
