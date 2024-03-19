@@ -5,7 +5,7 @@
 //  Copyright © 2021 FlareLabs. All rights reserved.
 //
 
-import Foundation
+import UIKit
 
 @objc open class FlareLaneNotification: NSObject {
   // In case of structure, it is difficult to be compatible with Objective-C

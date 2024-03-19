@@ -8,8 +8,10 @@
 #import "FLNNotificationServiceExtension.h"
 #if __has_include("FlareLane-Swift.h")
 #import "FlareLane-Swift.h"
-#else
+#elif __has_include(<FlareLane/FlareLane-Swift.h>)
 #import <FlareLane/FlareLane-Swift.h>
+#else
+@import FlareLane;
 #endif
 
 @implementation FLNNotificationServiceExtension

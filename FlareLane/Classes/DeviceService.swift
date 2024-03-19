@@ -5,7 +5,7 @@
 //  Copyright © 2021 FlareLabs. All rights reserved.
 //
 
-import Foundation
+import UIKit
 
 final class DeviceService {
   /// Get system infomation from device

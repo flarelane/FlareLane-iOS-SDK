@@ -5,6 +5,7 @@
 //  Copyright © 2021 FlareLabs. All rights reserved.
 //
 
+import UIKit
 import UserNotifications
 
 @available(iOSApplicationExtension, unavailable)
