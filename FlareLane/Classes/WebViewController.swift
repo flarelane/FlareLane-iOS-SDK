@@ -25,6 +25,7 @@ final class WebViewController: UIViewController, WKNavigationDelegate {
     super.loadView()
     webView = WKWebView(frame: self.view.frame)
     webView.navigationDelegate = self
+    self.edgesForExtendedLayout = []
     view = webView
   }
   

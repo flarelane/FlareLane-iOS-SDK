@@ -6,6 +6,7 @@
 //
 
 import UserNotifications
+import SafariServices
 
 @available(iOSApplicationExtension, unavailable)
 @objc public class FlareLaneNotificationCenter: NSObject, UNUserNotificationCenterDelegate {
@@ -47,7 +48,9 @@ import UserNotifications
       if let urlString = notification.url, let url = URL(string: urlString), let scheme = url.scheme {
         switch scheme {
         case "http", "https":
-          presentWebView(url: url)
+          // presentWebView(url: url)
+          presentSafariView(url: url)
+          // presentSafariApp(url: url)
         default:
           presentApplication(url: url)
         }
@@ -92,6 +95,24 @@ extension FlareLaneNotificationCenter {
         topViewController.present(webViewController, animated: true, completion: nil)
       }
     }
+  }
+  
+  func presentSafariView(url: URL) {
+    guard let topViewController = getTopViewController() else {
+      return
+    }
+    
+    UIApplication.shared.open(url, options: [.universalLinksOnly: true]) { hasApp in
+      if hasApp == false {
+        let safariViewController = SFSafariViewController(url: url)
+        safariViewController.modalPresentationStyle = .pageSheet
+        topViewController.present(safariViewController, animated: true, completion: nil)
+      }
+    }
+  }
+  
+  func presentSafariApp(url: URL) {
+    UIApplication.shared.open(url, options: [:], completionHandler: nil)
   }
   
   private func getTopViewController(_ baseViewController: UIViewController? = UIApplication.shared.keyWindow?.rootViewController) -> UIViewController? {
