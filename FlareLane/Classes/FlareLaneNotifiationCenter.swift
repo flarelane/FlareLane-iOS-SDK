@@ -6,6 +6,7 @@
 //
 
 import UserNotifications
+import SafariServices
 
 @available(iOSApplicationExtension, unavailable)
 @objc public class FlareLaneNotificationCenter: NSObject, UNUserNotificationCenterDelegate {
@@ -16,6 +17,10 @@ import UserNotifications
   /// To handle notification clicked
   @objc public func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
     Logger.verbose("INVOKED")
+    
+    defer {
+      completionHandler()
+    }
     
     if let notification = FlareLaneNotification.getFlareLaneNotificationFromUNNotificationContent(response.notification.request.content) {
       if Globals.projectId == nil {
@@ -28,8 +33,30 @@ import UserNotifications
         Logger.verbose("Clicked user notification.")
         EventService.createClicked(notification: notification)
       }
+      
+      if let infoDictionary = Bundle.main.infoDictionary,
+         let flarelane_dismiss_launch_url = infoDictionary["flarelane_dismiss_launch_url"] as? Bool, flarelane_dismiss_launch_url == true {
+        Logger.verbose("launch url dismissed cause flarelane_dismiss_launch_url in Info.plist is YES.")
+        return
+      }
+      
+      if let flarelane_dismiss_launch_url = notification.data?["flarelane_dismiss_launch_url"] as? String, flarelane_dismiss_launch_url == "true" {
+        Logger.verbose("launch url dismissed cause flarelane_dismiss_launch_url is true.")
+        return
+      }
+      
+      if let urlString = notification.url, let url = URL(string: urlString), let scheme = url.scheme {
+        switch scheme {
+        case "http", "https":
+          // presentWebView(url: url)
+          presentSafariView(url: url)
+          // presentSafariApp(url: url)
+        default:
+          presentApplication(url: url)
+        }
+      }
+      
     }
-    completionHandler()
   }
   
   /// To handle notification foreground received
@@ -52,4 +79,67 @@ import UserNotifications
       }
     }
   }
+}
+
+extension FlareLaneNotificationCenter {
+  
+  func presentWebView(url: URL) {
+    guard let topViewController = getTopViewController() else {
+      return
+    }
+    
+    UIApplication.shared.open(url, options: [.universalLinksOnly: true]) { hasApp in
+      if hasApp == false {
+        let webViewController = UINavigationController(rootViewController: WebViewController(url: url))
+        webViewController.modalPresentationStyle = .pageSheet
+        topViewController.present(webViewController, animated: true, completion: nil)
+      }
+    }
+  }
+  
+  func presentSafariView(url: URL) {
+    guard let topViewController = getTopViewController() else {
+      return
+    }
+    
+    UIApplication.shared.open(url, options: [.universalLinksOnly: true]) { hasApp in
+      if hasApp == false {
+        let safariViewController = SFSafariViewController(url: url)
+        safariViewController.modalPresentationStyle = .pageSheet
+        topViewController.present(safariViewController, animated: true, completion: nil)
+      }
+    }
+  }
+  
+  func presentSafariApp(url: URL) {
+    UIApplication.shared.open(url, options: [:], completionHandler: nil)
+  }
+  
+  private func getTopViewController(_ baseViewController: UIViewController? = UIApplication.shared.keyWindow?.rootViewController) -> UIViewController? {
+    
+    if let navigationController = baseViewController as? UINavigationController {
+      return getTopViewController(navigationController.visibleViewController)
+    }
+    
+    if let tabBarController = baseViewController as? UITabBarController {
+      if let selectedViewController = tabBarController.selectedViewController {
+        return getTopViewController(selectedViewController)
+      }
+    }
+    
+    if let presentedViewController = baseViewController?.presentedViewController {
+      return getTopViewController(presentedViewController)
+    }
+    
+    return baseViewController
+  }
+  
+}
+
+extension FlareLaneNotificationCenter {
+  
+  func presentApplication(url: URL) {
+    UIApplication.shared.open(url, options: [:])
+  }
+  
 }
