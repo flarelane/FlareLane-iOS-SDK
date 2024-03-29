@@ -19,7 +19,7 @@ PODS:
     - GoogleUtilities/Reachability (~> 7.8)
     - GoogleUtilities/UserDefaults (~> 7.8)
     - nanopb (< 2.30910.0, >= 2.30908.0)
-  - FlareLane (1.5.0)
+  - FlareLane (1.6.0)
   - GoogleDataTransport (9.2.5):
     - GoogleUtilities/Environment (~> 7.7)
     - nanopb (< 2.30910.0, >= 2.30908.0)
@@ -72,12 +72,12 @@ SPEC CHECKSUMS:
   FirebaseCoreInternal: 26233f705cc4531236818a07ac84d20c333e505a
   FirebaseInstallations: b822f91a61f7d1ba763e5ccc9d4f2e6f2ed3b3ee
   FirebaseMessaging: 80b4a086d20ed4fd385a702f4bfa920e14f5064d
-  FlareLane: 8d21c5cb9e591884b9ad862a1ca67e80144955c6
+  FlareLane: e53788c6907085b8008a2a28ef92679b4c707c01
   GoogleDataTransport: 54dee9d48d14580407f8f5fbf2f496e92437a2f2
   GoogleUtilities: 13e2c67ede716b8741c7989e26893d151b2b2084
   nanopb: b552cce312b6c8484180ef47159bc0f65a1f0431
   PromisesObjC: c50d2056b5253dadbd6c2bea79b0674bd5a52fa4
 
-PODFILE CHECKSUM: 5f0bb59b62547c8228a437e1b505f7d99b4f4652
+PODFILE CHECKSUM: 566767d195931922c55fe3a39f4ed6cbc65f13ca
 
-COCOAPODS: 1.13.0
+COCOAPODS: 1.15.2

@@ -14,7 +14,7 @@ public enum SdkType: String {
 }
 
 final class Globals {
-  static var sdkVersion = "1.5.0"
+  static var sdkVersion = "1.6.0"
   static var sdkType: SdkType = .native
 
   /// projectId before initialization succeeds
@@ -43,7 +43,7 @@ final class Globals {
       UserDefaults.standard.string(forKey: deviceIdKey)
     }
   }
-  
+
   /// Save userId in local storage
   private static var userIdKey = "flarelane_userIdKey"
   static var userIdInUserDefaults: String? {
@@ -55,7 +55,7 @@ final class Globals {
       UserDefaults.standard.string(forKey: userIdKey)
     }
   }
-  
+
   /// Save pushToken in local storage
   private static var pushTokenKey = "flarelane_pushTokenKey"
   static var pushTokenInUserDefaults: String? {
@@ -67,7 +67,7 @@ final class Globals {
       UserDefaults.standard.string(forKey: pushTokenKey)
     }
   }
-  
+
   /// Save isSubscribed in local storage
   private static var isSubscribedKey = "flarelane_isSubscribedKey"
   static var isSubscribedInUserDefaults: Bool? {
