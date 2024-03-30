@@ -7,6 +7,7 @@
 
 import WebKit
 
+@available(iOSApplicationExtension, unavailable)
 final class WebViewController: UIViewController, WKNavigationDelegate {
   
   private var webView: WKWebView!
