@@ -56,18 +56,24 @@ import UIKit
     guard let _ = Globals.projectId else {
       return
     }
-
-    // Convert token to string
-    let prevPushToken = Globals.pushTokenInUserDefaults
-    let pushToken = deviceToken.reduce("", {$0 + String(format: "%02X", $1)})
-    Logger.verbose("APNs device token: \(pushToken)")
     
-    // It is divided into activate and register depending on the presence of deviceId
-    if let deviceId = Globals.deviceIdInUserDefaults, pushToken != prevPushToken {
-      let body = ["pushToken": pushToken]
+    FlareLane.hasPermissionForNotifications { hasPermission in
+      if (!hasPermission) {
+        return;
+      }
       
-      DeviceService.update(deviceId: deviceId, body: body) { _ in
-        Globals.pushTokenInUserDefaults = pushToken
+      // Convert token to string
+      let prevPushToken = Globals.pushTokenInUserDefaults
+      let pushToken = deviceToken.reduce("", {$0 + String(format: "%02X", $1)})
+      Logger.verbose("APNs device token: \(pushToken)")
+      
+      // It is divided into activate and register depending on the presence of deviceId
+      if let deviceId = Globals.deviceIdInUserDefaults, pushToken != prevPushToken {
+        let body = ["pushToken": pushToken]
+        
+        DeviceService.update(deviceId: deviceId, body: body) { _ in
+          Globals.pushTokenInUserDefaults = pushToken
+        }
       }
     }
   }

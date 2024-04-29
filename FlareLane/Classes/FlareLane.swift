@@ -218,6 +218,17 @@ import UIKit
     }
   }
   
+  static func hasPermissionForNotifications(completion: @escaping (Bool) -> Void) {
+    UNUserNotificationCenter.current().getNotificationSettings { settings in
+      if settings.authorizationStatus == .notDetermined || settings.authorizationStatus == .denied {
+        completion(false)
+      } else {
+        // For stability, default return true
+        completion(true)
+      }
+    }
+  }
+  
   // MARK: Private Methods
   
   private static func requestPermissionForNotifications(completion: ((Bool) -> Void)? = nil) {
@@ -235,16 +246,7 @@ import UIKit
     }
   }
   
-  private static func hasPermissionForNotifications(completion: @escaping (Bool) -> Void) {
-    UNUserNotificationCenter.current().getNotificationSettings { settings in
-      if settings.authorizationStatus == .notDetermined || settings.authorizationStatus == .denied {
-        completion(false)
-      } else {
-        // For stability, default return true
-        completion(true)
-      }
-    }
-  }
+  
   
   /// Update isSubscribe of device
   /// - Parameter isSubscribed: subscribed or not
