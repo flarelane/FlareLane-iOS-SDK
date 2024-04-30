@@ -58,10 +58,6 @@ import UIKit
     }
     
     FlareLane.hasPermissionForNotifications { hasPermission in
-      if (!hasPermission) {
-        return;
-      }
-      
       // Convert token to string
       let prevPushToken = Globals.pushTokenInUserDefaults
       let pushToken = deviceToken.reduce("", {$0 + String(format: "%02X", $1)})
@@ -69,7 +65,10 @@ import UIKit
       
       // It is divided into activate and register depending on the presence of deviceId
       if let deviceId = Globals.deviceIdInUserDefaults, pushToken != prevPushToken {
-        let body = ["pushToken": pushToken]
+        let body = [
+          "pushToken": pushToken,
+          "isSubscribed": hasPermission
+        ]
         
         DeviceService.update(deviceId: deviceId, body: body) { _ in
           Globals.pushTokenInUserDefaults = pushToken
