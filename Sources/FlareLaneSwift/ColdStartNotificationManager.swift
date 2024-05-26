@@ -5,7 +5,7 @@
 //  Copyright © 2021 FlareLabs. All rights reserved.
 //
 
-import Foundation
+import UIKit
 
 @available(iOSApplicationExtension, unavailable)
 class ColdStartNotificationManager {
