@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="22505" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="vXZ-lx-hvc">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="32700.99.1234" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="vXZ-lx-hvc">
     <device id="retina6_12" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22504"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22685"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -24,36 +24,28 @@
                                 <rect key="frame" x="16" y="259" width="361" height="359"/>
                                 <subviews>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Xed-2g-mLL">
-                                        <rect key="frame" x="0.0" y="0.0" width="361" height="45"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="361" height="51.333333333333336"/>
                                         <state key="normal" title="Toggle User ID"/>
                                         <connections>
                                             <action selector="ToggleUserID:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="O0q-sy-chR"/>
                                         </connections>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="wEE-nl-Zn1">
-                                        <rect key="frame" x="0.0" y="45" width="361" height="44.666666666666657"/>
+                                        <rect key="frame" x="0.0" y="51.333333333333314" width="361" height="51.333333333333343"/>
                                         <state key="normal" title="Toggle Tags"/>
                                         <connections>
                                             <action selector="ToggleTags:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="m6F-j3-M58"/>
                                         </connections>
                                     </button>
-                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="56c-4e-ecC">
-                                        <rect key="frame" x="0.0" y="89.666666666666686" width="361" height="45"/>
-                                        <state key="normal" title="Button"/>
-                                        <buttonConfiguration key="configuration" style="plain" title="Get Tags"/>
-                                        <connections>
-                                            <action selector="getTags" destination="vXZ-lx-hvc" eventType="touchUpInside" id="udM-z6-kfq"/>
-                                        </connections>
-                                    </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="gWf-ff-Chm">
-                                        <rect key="frame" x="0.0" y="134.66666666666669" width="361" height="45"/>
+                                        <rect key="frame" x="0.0" y="102.66666666666667" width="361" height="51.333333333333329"/>
                                         <state key="normal" title="Track Event (test_event)"/>
                                         <connections>
                                             <action selector="TrackEvent:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="oJz-bS-n1N"/>
                                         </connections>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="XjB-DH-5sn">
-                                        <rect key="frame" x="0.0" y="179.66666666666669" width="361" height="44.666666666666657"/>
+                                        <rect key="frame" x="0.0" y="154" width="361" height="51"/>
                                         <state key="normal" title="Button"/>
                                         <buttonConfiguration key="configuration" style="plain" title="isSubscribed()"/>
                                         <connections>
@@ -61,7 +53,7 @@
                                         </connections>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="EWS-kE-5ej">
-                                        <rect key="frame" x="0.0" y="224.33333333333331" width="361" height="45"/>
+                                        <rect key="frame" x="0.0" y="205" width="361" height="51.333333333333314"/>
                                         <state key="normal" title="Button"/>
                                         <buttonConfiguration key="configuration" style="plain" title="subscribe()"/>
                                         <connections>
@@ -69,7 +61,7 @@
                                         </connections>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="iCR-E1-jub">
-                                        <rect key="frame" x="0.0" y="269.33333333333337" width="361" height="44.666666666666686"/>
+                                        <rect key="frame" x="0.0" y="256.33333333333337" width="361" height="51.333333333333314"/>
                                         <state key="normal" title="Button"/>
                                         <buttonConfiguration key="configuration" style="plain" title="unsubscribe()"/>
                                         <connections>
@@ -77,7 +69,7 @@
                                         </connections>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="DwK-t5-Xv4">
-                                        <rect key="frame" x="0.0" y="314" width="361" height="45"/>
+                                        <rect key="frame" x="0.0" y="307.66666666666663" width="361" height="51.333333333333314"/>
                                         <state key="normal" title="Button"/>
                                         <buttonConfiguration key="configuration" style="plain" title="WebView bridge test"/>
                                         <connections>
