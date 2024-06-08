@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		040A273E2C14BE5E00419F35 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 040A273D2C14BE5E00419F35 /* GoogleService-Info.plist */; };
 		044400212BD7C18B007BA17A /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 044400202BD7C18B007BA17A /* PrivacyInfo.xcprivacy */; };
 		044400222BD7C18B007BA17A /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 044400202BD7C18B007BA17A /* PrivacyInfo.xcprivacy */; };
 		044400232BD7C18B007BA17A /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 044400202BD7C18B007BA17A /* PrivacyInfo.xcprivacy */; };
@@ -58,6 +59,7 @@
 
 /* Begin PBXFileReference section */
 		03FE7084E42E1AFCF6BF7802 /* Pods-FlareLane_Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-FlareLane_Example.debug.xcconfig"; path = "Target Support Files/Pods-FlareLane_Example/Pods-FlareLane_Example.debug.xcconfig"; sourceTree = "<group>"; };
+		040A273D2C14BE5E00419F35 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "../../../GoogleService-Info.plist"; sourceTree = "<group>"; };
 		044400202BD7C18B007BA17A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		04938C0D2803D3AD00CED062 /* FlareLaneNotificationServiceExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = FlareLaneNotificationServiceExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		04938C0F2803D3AD00CED062 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
@@ -169,6 +171,7 @@
 				607FACD51AFB9204008FA782 /* AppDelegate.swift */,
 				607FACD71AFB9204008FA782 /* ViewController.swift */,
 				8F7605482B68F38100FBAABB /* WebViewController.swift */,
+				040A273D2C14BE5E00419F35 /* GoogleService-Info.plist */,
 				607FACD91AFB9204008FA782 /* Main.storyboard */,
 				607FACDC1AFB9204008FA782 /* Images.xcassets */,
 				8F76053C2B689EDF00FBAABB /* webview_bridge_test.html */,
@@ -356,6 +359,7 @@
 				607FACDD1AFB9204008FA782 /* Images.xcassets in Resources */,
 				044400212BD7C18B007BA17A /* PrivacyInfo.xcprivacy in Resources */,
 				8F76053D2B689EE000FBAABB /* webview_bridge_test.html in Resources */,
+				040A273E2C14BE5E00419F35 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
