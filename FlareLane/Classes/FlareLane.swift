@@ -244,4 +244,12 @@ import UIKit
       }
     }
   }
+  
+  static let inAppMessageThrottler = Throttler(interval: 5)
+  
+  @objc public static func displayInApp(group: String) {
+    inAppMessageThrottler.throttle {
+      InAppMessageService.shared.showInAppMessageIfNeeded()
+    }
+  }
 }
