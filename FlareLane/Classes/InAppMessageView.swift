@@ -28,7 +28,6 @@ class InAppMessageView: UIView {
     self.message = message
     super.init(frame: .zero)
     self.setupWebView(with: javascriptInterface)
-    self.setupTapGesture()
   }
   
   required init?(coder: NSCoder) {
@@ -47,10 +46,9 @@ class InAppMessageView: UIView {
     let webView = WKWebView(frame: .zero, configuration: configuration)
     webView.navigationDelegate = self
     webView.backgroundColor = .clear
-    webView.scrollView.isScrollEnabled = false
+    webView.scrollView.showsVerticalScrollIndicator = false
     webView.scrollView.pinchGestureRecognizer?.isEnabled = false
     webView.scrollView.bounces = false
-    webView.scrollView.contentInsetAdjustmentBehavior = .never
     webView.scrollView.delegate = self
     webView.isOpaque = false
     webView.alpha = 0
@@ -74,7 +72,11 @@ class InAppMessageView: UIView {
   }
   
   func loadHTML(_ string: String) {
-    self.webView?.loadHTMLString(string, baseURL: nil)
+//    self.webView?.loadHTMLString(string, baseURL: nil)
+    
+    let myURL = URL(string:"https://minhyeok4dev.github.io/inapp4.html")
+    let myRequest = URLRequest(url: myURL!)
+    self.webView?.load(myRequest)
   }
   
   func dismiss() {
@@ -93,15 +95,6 @@ class InAppMessageView: UIView {
     
   }
   
-  private func setupTapGesture() {
-    let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTapGesture))
-    tapGesture.delegate = self
-    self.addGestureRecognizer(tapGesture)
-  }
-  
-  @objc private func handleTapGesture() {
-    self.delegate?.messageViewDidReceiveTap(self)
-  }
 }
 
 extension InAppMessageView: UIGestureRecognizerDelegate {

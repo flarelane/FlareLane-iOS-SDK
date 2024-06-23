@@ -73,7 +73,10 @@ extension InAppMessageViewController: InAppMessageViewDelegate {
 extension InAppMessageViewController: InAppMessageJavascriptInterfaceDelegate {
     
     func inAppMessageJavascriptInterface(didReceive event: InAppMessageJavascriptInterface.Event) {
-        // TOOD: Handling javascript Interface events
+      switch event {
+      case .close:
+        self.messageView.dismiss()
+      }
     }
     
 }
