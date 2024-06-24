@@ -15,17 +15,34 @@ protocol InAppMessageViewDelegate: AnyObject {
 
 class InAppMessageView: UIView {
   
+  struct Configuration {
+    var usesPaddingForSafeArea: Bool
+    var horizontalPadding: CGFloat
+    
+    static let `default`: Self = .init(usesPaddingForSafeArea: true,
+                                       horizontalPadding: 8 * UIScreen.main.scale)
+    
+    init(usesPaddingForSafeArea: Bool, horizontalPadding: CGFloat) {
+      self.usesPaddingForSafeArea = usesPaddingForSafeArea
+      self.horizontalPadding = horizontalPadding
+    }
+  }
+  
   typealias ScriptMessageHandler = InAppMessageJavascriptInterfaceDelegate
   
   weak var delegate: InAppMessageViewDelegate?
   
   private var webView: WKWebView?
   
+  private var configuration: Configuration
+  
   let message: InAppMessage
   
   init(message: InAppMessage,
-       javascriptInterface: InAppMessageJavascriptInterface) {
+       javascriptInterface: InAppMessageJavascriptInterface,
+       configuration: Configuration = .default) {
     self.message = message
+    self.configuration = configuration
     super.init(frame: .zero)
     self.setupWebView(with: javascriptInterface)
   }
@@ -36,18 +53,30 @@ class InAppMessageView: UIView {
   
   private func setupWebView(with javascriptInterface: InAppMessageJavascriptInterface) {
     
-    let configuration = WKWebViewConfiguration()
-    configuration.suppressesIncrementalRendering = true
-    configuration.userContentController.add(
+    let webViewConfiguration = WKWebViewConfiguration()
+    webViewConfiguration.suppressesIncrementalRendering = true
+    
+    // Disable double tap zoom
+    let zoomDisableScript: WKUserScript = {
+      let source: String = "var meta = document.createElement('meta');" +
+      "meta.name = 'viewport';" +
+      "meta.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';" +
+      "var head = document.getElementsByTagName('head')[0];" + "head.appendChild(meta);"
+      return WKUserScript(source: source, injectionTime: .atDocumentEnd, forMainFrameOnly: true)
+    }()
+    webViewConfiguration.userContentController.addUserScript(zoomDisableScript)
+    
+    webViewConfiguration.userContentController.add(
       javascriptInterface,
       name: InAppMessageJavascriptInterface.name
     )
     
-    let webView = WKWebView(frame: .zero, configuration: configuration)
+    let webView = WKWebView(frame: .zero, configuration: webViewConfiguration)
     webView.navigationDelegate = self
     webView.backgroundColor = .clear
     webView.scrollView.showsVerticalScrollIndicator = false
     webView.scrollView.pinchGestureRecognizer?.isEnabled = false
+    webView.scrollView.contentInsetAdjustmentBehavior = configuration.usesPaddingForSafeArea ? .never : .automatic
     webView.scrollView.bounces = false
     webView.scrollView.delegate = self
     webView.isOpaque = false
@@ -95,6 +124,31 @@ class InAppMessageView: UIView {
     
   }
   
+  func updateSafeAreaInsets() {
+    
+    guard let keyWindow = UIApplication.shared.keyWindow else { return }
+    
+    let top = keyWindow.safeAreaInsets.top
+    let bottom = keyWindow.safeAreaInsets.bottom
+    let right = keyWindow.safeAreaInsets.right + configuration.horizontalPadding
+    let left = keyWindow.safeAreaInsets.left + configuration.horizontalPadding
+    
+    let jsScript = """
+      document.documentElement.style.setProperty('--safe-area-inset-top', '\(top)px');
+      document.documentElement.style.setProperty('--safe-area-inset-bottom', '\(bottom)px');
+      document.documentElement.style.setProperty('--safe-area-inset-left', '\(left)px');
+      document.documentElement.style.setProperty('--safe-area-inset-right', '\(right)px');
+    """
+    
+    webView?.evaluateJavaScript(jsScript, completionHandler: { (result, error) in
+      if let error = error {
+        Logger.verbose("Failed to update html safe area insets: \(error)")
+      } else {
+        Logger.verbose("Succeed update html safe area insets")
+      }
+    })
+  }
+  
 }
 
 extension InAppMessageView: UIGestureRecognizerDelegate {
@@ -130,6 +184,10 @@ extension InAppMessageView: WKNavigationDelegate {
   }
   
   func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+    
+    if configuration.usesPaddingForSafeArea {
+      updateSafeAreaInsets()
+    }
     
   }
   
