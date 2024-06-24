@@ -19,8 +19,7 @@ class InAppMessageView: UIView {
     var usesPaddingForSafeArea: Bool
     var horizontalPadding: CGFloat
     
-    static let `default`: Self = .init(usesPaddingForSafeArea: true,
-                                       horizontalPadding: 8 * UIScreen.main.scale)
+    static let `default`: Self = .init(usesPaddingForSafeArea: false, horizontalPadding: .zero)
     
     init(usesPaddingForSafeArea: Bool, horizontalPadding: CGFloat) {
       self.usesPaddingForSafeArea = usesPaddingForSafeArea
