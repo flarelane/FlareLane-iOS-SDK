@@ -54,6 +54,8 @@ class InAppMessageView: UIView {
     
     let webViewConfiguration = WKWebViewConfiguration()
     webViewConfiguration.suppressesIncrementalRendering = true
+    // Use in-memory data store
+    webViewConfiguration.websiteDataStore = .nonPersistent()
     
     // Disable double tap zoom
     let zoomDisableScript: WKUserScript = {
@@ -103,7 +105,8 @@ class InAppMessageView: UIView {
 //    self.webView?.loadHTMLString(string, baseURL: nil)
     
     let myURL = URL(string:"https://minhyeok4dev.github.io/inapp4.html")
-    let myRequest = URLRequest(url: myURL!)
+    var myRequest = URLRequest(url: myURL!)
+    myRequest.cachePolicy = .reloadIgnoringLocalCacheData
     self.webView?.load(myRequest)
   }
   
