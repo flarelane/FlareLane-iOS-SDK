@@ -44,7 +44,7 @@ class InAppMessageJavascriptInterface: NSObject, WKScriptMessageHandler {
     case "requestPushPermission":
       requestPushPermission(fallbackToSettings: true)
     case "close":
-      close()
+      close(body: body)
     case "click":
       click(body: body)
     default:
@@ -79,18 +79,24 @@ private extension InAppMessageJavascriptInterface {
         FlareLane.subscribe(fallbackToSettings: fallbackToSettings) { _ in }
       }
     }
+    FlareLane.trackEvent("iam_request_push_permission")
   }
   
   func openURL(body: [String: Any]) {
     if let urlString = body["url"] as? String, let url = URL(string: urlString) {
       FlareLaneNotificationCenter.shared.handleReceivedURL(url: url)
     }
+    FlareLane.trackEvent("iam_open_url")
   }
   
-  func close() {
+  func close(body: [String: Any]) {
     self.delegate?.inAppMessageJavascriptInterface(didReceive: .close)
+    if let doNotShowDays = body["do_not_show_days"] as? Int {
+      FlareLane.trackEvent("iam_closed", data: ["do_now_show_days": doNotShowDays])
+    } else {
+      FlareLane.trackEvent("iam_closed")
+    }
   }
-  
   
   func click(body: [String: Any]) {
     if let actionId = body["action_id"] as? String {
