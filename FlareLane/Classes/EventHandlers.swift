@@ -11,4 +11,5 @@ final class EventHandlers {
   static var unhandledNotification: FlareLaneNotification?
   static var notificationClicked: ((FlareLaneNotification) -> Void)? = nil
   static var notificationForegroundReceived: ((FlareLaneNotificationReceivedEvent) -> Void)? = nil
+  static var inAppMessageClicked: ((FlareLaneInAppMessageClickedEvent) -> Void)? = nil
 }

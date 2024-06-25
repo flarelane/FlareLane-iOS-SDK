@@ -97,6 +97,11 @@ import UIKit
     EventHandlers.notificationForegroundReceived = callback
     Logger.verbose("NotificationForegroundReceivedHandler has been registered.")
   }
+  
+  @objc public static func setInAppMessageClickedHandler(callback: @escaping (FlareLaneInAppMessageClickedEvent) -> Void) {
+    EventHandlers.inAppMessageClicked = callback
+    Logger.verbose("InAppMessageClickedHandler has been registered.")
+  }
 
   /// Set userId of device
   /// - Parameter userId: userId

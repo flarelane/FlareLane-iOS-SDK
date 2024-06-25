@@ -24,7 +24,7 @@ class InAppMessageViewController: UIViewController {
     self.message = message
     super.init(nibName: nil, bundle: nil)
     
-    let inAppMessageJavascriptInterface = InAppMessageJavascriptInterface()
+    let inAppMessageJavascriptInterface = InAppMessageJavascriptInterface(messageId: message.id)
     inAppMessageJavascriptInterface.delegate = self
     
     self.messageView = InAppMessageView(
