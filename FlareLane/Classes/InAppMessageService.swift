@@ -14,6 +14,7 @@ struct InAppMessage {
   init?(dictionary: [String: Any]) {
     guard let id = dictionary["id"] as? String,
           let htmlString = dictionary["htmlString"] as? String else {
+      Logger.error("InAppMessage invalid dictionary format: \(dictionary)")
       return nil
     }
     self.id = id
@@ -32,31 +33,28 @@ final class InAppMessageService {
   private init() {}
   
   func showInAppMessageIfNeeded() {
-    
     API.shared.getInAppMessagesForTest { result in
       switch result {
       case let .success(data):
-        guard let inAppMessagesData = data["data"] as? [[String: Any]],
-              let firstInAppMessageData = inAppMessagesData.first else {
-          Logger.verbose("Requested in app messages are empty.")
-          return
-        }
-        
-        guard let firstInAppMessage = InAppMessage(dictionary: firstInAppMessageData) else {
-          Logger.error("Failed to decode in app message data")
-          return
-        }
-        
-        self.show(message: firstInAppMessage)
-        
+        self.processInAppMessages(data: data)
       case let .failure(error):
         Logger.error("Failed to get in app messages: \(error.localizedDescription)")
       }
     }
   }
   
-  private func show(message: InAppMessage) {
+  private func processInAppMessages(data: [String: Any]) {
+    guard let inAppMessagesData = data["data"] as? [[String: Any]],
+          let firstInAppMessageData = inAppMessagesData.first,
+          let firstInAppMessage = InAppMessage(dictionary: firstInAppMessageData) else {
+      Logger.error("No valid in-app messages or empty data")
+      return
+    }
     
+    self.show(message: firstInAppMessage)
+  }
+  
+  private func show(message: InAppMessage) {
     DispatchQueue.main.async {
       let viewController = InAppMessageViewController(message: message)
       self.viewController = viewController
@@ -77,35 +75,15 @@ extension InAppMessageService: InAppMessageViewControllerDelegate {
   func messageViewControllerDidFinishLoading(_ message: InAppMessage) {
     
     guard let viewController = self.viewController else { return }
-      
-    let window: UIWindow
     
     if self.window == nil {
-      window = UIWindow(frame: UIScreen.main.bounds)
-      window.windowLevel = .alert
-        
-      // Set active window scene
-      if #available(iOS 13.0, *) {
-        window.windowScene = UIApplication.shared.connectedScenes
-          .compactMap {
-              guard let scene = $0 as? UIWindowScene, scene.activationState == .foregroundActive else {
-                  return nil
-              }
-              return scene
-          }
-          .first
-      }
-      self.window = window
-    } else {
-      window = self.window!
+      self.window = createAndConfigureWindow()
     }
     
-    window.rootViewController = viewController
-    window.backgroundColor = .clear
-    window.isOpaque = false
-    window.clipsToBounds = true
+    guard let window else { return }
     
-    // TODO: Determine if animation should be included.
+    window.rootViewController = viewController
+    
     if #available(iOS 15.0, *) {
       UIView.animate(withDuration: 0.25) {
         window.isHidden = false
@@ -113,6 +91,23 @@ extension InAppMessageService: InAppMessageViewControllerDelegate {
     } else {
       window.isHidden = false
     }
+    
+  }
+  
+  private func createAndConfigureWindow() -> UIWindow {
+      let window = UIWindow(frame: UIScreen.main.bounds)
+      window.windowLevel = .alert
+      window.backgroundColor = .clear
+      window.isOpaque = false
+      window.clipsToBounds = true
+
+      if #available(iOS 13.0, *) {
+          window.windowScene = UIApplication.shared.connectedScenes
+              .compactMap { $0 as? UIWindowScene }
+              .first(where: { $0.activationState == .foregroundActive })
+      }
+
+      return window
   }
   
 }

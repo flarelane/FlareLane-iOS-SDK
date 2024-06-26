@@ -57,22 +57,22 @@ class InAppMessageJavascriptInterface: NSObject, WKScriptMessageHandler {
 private extension InAppMessageJavascriptInterface {
   
   func setTags(body: [String: Any]) {
-    if let tags = body["tags"] as? [String: Any] {
-      FlareLane.setTags(tags: tags)
-    } else {
+    guard let tags = body["tags"] as? [String: Any] else {
       Logger.error("setTags() tags not found")
+      return
     }
+    FlareLane.setTags(tags: tags)
   }
   
   func trackEvent(body: [String: Any]) {
-    if let type = body["type"] as? String {
-      let data = body["data"] as? [String: Any]
-      FlareLane.trackEvent(type, data: data)
-    } else {
+    guard let type = body["type"] as? String else {
       Logger.error("trackEvent() type not found")
+      return
     }
+    let data = body["data"] as? [String: Any]
+    FlareLane.trackEvent(type, data: data)
   }
- 
+  
   func requestPushPermission(fallbackToSettings: Bool) {
     FlareLane.isSubscribed { isSubscribed in
       if isSubscribed == false {
@@ -83,29 +83,31 @@ private extension InAppMessageJavascriptInterface {
   }
   
   func openURL(body: [String: Any]) {
-    if let urlString = body["url"] as? String, let url = URL(string: urlString) {
-      FlareLaneNotificationCenter.shared.handleReceivedURL(url: url)
+    guard let urlString = body["url"] as? String, let url = URL(string: urlString) else {
+      Logger.error("openURL() URL is invalid")
+      return
     }
+    FlareLaneNotificationCenter.shared.handleReceivedURL(url: url)
     FlareLane.trackEvent("iam_open_url")
   }
   
   func close(body: [String: Any]) {
-    self.delegate?.inAppMessageJavascriptInterface(didReceive: .close)
+    delegate?.inAppMessageJavascriptInterface(didReceive: .close)
     if let doNotShowDays = body["do_not_show_days"] as? Int {
-      FlareLane.trackEvent("iam_closed", data: ["do_now_show_days": doNotShowDays])
+      FlareLane.trackEvent("iam_closed", data: ["do_not_show_days": doNotShowDays])
     } else {
       FlareLane.trackEvent("iam_closed")
     }
   }
   
   func click(body: [String: Any]) {
-    if let actionId = body["action_id"] as? String {
-      if let handler = EventHandlers.inAppMessageClicked {
-        DispatchQueue.main.async {
-          handler(.init(messageId: self.messageId, actionId: actionId))
-        }
-      }
-      FlareLane.trackEvent("iam_click", data: ["actionId": actionId])
+    guard let actionId = body["action_id"] as? String else {
+      Logger.error("click() actionId not found")
+      return
     }
+    DispatchQueue.main.async {
+      EventHandlers.inAppMessageClicked?(.init(messageId: self.messageId, actionId: actionId))
+    }
+    FlareLane.trackEvent("iam_click", data: ["actionId": actionId])
   }
 }

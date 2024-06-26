@@ -15,68 +15,56 @@ protocol InAppMessageViewControllerDelegate: AnyObject {
 class InAppMessageViewController: UIViewController {
   
   private let message: InAppMessage
-  
-  var messageView: InAppMessageView!
+  private var messageView: InAppMessageView!
   
   weak var delegate: InAppMessageViewControllerDelegate?
   
   init(message: InAppMessage) {
     self.message = message
     super.init(nibName: nil, bundle: nil)
-    
-    let inAppMessageJavascriptInterface = InAppMessageJavascriptInterface(messageId: message.id)
-    inAppMessageJavascriptInterface.delegate = self
-    
-    self.messageView = InAppMessageView(
-      message: message,
-      javascriptInterface: inAppMessageJavascriptInterface
-    )
-    self.messageView.translatesAutoresizingMaskIntoConstraints = false
-    self.messageView.delegate = self
+    self.setupInAppMessageView()
   }
   
   required init?(coder: NSCoder) {
     fatalError("init(coder:) has not been implemented")
   }
   
+  private func setupInAppMessageView() {
+    let javascriptInterface = InAppMessageJavascriptInterface(messageId: message.id)
+    javascriptInterface.delegate = self
+    self.messageView = InAppMessageView(message: message, javascriptInterface: javascriptInterface)
+    self.messageView.translatesAutoresizingMaskIntoConstraints = false
+    self.messageView.delegate = self
+    view.addSubview(self.messageView)
+    NSLayoutConstraint.activate([
+      self.messageView.topAnchor.constraint(equalTo: view.topAnchor),
+      self.messageView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+      self.messageView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+      self.messageView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
+    ])
+  }
+  
   override func viewDidLoad() {
     super.viewDidLoad()
     self.messageView.loadHTML(message.htmlString)
   }
-  
-  private func setupMessageViewConstraints() {
-    self.view.addSubview(self.messageView)
-    NSLayoutConstraint.activate([
-      self.view.topAnchor.constraint(equalTo: self.messageView.topAnchor),
-      self.view.bottomAnchor.constraint(equalTo: self.messageView.bottomAnchor),
-      self.view.leadingAnchor.constraint(equalTo: self.messageView.leadingAnchor),
-      self.view.trailingAnchor.constraint(equalTo: self.messageView.trailingAnchor)
-    ])
-  }
 }
 
 extension InAppMessageViewController: InAppMessageViewDelegate {
-  
   func messageViewDidFinishNavigation(_ messageView: InAppMessageView) {
-    self.delegate?.messageViewControllerDidFinishLoading(messageView.message)
-    DispatchQueue.main.async {
-      self.setupMessageViewConstraints()
-    }
+    self.delegate?.messageViewControllerDidFinishLoading(message)
   }
   
   func messageViewDidReceiveTap(_ messageView: InAppMessageView) {
     self.messageView.dismiss()
   }
-  
 }
 
 extension InAppMessageViewController: InAppMessageJavascriptInterfaceDelegate {
-    
-    func inAppMessageJavascriptInterface(didReceive event: InAppMessageJavascriptInterface.Event) {
-      switch event {
-      case .close:
-        self.messageView.dismiss()
-      }
+  func inAppMessageJavascriptInterface(didReceive event: InAppMessageJavascriptInterface.Event) {
+    switch event {
+    case .close:
+      self.messageView.dismiss()
     }
-    
+  }
 }

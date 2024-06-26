@@ -18,24 +18,14 @@ class InAppMessageView: UIView {
   struct Configuration {
     var usesPaddingForSafeArea: Bool
     var horizontalPadding: CGFloat
-    
     static let `default`: Self = .init(usesPaddingForSafeArea: false, horizontalPadding: .zero)
-    
-    init(usesPaddingForSafeArea: Bool, horizontalPadding: CGFloat) {
-      self.usesPaddingForSafeArea = usesPaddingForSafeArea
-      self.horizontalPadding = horizontalPadding
-    }
   }
-  
-  typealias ScriptMessageHandler = InAppMessageJavascriptInterfaceDelegate
   
   weak var delegate: InAppMessageViewDelegate?
   
   private var webView: WKWebView?
-  
   private var configuration: Configuration
-  
-  let message: InAppMessage
+  private let message: InAppMessage
   
   init(message: InAppMessage,
        javascriptInterface: InAppMessageJavascriptInterface,
@@ -54,19 +44,15 @@ class InAppMessageView: UIView {
     
     let webViewConfiguration = WKWebViewConfiguration()
     webViewConfiguration.suppressesIncrementalRendering = true
-    // Use in-memory data store
     webViewConfiguration.websiteDataStore = .nonPersistent()
     
     // Disable double tap zoom
-    let zoomDisableScript: WKUserScript = {
-      let source: String = "var meta = document.createElement('meta');" +
+    let source: String = "var meta = document.createElement('meta');" +
       "meta.name = 'viewport';" +
       "meta.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';" +
       "var head = document.getElementsByTagName('head')[0];" + "head.appendChild(meta);"
-      return WKUserScript(source: source, injectionTime: .atDocumentEnd, forMainFrameOnly: true)
-    }()
+    let zoomDisableScript = WKUserScript(source: source, injectionTime: .atDocumentEnd, forMainFrameOnly: true)
     webViewConfiguration.userContentController.addUserScript(zoomDisableScript)
-    
     webViewConfiguration.userContentController.add(
       javascriptInterface,
       name: InAppMessageJavascriptInterface.name
@@ -89,7 +75,6 @@ class InAppMessageView: UIView {
     #endif
   
     self.addSubview(webView)
-    
     webView.translatesAutoresizingMaskIntoConstraints = false
     NSLayoutConstraint.activate([
       self.topAnchor.constraint(equalTo: webView.topAnchor),
@@ -97,7 +82,6 @@ class InAppMessageView: UIView {
       self.leadingAnchor.constraint(equalTo: webView.leadingAnchor),
       self.trailingAnchor.constraint(equalTo: webView.trailingAnchor)
     ])
-    
     self.webView = webView
   }
   
@@ -112,7 +96,6 @@ class InAppMessageView: UIView {
   
   func dismiss() {
     webView?.stopLoading()
-    
     UIView.animate(withDuration: 0.25) {
       self.webView?.alpha = 0
     } completion: { _ in
@@ -123,12 +106,11 @@ class InAppMessageView: UIView {
       InAppMessageService.shared.window = nil
       InAppMessageService.shared.viewController = nil
     }
-    
   }
   
   func updateSafeAreaInsets() {
     
-    guard let keyWindow = UIApplication.shared.keyWindow else { return }
+    guard let keyWindow = UIApplication.shared.keyWindow, let webView else { return }
     
     let top = keyWindow.safeAreaInsets.top
     let bottom = keyWindow.safeAreaInsets.bottom
@@ -142,7 +124,7 @@ class InAppMessageView: UIView {
       document.documentElement.style.setProperty('--safe-area-inset-right', '\(right)px');
     """
     
-    webView?.evaluateJavaScript(jsScript, completionHandler: { (result, error) in
+    webView.evaluateJavaScript(jsScript, completionHandler: { (result, error) in
       if let error = error {
         Logger.verbose("Failed to update html safe area insets: \(error)")
       } else {
@@ -177,15 +159,15 @@ extension InAppMessageView: WKNavigationDelegate {
   
   func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
     
+  }
+  
+  func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+    
     self.delegate?.messageViewDidFinishNavigation(self)
     
     UIView.animate(withDuration: 0.25) {
       self.webView?.alpha = 1
     }
-    
-  }
-  
-  func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
     
     if configuration.usesPaddingForSafeArea {
       updateSafeAreaInsets()
