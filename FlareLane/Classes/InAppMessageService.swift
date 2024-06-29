@@ -14,11 +14,18 @@ final class InAppMessageService {
   var window: UIWindow?
   var viewController: InAppMessageViewController?
   
+  private var isDisplaying: Bool = false
+  
   private init() {}
   
   func showInAppMessageIfNeeded(group: String) {
     guard let deviceId = Globals.deviceIdInUserDefaults else {
       Logger.error("deviceId does not set.")
+      return
+    }
+    
+    if isDisplaying {
+      Logger.verbose("InAppMessage is already displaying")
       return
     }
     
@@ -55,13 +62,20 @@ final class InAppMessageService {
       self.viewController = viewController
       viewController.delegate = self
       viewController.view.setNeedsLayout()
+      self.isDisplaying = true
     }
   }
   
   func dismissInAppMessage() {
-    self.window?.isHidden = true
-    self.window = nil
-    self.viewController = nil
+    DispatchQueue.main.async {
+      self.window?.isHidden = true
+      if #available(iOS 13.0, *) {
+        self.window?.windowScene = nil
+      }
+      self.window = nil
+      self.viewController = nil
+      self.isDisplaying = false
+    }
   }
 }
 

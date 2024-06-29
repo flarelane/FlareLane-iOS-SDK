@@ -100,11 +100,7 @@ class InAppMessageView: UIView {
       self.webView?.alpha = 0
     } completion: { _ in
       self.removeFromSuperview()
-      if #available(iOS 13.0, *) {
-        InAppMessageService.shared.window?.windowScene = nil
-      }
-      InAppMessageService.shared.window = nil
-      InAppMessageService.shared.viewController = nil
+      InAppMessageService.shared.dismissInAppMessage()
     }
   }
   
