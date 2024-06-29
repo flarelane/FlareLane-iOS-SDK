@@ -9,17 +9,17 @@ import UIKit
 import WebKit
 
 protocol InAppMessageViewControllerDelegate: AnyObject {
-  func messageViewControllerDidFinishLoading(_ message: InAppMessage)
+  func messageViewControllerDidFinishLoading(_ message: FlareLaneInAppMessage)
 }
 
 class InAppMessageViewController: UIViewController {
   
-  private let message: InAppMessage
+  private let message: FlareLaneInAppMessage
   private var messageView: InAppMessageView!
   
   weak var delegate: InAppMessageViewControllerDelegate?
   
-  init(message: InAppMessage) {
+  init(message: FlareLaneInAppMessage) {
     self.message = message
     super.init(nibName: nil, bundle: nil)
     self.setupInAppMessageView()
@@ -30,7 +30,7 @@ class InAppMessageViewController: UIViewController {
   }
   
   private func setupInAppMessageView() {
-    let javascriptInterface = InAppMessageJavascriptInterface(messageId: message.id)
+    let javascriptInterface = InAppMessageJavascriptInterface(message: self.message)
     javascriptInterface.delegate = self
     self.messageView = InAppMessageView(message: message, javascriptInterface: javascriptInterface)
     self.messageView.translatesAutoresizingMaskIntoConstraints = false

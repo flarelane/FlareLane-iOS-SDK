@@ -17,10 +17,10 @@ class InAppMessageJavascriptInterface: NSObject, WKScriptMessageHandler {
   
   weak var delegate: InAppMessageJavascriptInterfaceDelegate?
   
-  private let messageId: String
+  private let message: FlareLaneInAppMessage
   
-  init(messageId: String) {
-    self.messageId = messageId
+  init(message: FlareLaneInAppMessage) {
+    self.message = message
   }
   
   enum Event {
@@ -45,8 +45,8 @@ class InAppMessageJavascriptInterface: NSObject, WKScriptMessageHandler {
       requestPushPermission(fallbackToSettings: true)
     case "close":
       close(body: body)
-    case "click":
-      click(body: body)
+    case "executeAction":
+      executeAction(body: body)
     default:
       Logger.error("userContentController() method not found")
       break
@@ -100,14 +100,14 @@ private extension InAppMessageJavascriptInterface {
     }
   }
   
-  func click(body: [String: Any]) {
+  func executeAction(body: [String: Any]) {
     guard let actionId = body["action_id"] as? String else {
-      Logger.error("click() actionId not found")
+      Logger.error("executeAction() actionId not found")
       return
     }
     DispatchQueue.main.async {
-      EventHandlers.inAppMessageClicked?(.init(messageId: self.messageId, actionId: actionId))
+      EventHandlers.inAppMessageActionHandler?(self.message, actionId)
     }
-    FlareLane.trackEvent("iam_click", data: ["actionId": actionId])
+    FlareLane.trackEvent("iam_executeAction", data: ["actionId": actionId])
   }
 }

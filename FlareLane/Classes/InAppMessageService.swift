@@ -7,22 +7,6 @@
 
 import Foundation
 
-struct InAppMessage {
-  var id: String
-  var htmlString: String
-  
-  init?(dictionary: [String: Any]) {
-    guard let id = dictionary["id"] as? String,
-          let htmlString = dictionary["htmlString"] as? String else {
-      Logger.error("InAppMessage invalid dictionary format: \(dictionary)")
-      return nil
-    }
-    self.id = id
-    self.htmlString = htmlString
-  }
-}
-
-
 final class InAppMessageService {
   
   static let shared = InAppMessageService()
@@ -32,8 +16,13 @@ final class InAppMessageService {
   
   private init() {}
   
-  func showInAppMessageIfNeeded() {
-    API.shared.getInAppMessagesForTest { result in
+  func showInAppMessageIfNeeded(group: String) {
+    guard let deviceId = Globals.deviceIdInUserDefaults else {
+      Logger.error("deviceId does not set.")
+      return
+    }
+    
+    API.shared.getInAppMessages(deviceId: deviceId, group: group) { result in
       switch result {
       case let .success(data):
         self.processInAppMessages(data: data)
@@ -45,16 +34,22 @@ final class InAppMessageService {
   
   private func processInAppMessages(data: [String: Any]) {
     guard let inAppMessagesData = data["data"] as? [[String: Any]],
-          let firstInAppMessageData = inAppMessagesData.first,
-          let firstInAppMessage = InAppMessage(dictionary: firstInAppMessageData) else {
-      Logger.error("No valid in-app messages or empty data")
+          let firstData = inAppMessagesData.first else {
+      Logger.error("Failed to process in app message: empty data")
       return
     }
     
-    self.show(message: firstInAppMessage)
+    guard let messageId = firstData["id"] as? String,
+          let htmlString = firstData["htmlString"] as? String else {
+      Logger.error("Failed to process in app message: invalid data (\(firstData))")
+      return
+    }
+    
+    let message = FlareLaneInAppMessage(id: messageId, htmlString: htmlString)
+    self.show(message: message)
   }
   
-  private func show(message: InAppMessage) {
+  private func show(message: FlareLaneInAppMessage) {
     DispatchQueue.main.async {
       let viewController = InAppMessageViewController(message: message)
       self.viewController = viewController
@@ -72,7 +67,7 @@ final class InAppMessageService {
 
 extension InAppMessageService: InAppMessageViewControllerDelegate {
   
-  func messageViewControllerDidFinishLoading(_ message: InAppMessage) {
+  func messageViewControllerDidFinishLoading(_ message: FlareLaneInAppMessage) {
     
     guard let viewController = self.viewController else { return }
     

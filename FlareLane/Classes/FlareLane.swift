@@ -98,8 +98,8 @@ import UIKit
     Logger.verbose("NotificationForegroundReceivedHandler has been registered.")
   }
   
-  @objc public static func setInAppMessageClickedHandler(callback: @escaping (FlareLaneInAppMessageClickedEvent) -> Void) {
-    EventHandlers.inAppMessageClicked = callback
+  @objc public static func setInAppMessageActionHandler(callback: @escaping (FlareLaneInAppMessage, _ actionId: String) -> Void) {
+    EventHandlers.inAppMessageActionHandler = callback
     Logger.verbose("InAppMessageClickedHandler has been registered.")
   }
 

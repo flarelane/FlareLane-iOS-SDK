@@ -25,9 +25,9 @@ class InAppMessageView: UIView {
   
   private var webView: WKWebView?
   private var configuration: Configuration
-  private let message: InAppMessage
+  private let message: FlareLaneInAppMessage
   
-  init(message: InAppMessage,
+  init(message: FlareLaneInAppMessage,
        javascriptInterface: InAppMessageJavascriptInterface,
        configuration: Configuration = .default) {
     self.message = message
