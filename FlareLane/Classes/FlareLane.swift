@@ -254,7 +254,7 @@ import UIKit
   
   @objc public static func displayInApp(group: String) {
     inAppMessageThrottler.throttle {
-      InAppMessageService.shared.showInAppMessageIfNeeded()
+      InAppMessageService.shared.showInAppMessageIfNeeded(group: group)
     }
   }
 }
