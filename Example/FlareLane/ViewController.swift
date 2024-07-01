@@ -54,6 +54,10 @@ class ViewController: UIViewController {
       print("FlareLane.unsubscribe() - \(isSubscribed), isMainThread: \(Thread.isMainThread)")
     }
   }
+  
+  @IBAction func displayInApp(_ sender: Any) {
+    FlareLane.displayInApp(group: "")
+  }
 
   override func didReceiveMemoryWarning() {
     super.didReceiveMemoryWarning()

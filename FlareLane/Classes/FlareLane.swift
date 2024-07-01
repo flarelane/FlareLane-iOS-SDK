@@ -97,6 +97,11 @@ import UIKit
     EventHandlers.notificationForegroundReceived = callback
     Logger.verbose("NotificationForegroundReceivedHandler has been registered.")
   }
+  
+  @objc public static func setInAppMessageActionHandler(callback: @escaping (FlareLaneInAppMessage, _ actionId: String) -> Void) {
+    EventHandlers.inAppMessageActionHandler = callback
+    Logger.verbose("InAppMessageClickedHandler has been registered.")
+  }
 
   /// Set userId of device
   /// - Parameter userId: userId
@@ -242,6 +247,14 @@ import UIKit
       DispatchQueue.main.sync {
         completion?(device.isSubscribed)
       }
+    }
+  }
+  
+  static let inAppMessageThrottler = Throttler(interval: 5)
+  
+  @objc public static func displayInApp(group: String) {
+    inAppMessageThrottler.throttle {
+      InAppMessageService.shared.showInAppMessageIfNeeded(group: group)
     }
   }
 }

@@ -45,15 +45,8 @@ import SafariServices
         return
       }
 
-      if let urlString = notification.url, let url = URL(string: urlString), let scheme = url.scheme {
-        switch scheme {
-        case "http", "https":
-          // presentWebView(url: url)
-          presentSafariView(url: url)
-          // presentSafariApp(url: url)
-        default:
-          presentApplication(url: url)
-        }
+      if let urlString = notification.url, let url = URL(string: urlString) {
+        handleReceivedURL(url: url)
       }
 
     }
@@ -77,6 +70,18 @@ import SafariServices
       } else {
         event.display()
       }
+    }
+  }
+  
+  func handleReceivedURL(url: URL) {
+    let scheme = url.scheme
+    switch scheme {
+    case "http", "https":
+      // presentWebView(url: url)
+      presentSafariView(url: url)
+      // presentSafariApp(url: url)
+    default:
+      presentApplication(url: url)
     }
   }
 

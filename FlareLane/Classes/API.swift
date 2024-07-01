@@ -89,4 +89,36 @@ final class API {
       completion(error)
     }
   }
+    
+  func getInAppMessages(deviceId: String, group: String, completionHandler: @escaping (Result<[String: Any], Error>) -> Void) {
+    request.get(
+      path: "/devices/\(deviceId)/in-app-messages",
+      parameters: ["group": group]
+    ) { result, error in
+      if let error {
+        completionHandler(.failure(error))
+        return
+      }
+      if let result {
+        completionHandler(.success(result))
+      } else {
+        fatalError("Unreachable")
+      }
+    }
+  }
+  
+  // For test purposes only
+  func getInAppMessagesForTest(completionHandler: @escaping (Result<[String: Any], Error>) -> Void) {
+    request.get(path: "/devices/test/in-app-messages", parameters: [:]) { result, error in
+      if let error {
+        completionHandler(.failure(error))
+        return
+      }
+      if let result {
+        completionHandler(.success(result))
+      } else {
+        fatalError("Unreachable")
+      }
+    }
+  }
 }
