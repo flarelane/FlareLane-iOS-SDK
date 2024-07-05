@@ -19,6 +19,8 @@ class InAppMessageJavascriptInterface: NSObject, WKScriptMessageHandler {
   
   private let message: FlareLaneInAppMessage
   
+  private let queue = DispatchQueue(label: "com.flarelane.iam-js-interface")
+  
   init(message: FlareLaneInAppMessage) {
     self.message = message
   }
@@ -34,22 +36,24 @@ class InAppMessageJavascriptInterface: NSObject, WKScriptMessageHandler {
       return
     }
     
-    switch method {
-    case "setTags":
-      setTags(body: body)
-    case "trackEvent":
-      trackEvent(body: body)
-    case "openUrl":
-      openURL(body: body)
-    case "requestPushPermission":
-      requestPushPermission(fallbackToSettings: true)
-    case "close":
-      close(body: body)
-    case "executeAction":
-      executeAction(body: body)
-    default:
-      Logger.error("userContentController() method not found")
-      break
+    self.queue.async {
+      switch method {
+      case "setTags":
+        self.setTags(body: body)
+      case "trackEvent":
+        self.trackEvent(body: body)
+      case "openUrl":
+        self.openURL(body: body)
+      case "requestPushPermission":
+        self.requestPushPermission(fallbackToSettings: true)
+      case "close":
+        self.close(body: body)
+      case "executeAction":
+        self.executeAction(body: body)
+      default:
+        Logger.error("userContentController() method not found")
+        break
+      }
     }
   }
 }
@@ -87,17 +91,23 @@ private extension InAppMessageJavascriptInterface {
       Logger.error("openURL() URL is invalid")
       return
     }
-    FlareLaneNotificationCenter.shared.handleReceivedURL(url: url)
+    DispatchQueue.main.async {
+      FlareLaneNotificationCenter.shared.handleReceivedURL(url: url)
+    }
     FlareLane.trackEvent("iam_open_url")
   }
   
   func close(body: [String: Any]) {
-    delegate?.inAppMessageJavascriptInterface(didReceive: .close)
+    DispatchQueue.main.async {
+      self.delegate?.inAppMessageJavascriptInterface(didReceive: .close)
+    }
     if let doNotShowDays = body["do_not_show_days"] as? Int {
       FlareLane.trackEvent("iam_closed", data: ["do_not_show_days": doNotShowDays])
     } else {
       FlareLane.trackEvent("iam_closed")
     }
+    // InAppMessage Window가 제거되기 전에 다른 이벤트가 처리되지 않게 딜레이를 추가한다
+    Thread.sleep(forTimeInterval: 0.3)
   }
   
   func executeAction(body: [String: Any]) {
