@@ -56,7 +56,7 @@ class ViewController: UIViewController {
   }
   
   @IBAction func displayInApp(_ sender: Any) {
-    FlareLane.displayInApp(group: "")
+    FlareLane.displayInApp(group: "home")
   }
 
   override func didReceiveMemoryWarning() {

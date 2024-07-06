@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'FlareLane'
-  s.version          = '1.7.0'
+  s.version          = '1.6.3'
   s.summary          = 'FlareLane iOS SDK'
 
   s.homepage         = 'https://github.com/flarelane/FlareLane-iOS-SDK'

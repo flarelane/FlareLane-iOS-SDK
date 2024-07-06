@@ -8,11 +8,13 @@
 import UIKit
 import WebKit
 
+@available(iOSApplicationExtension, unavailable)
 protocol InAppMessageViewDelegate: AnyObject {
   func messageViewDidFinishNavigation(_ messageView: InAppMessageView)
   func messageViewDidReceiveTap(_ messageView: InAppMessageView)
 }
 
+@available(iOSApplicationExtension, unavailable)
 class InAppMessageView: UIView {
   
   struct Configuration {
@@ -131,6 +133,7 @@ class InAppMessageView: UIView {
   
 }
 
+@available(iOSApplicationExtension, unavailable)
 extension InAppMessageView: UIGestureRecognizerDelegate {
   
   func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
@@ -139,6 +142,7 @@ extension InAppMessageView: UIGestureRecognizerDelegate {
   
 }
 
+@available(iOSApplicationExtension, unavailable)
 extension InAppMessageView: UIScrollViewDelegate {
     
     func viewForZooming(in scrollView: UIScrollView) -> UIView? {
@@ -151,6 +155,7 @@ extension InAppMessageView: UIScrollViewDelegate {
     
 }
 
+@available(iOSApplicationExtension, unavailable)
 extension InAppMessageView: WKNavigationDelegate {
   
   func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
