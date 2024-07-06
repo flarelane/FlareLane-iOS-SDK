@@ -8,10 +8,12 @@
 import UIKit
 import WebKit
 
+@available(iOSApplicationExtension, unavailable)
 protocol InAppMessageViewControllerDelegate: AnyObject {
   func messageViewControllerDidFinishLoading(_ message: FlareLaneInAppMessage)
 }
 
+@available(iOSApplicationExtension, unavailable)
 class InAppMessageViewController: UIViewController {
   
   private let message: FlareLaneInAppMessage
@@ -50,6 +52,7 @@ class InAppMessageViewController: UIViewController {
   }
 }
 
+@available(iOSApplicationExtension, unavailable)
 extension InAppMessageViewController: InAppMessageViewDelegate {
   func messageViewDidFinishNavigation(_ messageView: InAppMessageView) {
     self.delegate?.messageViewControllerDidFinishLoading(message)
@@ -60,6 +63,7 @@ extension InAppMessageViewController: InAppMessageViewDelegate {
   }
 }
 
+@available(iOSApplicationExtension, unavailable)
 extension InAppMessageViewController: InAppMessageJavascriptInterfaceDelegate {
   func inAppMessageJavascriptInterface(didReceive event: InAppMessageJavascriptInterface.Event) {
     switch event {

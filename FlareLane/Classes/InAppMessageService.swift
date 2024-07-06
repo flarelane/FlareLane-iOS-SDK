@@ -7,6 +7,7 @@
 
 import Foundation
 
+@available(iOSApplicationExtension, unavailable)
 final class InAppMessageService {
   
   static let shared = InAppMessageService()
@@ -79,6 +80,7 @@ final class InAppMessageService {
   }
 }
 
+@available(iOSApplicationExtension, unavailable)
 extension InAppMessageService: InAppMessageViewControllerDelegate {
   
   func messageViewControllerDidFinishLoading(_ message: FlareLaneInAppMessage) {

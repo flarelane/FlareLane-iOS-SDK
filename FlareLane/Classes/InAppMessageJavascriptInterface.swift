@@ -7,10 +7,12 @@
 
 import WebKit
 
+@available(iOSApplicationExtension, unavailable)
 protocol InAppMessageJavascriptInterfaceDelegate: AnyObject {
   func inAppMessageJavascriptInterface(didReceive event: InAppMessageJavascriptInterface.Event)
 }
 
+@available(iOSApplicationExtension, unavailable)
 class InAppMessageJavascriptInterface: NSObject, WKScriptMessageHandler {
   
   static let name: String = "FlareLaneIAMBridge"
@@ -58,6 +60,7 @@ class InAppMessageJavascriptInterface: NSObject, WKScriptMessageHandler {
   }
 }
 
+@available(iOSApplicationExtension, unavailable)
 private extension InAppMessageJavascriptInterface {
   
   func setTags(body: [String: Any]) {
@@ -83,7 +86,6 @@ private extension InAppMessageJavascriptInterface {
         FlareLane.subscribe(fallbackToSettings: fallbackToSettings) { _ in }
       }
     }
-    FlareLane.trackEvent("iam_request_push_permission")
   }
   
   func openURL(body: [String: Any]) {
@@ -94,30 +96,23 @@ private extension InAppMessageJavascriptInterface {
     DispatchQueue.main.async {
       FlareLaneNotificationCenter.shared.handleReceivedURL(url: url)
     }
-    FlareLane.trackEvent("iam_open_url")
   }
   
   func close(body: [String: Any]) {
     DispatchQueue.main.async {
       self.delegate?.inAppMessageJavascriptInterface(didReceive: .close)
     }
-    if let doNotShowDays = body["do_not_show_days"] as? Int {
-      FlareLane.trackEvent("iam_closed", data: ["do_not_show_days": doNotShowDays])
-    } else {
-      FlareLane.trackEvent("iam_closed")
-    }
     // InAppMessage Window가 제거되기 전에 다른 이벤트가 처리되지 않게 딜레이를 추가한다
     Thread.sleep(forTimeInterval: 0.3)
   }
   
   func executeAction(body: [String: Any]) {
-    guard let actionId = body["action_id"] as? String else {
+    guard let actionId = body["actionId"] as? String else {
       Logger.error("executeAction() actionId not found")
       return
     }
     DispatchQueue.main.async {
       EventHandlers.inAppMessageActionHandler?(self.message, actionId)
     }
-    FlareLane.trackEvent("iam_executeAction", data: ["actionId": actionId])
   }
 }
