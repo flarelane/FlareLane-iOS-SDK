@@ -54,6 +54,7 @@
   <body>
     <div class="title">WebView</div>
     <div class="container">
+      <button class="func_btn" id="syncDeviceData">syncDeviceData</button>
       <button class="func_btn" id="setUserId">setUserId</button>
       <button class="func_btn" id="setTags">setTags</button>
       <button class="func_btn" id="trackEvent">trackEvent</button>
@@ -67,7 +68,14 @@
         const message = { method, ...data };
         webkit.messageHandlers.FlareLaneBridge.postMessage(message);
       }
+      
+      var FlareLane = {
+        syncDeviceDataCallback: function(data) {
+          $('syncDeviceData').innerText = JSON.stringify(data);
+        }
+      };
 
+      $('syncDeviceData').onclick = () => sendMessage('syncDeviceData');
       $('setUserId').onclick = () => sendMessage('setUserId', { userId: 'test_user' });
       $('setTags').onclick = () => sendMessage('setTags', { tags: { a: 'a', b: 'b', c: 'c' } });
       $('trackEvent').onclick = () => sendMessage('trackEvent', { type: 'type', data: { a: 'a', b: 'b', c: 'c' } });

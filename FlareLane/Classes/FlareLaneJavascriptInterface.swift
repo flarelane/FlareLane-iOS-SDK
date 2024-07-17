@@ -8,8 +8,12 @@ import WebKit
 
 @available(iOSApplicationExtension, unavailable)
 @objc public class FlareLaneJavascriptInterface: NSObject, WKScriptMessageHandler {
-    
+    @objc private var webView: WKWebView?
     @objc public static let BRIDGE_NAME = "FlareLaneBridge"
+  
+    public init(_ webView: WKWebView) {
+        self.webView = webView
+    }
 
     public func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
         guard let body = message.body as? [String: Any],
@@ -18,6 +22,8 @@ import WebKit
         }
         
         switch method {
+        case "syncDeviceData":
+            syncDeviceData()
         case "setUserId":
             setUserId(body: body)
         case "setTags":
@@ -28,6 +34,20 @@ import WebKit
             Logger.error("userContentController() method not found")
             break
         }
+    }
+  
+    private func syncDeviceData() {
+      let data = ["platform":Globals.sdkPlatform, "deviceId":Globals.deviceIdInUserDefaults, "userId":Globals.userIdInUserDefaults]
+      if let jsonData = try? JSONSerialization.data(withJSONObject: data, options: []),
+         let jsonString = String(data: jsonData, encoding: .utf8) {
+        let jsCode = "FlareLane.syncDeviceDataCallback(\(jsonString))"
+        
+        webView?.evaluateJavaScript(jsCode, completionHandler: { result, error in
+            if let error = error {
+              print("Error getDeviceData.evaluateJavaScript: \(error)")
+            }
+        })
+      }
     }
     
     private func setUserId(body: [String: Any]) {

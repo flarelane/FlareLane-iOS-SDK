@@ -26,7 +26,7 @@ class WebViewController: UIViewController, WKUIDelegate, WKNavigationDelegate {
         webView.configuration.preferences.javaScriptEnabled = true
         
         // add FlareLane javascript interface
-        let interface = FlareLaneJavascriptInterface()
+        let interface = FlareLaneJavascriptInterface(webView)
         webView.configuration.userContentController.add(
             interface,
             name: FlareLaneJavascriptInterface.BRIDGE_NAME
