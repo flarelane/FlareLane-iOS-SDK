@@ -11,9 +11,10 @@ class ViewController: UIViewController {
   var isSubscribed = false
   var isSetTags = false
   let userId = "myuser@flarelane.com"
-
-  override func viewDidLoad() {
-    super.viewDidLoad()
+  
+  override func viewDidAppear(_ animated: Bool) {
+    super.viewDidAppear(animated)
+    FlareLane.displayInApp(group: "home")
   }
 
   @IBAction func ToggleUserID(_ sender: Any) {

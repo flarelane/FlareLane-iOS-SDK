@@ -47,7 +47,7 @@ class InAppMessageJavascriptInterface: NSObject, WKScriptMessageHandler {
       case "openUrl":
         self.openURL(body: body)
       case "requestPushPermission":
-        self.requestPushPermission(fallbackToSettings: true)
+        self.requestPushPermission()
       case "close":
         self.close(body: body)
       case "executeAction":
@@ -80,10 +80,10 @@ private extension InAppMessageJavascriptInterface {
     FlareLane.trackEvent(type, data: data)
   }
   
-  func requestPushPermission(fallbackToSettings: Bool) {
+  func requestPushPermission() {
     FlareLane.isSubscribed { isSubscribed in
       if isSubscribed == false {
-        FlareLane.subscribe(fallbackToSettings: fallbackToSettings) { _ in }
+        FlareLane.subscribe(fallbackToSettings: true) { _ in }
       }
     }
   }

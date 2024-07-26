@@ -11,6 +11,10 @@ import UIKit
 @objc open class FlareLane: NSObject {
   static private var appDelegate = FlareLaneAppDelegate()
   static private let swizzlingEnabledKey = "FlareLaneSwizzlingEnabled"
+  static private let dispatchGroupForInit = DispatchGroup()
+  static private let dispatchQueueForInit = DispatchQueue(label: "com.flarelane.dispatchQueue.init")
+  static private let inAppMessageThrottler = Throttler(interval: 5)
+
 
   // MARK: - Public Methods
 
@@ -38,40 +42,45 @@ import UIKit
   ///   - launchOptions: AppDelegate didFinishLaunchingWithOptions
   ///   - requestPermissionOnLaunch: Request permission for notifications on launch
   @objc public static func initWithLaunchOptions(_ launchOptions: [UIApplication.LaunchOptionsKey: Any]?, projectId: String, requestPermissionOnLaunch: Bool = true) {
-    Logger.verbose("Initialize FlareLane")
+    dispatchGroupForInit.enter()
+    dispatchQueueForInit.async {
+      Logger.verbose("Initialize FlareLane")
 
 
-    if (Globals.projectIdInUserDefaults != projectId) {
-      // If the previous projectId and the current projectId are not the same, set deviceId to nil for device creation
-      Globals.deviceIdInUserDefaults = nil
-      Globals.isSubscribedInUserDefaults = nil
-    }
-
-    // Set projectId before device is registered
-    Globals.projectId = projectId
-
-
-    ColdStartNotificationManager.setColdStartNotification(launchOptions: launchOptions)
-
-    let swizzlingEnabled = Bundle.main.object(forInfoDictionaryKey: swizzlingEnabledKey) as? Bool
-    Logger.verbose("FlareLaneSwizzlingEnabled: \(String(describing: swizzlingEnabled))")
-    if swizzlingEnabled != false {
-      UNUserNotificationCenter.current().delegate = FlareLaneNotificationCenter.shared
-      appDelegate.swizzle()
-    }
-
-    ColdStartNotificationManager.process()
-
-    if let deviceId = Globals.deviceIdInUserDefaults {
-      DeviceService.activate(deviceId: deviceId) {
-        if (requestPermissionOnLaunch) {
-          requestPermissionForNotifications()
-        }
+      if (Globals.projectIdInUserDefaults != projectId) {
+        // If the previous projectId and the current projectId are not the same, set deviceId to nil for device creation
+        Globals.deviceIdInUserDefaults = nil
+        Globals.isSubscribedInUserDefaults = nil
       }
-    } else {
-      DeviceService.register(projectId: projectId) {
-        if (requestPermissionOnLaunch) {
-          requestPermissionForNotifications()
+
+      // Set projectId before device is registered
+      Globals.projectId = projectId
+
+
+      ColdStartNotificationManager.setColdStartNotification(launchOptions: launchOptions)
+
+      let swizzlingEnabled = Bundle.main.object(forInfoDictionaryKey: swizzlingEnabledKey) as? Bool
+      Logger.verbose("FlareLaneSwizzlingEnabled: \(String(describing: swizzlingEnabled))")
+      if swizzlingEnabled != false {
+        UNUserNotificationCenter.current().delegate = FlareLaneNotificationCenter.shared
+        appDelegate.swizzle()
+      }
+
+      ColdStartNotificationManager.process()
+
+      if let deviceId = Globals.deviceIdInUserDefaults {
+        DeviceService.activate(deviceId: deviceId) {
+          dispatchGroupForInit.leave()
+          if (requestPermissionOnLaunch) {
+            requestPermissionForNotifications()
+          }
+        }
+      } else {
+        DeviceService.register(projectId: projectId) {
+          dispatchGroupForInit.leave()
+          if (requestPermissionOnLaunch) {
+            requestPermissionForNotifications()
+          }
         }
       }
     }
@@ -106,25 +115,17 @@ import UIKit
   /// Set userId of device
   /// - Parameter userId: userId
   @objc public static func setUserId(userId: String?) {
-    guard let deviceId = Globals.deviceIdInUserDefaults else {
-      return
+    afterInit { deviceId in
+      DeviceService.update(deviceId: deviceId, body: ["userId": userId])
     }
-
-    let body = ["userId": userId]
-
-    DeviceService.update(deviceId: deviceId, body: body)
   }
 
   /// Set tags of device
   /// - Parameter tags: tags
   @objc public static func setTags(tags: [String: Any]) {
-    guard let deviceId = Globals.deviceIdInUserDefaults else {
-      return
+    afterInit { deviceId in
+      DeviceService.update(deviceId: deviceId, body: ["tags": tags])
     }
-
-    let body = ["tags": tags]
-
-    DeviceService.update(deviceId: deviceId, body: body)
   }
 
   /// Get id of device
@@ -137,7 +138,10 @@ import UIKit
   ///   - type: event type
   ///   - data: event data
   @objc public static func trackEvent(_ type: String, data: [String: Any]? = nil) {
-    EventService.trackEvent(type: type, data: data)
+    afterInit { _ in
+      EventService.trackEvent(type: type, data: data)
+    }
+    
   }
 
   /// Request a permission and subscribe for notifications
@@ -208,6 +212,14 @@ import UIKit
       }
     }
   }
+  
+  @objc public static func displayInApp(group: String) {
+    afterInit { _ in
+      inAppMessageThrottler.throttle {
+        InAppMessageService.shared.showInAppMessageIfNeeded(group: group)
+      }
+    }
+  }
 
   // MARK: Private Methods
 
@@ -226,35 +238,35 @@ import UIKit
     }
   }
 
-
-
   /// Update isSubscribe of device
   /// - Parameter isSubscribed: subscribed or not
   private static func setIsSubscribed(isSubscribed: Bool, completion: ((Bool) -> Void)? = nil) {
-    guard let deviceId = Globals.deviceIdInUserDefaults else {
-      return
-    }
+    afterInit { deviceId in
+      var body: [String: Any?] = [
+        "isSubscribed": isSubscribed
+      ]
 
-    var body: [String: Any?] = [
-      "isSubscribed": isSubscribed
-    ]
+      if isSubscribed == true {
+        body["pushToken"] = Globals.pushTokenInUserDefaults
+      }
 
-    if isSubscribed == true {
-      body["pushToken"] = Globals.pushTokenInUserDefaults
-    }
-
-    DeviceService.update(deviceId: deviceId, body: body) { device in
-      DispatchQueue.main.sync {
-        completion?(device.isSubscribed)
+      DeviceService.update(deviceId: deviceId, body: body) { device in
+        DispatchQueue.main.sync {
+          completion?(device.isSubscribed)
+        }
       }
     }
   }
   
-  static let inAppMessageThrottler = Throttler(interval: 5)
-  
-  @objc public static func displayInApp(group: String) {
-    inAppMessageThrottler.throttle {
-      InAppMessageService.shared.showInAppMessageIfNeeded(group: group)
+  private static func afterInit(completion: @escaping (_ deviceId: String) -> Void) {
+    dispatchQueueForInit.async {
+      dispatchGroupForInit.wait()
+      guard let deviceId = Globals.deviceIdInUserDefaults else {
+        Logger.error("no deviceID")
+        return
+      }
+      
+      completion(deviceId)
     }
   }
 }

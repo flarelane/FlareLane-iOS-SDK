@@ -58,6 +58,7 @@
       <button class="func_btn" id="setUserId">setUserId</button>
       <button class="func_btn" id="setTags">setTags</button>
       <button class="func_btn" id="trackEvent">trackEvent</button>
+      <button class="func_btn" id="openUrl">openUrl: naver.com</button>
     </div>
     <script>
       function $(id) {
@@ -79,6 +80,7 @@
       $('setUserId').onclick = () => sendMessage('setUserId', { userId: 'test_user' });
       $('setTags').onclick = () => sendMessage('setTags', { tags: { a: 'a', b: 'b', c: 'c' } });
       $('trackEvent').onclick = () => sendMessage('trackEvent', { type: 'type', data: { a: 'a', b: 'b', c: 'c' } });
+      $('openUrl').onclick = () => sendMessage('openUrl', { url: 'https://naver.com' });
     </script>
   </body>
 </html>

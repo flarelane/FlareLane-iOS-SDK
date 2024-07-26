@@ -43,7 +43,7 @@ final class InAppMessageService {
   private func processInAppMessages(data: [String: Any]) {
     guard let inAppMessagesData = data["data"] as? [[String: Any]],
           let firstData = inAppMessagesData.first else {
-      Logger.error("Failed to process in app message: empty data")
+      Logger.verbose("There is no displayable IAM")
       return
     }
     

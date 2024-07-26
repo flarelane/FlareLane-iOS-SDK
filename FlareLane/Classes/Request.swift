@@ -26,7 +26,7 @@ final class Request {
         return nil
       }
 
-      return "https://service-api.flarelane.com/internal/v1/projects/\(projectId)"
+      return "https://staging-service-api.flarelane.com/internal/v1/projects/\(projectId)"
   }
 
   func getRequestSDKInfoHeaderValue() -> String {

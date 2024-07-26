@@ -3,7 +3,7 @@
     <device id="retina6_12" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22684"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22685"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -24,28 +24,28 @@
                                 <rect key="frame" x="16" y="259" width="361" height="359"/>
                                 <subviews>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Xed-2g-mLL">
-                                        <rect key="frame" x="0.0" y="0.0" width="361" height="45"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="361" height="40"/>
                                         <state key="normal" title="Toggle User ID"/>
                                         <connections>
                                             <action selector="ToggleUserID:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="O0q-sy-chR"/>
                                         </connections>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="wEE-nl-Zn1">
-                                        <rect key="frame" x="0.0" y="45" width="361" height="44.666666666666657"/>
+                                        <rect key="frame" x="0.0" y="40" width="361" height="39.666666666666657"/>
                                         <state key="normal" title="Toggle Tags"/>
                                         <connections>
                                             <action selector="ToggleTags:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="m6F-j3-M58"/>
                                         </connections>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="gWf-ff-Chm">
-                                        <rect key="frame" x="0.0" y="89.666666666666686" width="361" height="45"/>
+                                        <rect key="frame" x="0.0" y="79.666666666666686" width="361" height="40"/>
                                         <state key="normal" title="Track Event (test_event)"/>
                                         <connections>
                                             <action selector="TrackEvent:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="oJz-bS-n1N"/>
                                         </connections>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="XjB-DH-5sn">
-                                        <rect key="frame" x="0.0" y="134.66666666666669" width="361" height="45"/>
+                                        <rect key="frame" x="0.0" y="119.66666666666669" width="361" height="40"/>
                                         <state key="normal" title="Button"/>
                                         <buttonConfiguration key="configuration" style="plain" title="isSubscribed()"/>
                                         <connections>
@@ -53,7 +53,7 @@
                                         </connections>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="EWS-kE-5ej">
-                                        <rect key="frame" x="0.0" y="179.66666666666669" width="361" height="44.666666666666657"/>
+                                        <rect key="frame" x="0.0" y="159.66666666666669" width="361" height="39.666666666666657"/>
                                         <state key="normal" title="Button"/>
                                         <buttonConfiguration key="configuration" style="plain" title="subscribe()"/>
                                         <connections>
@@ -61,7 +61,7 @@
                                         </connections>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="iCR-E1-jub">
-                                        <rect key="frame" x="0.0" y="224.33333333333331" width="361" height="45"/>
+                                        <rect key="frame" x="0.0" y="199.33333333333331" width="361" height="40"/>
                                         <state key="normal" title="Button"/>
                                         <buttonConfiguration key="configuration" style="plain" title="unsubscribe()"/>
                                         <connections>
@@ -69,7 +69,7 @@
                                         </connections>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="BLR-sN-lM6" userLabel="displayInApp()">
-                                        <rect key="frame" x="0.0" y="269.33333333333337" width="361" height="44.666666666666686"/>
+                                        <rect key="frame" x="0.0" y="239.33333333333331" width="361" height="40"/>
                                         <state key="normal" title="Button"/>
                                         <buttonConfiguration key="configuration" style="plain" title="displayInApp()"/>
                                         <connections>
@@ -77,11 +77,19 @@
                                         </connections>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="DwK-t5-Xv4">
-                                        <rect key="frame" x="0.0" y="314" width="361" height="45"/>
+                                        <rect key="frame" x="0.0" y="279.33333333333337" width="361" height="39.666666666666686"/>
                                         <state key="normal" title="Button"/>
                                         <buttonConfiguration key="configuration" style="plain" title="WebView bridge test"/>
                                         <connections>
                                             <segue destination="evW-6y-rJI" kind="show" id="Svs-Ya-8Rj"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="YKf-9m-fxo">
+                                        <rect key="frame" x="0.0" y="319" width="361" height="40"/>
+                                        <state key="normal" title="Button"/>
+                                        <buttonConfiguration key="configuration" style="plain" title="WebView test"/>
+                                        <connections>
+                                            <segue destination="2VA-8W-AYh" kind="show" id="oO8-Uy-z1M"/>
                                         </connections>
                                     </button>
                                 </subviews>
@@ -100,10 +108,10 @@
             </objects>
             <point key="canvasLocation" x="-1605" y="-1261"/>
         </scene>
-        <!--Web View Controller-->
+        <!--Web View Bridge Controller-->
         <scene sceneID="nHK-Ul-FH5">
             <objects>
-                <viewController id="evW-6y-rJI" customClass="WebViewController" customModule="FlareLane_Example" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="evW-6y-rJI" customClass="WebViewBridgeController" customModule="FlareLane_Example" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="cUT-Ar-X1L"/>
                         <viewControllerLayoutGuide type="bottom" id="aNM-Qk-avJ"/>
@@ -131,7 +139,40 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="uMH-Sf-bSv" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-857.25190839694653" y="-1261.267605633803"/>
+            <point key="canvasLocation" x="-132" y="-1708"/>
+        </scene>
+        <!--Web View Controller-->
+        <scene sceneID="Ypt-je-veo">
+            <objects>
+                <viewController id="2VA-8W-AYh" customClass="WebViewController" customModule="FlareLane_Example" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="RLa-b0-4Nx"/>
+                        <viewControllerLayoutGuide type="bottom" id="4wb-KX-KGg"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="Fho-E4-Uzb">
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="842"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <wkWebView contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="pnJ-tA-zDu">
+                                <rect key="frame" x="0.0" y="-54" width="393" height="896"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <color key="backgroundColor" red="0.36078431370000003" green="0.38823529410000002" blue="0.4039215686" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <wkWebViewConfiguration key="configuration">
+                                    <audiovisualMediaTypes key="mediaTypesRequiringUserActionForPlayback" none="YES"/>
+                                    <wkPreferences key="preferences"/>
+                                </wkWebViewConfiguration>
+                            </wkWebView>
+                        </subviews>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                    </view>
+                    <navigationItem key="navigationItem" id="IG5-xO-aBl"/>
+                    <connections>
+                        <outlet property="webView" destination="pnJ-tA-zDu" id="10A-z8-GHV"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="1tx-dL-RnU" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-132" y="-906"/>
         </scene>
     </scenes>
     <resources>

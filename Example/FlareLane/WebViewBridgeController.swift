@@ -1,8 +1,8 @@
 //
-//  WebviewController.swift
+//  WebViewBridgeController.swift
 //  FlareLane_Example
 //
-//  Created by jp on 1/30/24.
+//  Created by MinHyeok Kim on 7/20/24.
 //  Copyright © 2024 CocoaPods. All rights reserved.
 //
 
@@ -10,7 +10,7 @@ import UIKit
 import WebKit
 import FlareLane
 
-class WebViewController: UIViewController, WKUIDelegate, WKNavigationDelegate {
+class WebViewBridgeController: UIViewController, WKUIDelegate, WKNavigationDelegate {
     
     @IBOutlet var webView: WKWebView!
     
@@ -32,7 +32,8 @@ class WebViewController: UIViewController, WKUIDelegate, WKNavigationDelegate {
             name: FlareLaneJavascriptInterface.BRIDGE_NAME
         )
         
-        let request = URLRequest(url: URL(string: "https://junyeongchoi.github.io/")!)
+        let localFilePath = Bundle.main.url(forResource: "/webview_bridge_test", withExtension: "html")
+        let request = URLRequest(url: localFilePath!)
         webView.load(request)
     }
 }
