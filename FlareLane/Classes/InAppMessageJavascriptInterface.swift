@@ -49,7 +49,7 @@ class InAppMessageJavascriptInterface: NSObject, WKScriptMessageHandler {
       case "requestPushPermission":
         self.requestPushPermission()
       case "close":
-        self.close(body: body)
+        self.close()
       case "executeAction":
         self.executeAction(body: body)
       default:
@@ -82,7 +82,9 @@ private extension InAppMessageJavascriptInterface {
   
   func requestPushPermission() {
     FlareLane.isSubscribed { isSubscribed in
-      if isSubscribed == false {
+      if (isSubscribed) {
+        self.close()
+      } else {
         FlareLane.subscribe(fallbackToSettings: true) { _ in }
       }
     }
@@ -98,7 +100,7 @@ private extension InAppMessageJavascriptInterface {
     }
   }
   
-  func close(body: [String: Any]) {
+  func close() {
     DispatchQueue.main.async {
       self.delegate?.inAppMessageJavascriptInterface(didReceive: .close)
     }

@@ -15,7 +15,7 @@ import FirebaseMessaging
 class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterDelegate {
 
   var window: UIWindow?
-  private let FLARELANE_PROJECT_ID = "6be7d281-5cdc-4c1e-b441-73a585322bff"
+  private let FLARELANE_PROJECT_ID = "FLARELANE_PROJECT_ID"
 
   func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
     // FlareLane

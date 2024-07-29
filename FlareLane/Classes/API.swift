@@ -117,19 +117,4 @@ final class API {
       }
     }
   }
-  
-  // For test purposes only
-  func getInAppMessagesForTest(completionHandler: @escaping (Result<[String: Any], Error>) -> Void) {
-    request.get(path: "/devices/test/in-app-messages", parameters: [:]) { result, error in
-      if let error {
-        completionHandler(.failure(error))
-        return
-      }
-      if let result {
-        completionHandler(.success(result))
-      } else {
-        fatalError("Unreachable")
-      }
-    }
-  }
 }
