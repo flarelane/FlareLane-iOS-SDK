@@ -59,7 +59,7 @@ final class API {
       "deviceId": deviceId,
       "type": type,
       "createdAt": Date().toString(),
-      "platform" : "ios"
+      "platform" : Globals.sdkPlatform
     ]
 
     request.post(path: "/events", body: body) { (response, error) in
@@ -73,20 +73,48 @@ final class API {
   ///   - subjectId: string
   ///   - type: event type
   ///   - data: event data
-  func trackEvent(subjectType: String, subjectId: String, type: String, data: [String: Any]?, completion: @escaping (Error?) -> Void) {
+  func trackEvent(deviceId: String, type: String, data: [String: Any]?, completion: @escaping (Error?) -> Void) {
+    let userId = Globals.userIdInUserDefaults
+    
+    let subjectType = userId != nil ? "user": "device"
+    let subjectId = userId ?? deviceId
+    
     var event: [String: Any] = [
       "subjectType": subjectType,
       "subjectId": subjectId,
       "type": type,
       "createdAt": Date().toString(),
+      "platform": Globals.sdkPlatform,
+      "deviceId": deviceId
     ]
 
     if (data != nil) {
       event["data"] = data
     }
+    
+    if (userId != nil) {
+      event["userId"] = userId
+    }
 
     request.post(path: "/events-v2", body: ["events": [event]]) { (response, error) in
       completion(error)
+    }
+  }
+    
+  func getInAppMessages(deviceId: String, group: String, completionHandler: @escaping (Result<[String: Any], Error>) -> Void) {
+    request.post(
+      path: "/devices/\(deviceId)/in-app-messages",
+      body: ["group": group]
+    ) { result, error in
+      if let error {
+        completionHandler(.failure(error))
+        return
+      }
+      if let result {
+        completionHandler(.success(result))
+      } else {
+        fatalError("Unreachable")
+      }
     }
   }
 }

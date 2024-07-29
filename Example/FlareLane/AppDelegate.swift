@@ -23,16 +23,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     FlareLane.setNotificationClickedHandler() { payload in
       print(payload)
     }
-    
+
     FlareLane.setNotificationForegroundReceivedHandler { event in
       if let dismissData = event.notification.data?["dismiss_foreground_notification"] as? String,
          dismissData == "true" {
         return
       }
-      
+
       event.display()
     }
-    
+
+    FlareLane.setInAppMessageActionHandler { iam, actionId in
+      print("setInAppMessageActionHandler: \(iam), \(actionId)")
+    }
+
     // Test with FCM
     UNUserNotificationCenter.current().delegate = self
     FirebaseApp.configure()
@@ -43,7 +47,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
   // If you are not swizzled, must input this matched methods.
   func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
     FlareLaneAppDelegate.shared.application(application, didRegisterForRemoteNotificationsWithDeviceToken: deviceToken)
-    
+
     // Test with FCM
     Messaging.messaging().apnsToken = deviceToken
     Messaging.messaging().token { token, error in

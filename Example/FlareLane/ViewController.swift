@@ -11,9 +11,10 @@ class ViewController: UIViewController {
   var isSubscribed = false
   var isSetTags = false
   let userId = "myuser@flarelane.com"
-
-  override func viewDidLoad() {
-    super.viewDidLoad()
+  
+  override func viewDidAppear(_ animated: Bool) {
+    super.viewDidAppear(animated)
+    FlareLane.displayInApp(group: "home")
   }
 
   @IBAction func ToggleUserID(_ sender: Any) {
@@ -53,6 +54,10 @@ class ViewController: UIViewController {
     FlareLane.unsubscribe() { isSubscribed in
       print("FlareLane.unsubscribe() - \(isSubscribed), isMainThread: \(Thread.isMainThread)")
     }
+  }
+  
+  @IBAction func displayInApp(_ sender: Any) {
+    FlareLane.displayInApp(group: "home")
   }
 
   override func didReceiveMemoryWarning() {

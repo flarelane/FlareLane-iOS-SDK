@@ -14,7 +14,7 @@ final class DeviceService {
     let languageCode = Locale.preferredLanguages.count > 0 ? Locale(identifier: Locale.preferredLanguages.first!).languageCode : nil
 
     return [
-      "platform": "ios",
+      "platform": Globals.sdkPlatform,
       "deviceModel":  UIDevice.modelName,
       "osVersion":  UIDevice.current.systemVersion,
       "sdkVersion": Globals.sdkVersion,

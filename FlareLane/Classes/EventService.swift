@@ -97,12 +97,7 @@ class EventService {
       return
     }
     
-    let userId = Globals.userIdInUserDefaults
-    
-    let subjectType = userId != nil ? "user": "device"
-    let subjectId = userId ?? deviceId
-    
-    API.shared.trackEvent(subjectType: subjectType, subjectId: subjectId, type: type, data: data) { (error) in
+    API.shared.trackEvent(deviceId: deviceId, type: type, data: data) { (error) in
       if error != nil {
         Logger.error("Failed send event request. \(type)")
         return
