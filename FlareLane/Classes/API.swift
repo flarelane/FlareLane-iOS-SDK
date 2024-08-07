@@ -54,13 +54,19 @@ final class API {
   ///   - notificationId: NotificationId
   ///   - completion: Completion callback
   func sendEvent(deviceId: String, type: String, notificationId: String, completion: @escaping (Error?) -> Void) {
-    let body = [
+    var body: [String: Any] = [
       "notificationId":notificationId,
       "deviceId": deviceId,
       "type": type,
       "createdAt": Date().toString(),
       "platform" : Globals.sdkPlatform
     ]
+    
+    let userId = Globals.userIdInUserDefaults
+    if (userId != nil) {
+      body["userId"] = userId
+    }
+
 
     request.post(path: "/events", body: body) { (response, error) in
       completion(error)

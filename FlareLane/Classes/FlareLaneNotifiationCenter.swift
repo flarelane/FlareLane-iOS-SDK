@@ -55,13 +55,16 @@ import SafariServices
   /// To handle notification foreground received
   @objc public func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
     if let flarelaneNotification = FlareLaneNotification.getFlareLaneNotificationFromUNNotificationContent(notification.request.content) {
+      
+      BadgeManager.setCount(0)
+      
       if let flarelane_dismiss_foreground_notification = flarelaneNotification.data?["flarelane_dismiss_foreground_notification"] as? String,
          flarelane_dismiss_foreground_notification == "true" {
 
         Logger.verbose("notification dismissed cause flarelane_dismiss_foreground_notification is true.")
         return
       }
-
+      
       let event = FlareLaneNotificationReceivedEvent(UIApplication.shared, notification: flarelaneNotification, completionHandler: completionHandler)
 
       if let handler = EventHandlers.notificationForegroundReceived {
