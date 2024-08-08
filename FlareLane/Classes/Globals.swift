@@ -80,6 +80,45 @@ final class Globals {
       UserDefaults.standard.bool(forKey: isSubscribedKey)
     }
   }
+  
+  private static var badgeCount = "flarelane_badgeCount"
+  static var badgeCountUserDefaults: Int? {
+    set {
+      if let userDefaults = shardUserDefaults {
+        userDefaults.set(newValue, forKey: badgeCount)
+      }
+    }
+
+    get {
+      if let userDefaults = shardUserDefaults {
+        return userDefaults.integer(forKey: badgeCount)
+      } else {
+        return nil
+      }
+    }
+  }
+  
+  static var shardUserDefaults: UserDefaults? {
+    get {
+      UserDefaults(suiteName: appGroupName)
+    }
+  }
+  
+  static var appGroupName: String {
+    let appGroupName = "group.\(bundleIdentifier ?? "").flarelane"
+    return appGroupName.trimmingCharacters(in: .whitespaces)
+  }
+  
+  static var bundleIdentifier: String? {
+    var bundle = Bundle.main
+    
+    // If it is an extension, use the value of the parent bundle.
+    if bundle.bundleURL.pathExtension == "appex" {
+      bundle = Bundle(url: bundle.bundleURL.deletingLastPathComponent().deletingLastPathComponent())!
+    }
+    
+    return bundle.bundleIdentifier
+  }
 
   /// Current logLevel
   static var logLevel: LogLevel = .verbose

@@ -73,6 +73,7 @@
 		2A78EC333C72CB06474C9053 /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
 		35DF8215F94521ADC5AFFD8D /* FlareLane.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = FlareLane.podspec; path = ../FlareLane.podspec; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 		4240BE1426FD77690077B6FE /* FlareLane_Example.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = FlareLane_Example.entitlements; sourceTree = "<group>"; };
+		4274953A2C622C0E0039BBF2 /* FlareLaneNotificationServiceExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = FlareLaneNotificationServiceExtension.entitlements; sourceTree = "<group>"; };
 		4EB95071D4F3355BF3E9B4AF /* Pods-FlareLane_Tests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-FlareLane_Tests.release.xcconfig"; path = "Target Support Files/Pods-FlareLane_Tests/Pods-FlareLane_Tests.release.xcconfig"; sourceTree = "<group>"; };
 		5A961C00784FA50E6E12BA8B /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
 		607FACD01AFB9204008FA782 /* FlareLane_Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FlareLane_Example.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -125,6 +126,7 @@
 		04938C0E2803D3AD00CED062 /* FlareLaneNotificationServiceExtension */ = {
 			isa = PBXGroup;
 			children = (
+				4274953A2C622C0E0039BBF2 /* FlareLaneNotificationServiceExtension.entitlements */,
 				04938C0F2803D3AD00CED062 /* NotificationService.swift */,
 				04938C112803D3AD00CED062 /* Info.plist */,
 			);
@@ -555,6 +557,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = "$(inherited)";
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_ENTITLEMENTS = FlareLaneNotificationServiceExtension/FlareLaneNotificationServiceExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = dwarf;
@@ -592,6 +595,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = "$(inherited)";
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_ENTITLEMENTS = FlareLaneNotificationServiceExtension/FlareLaneNotificationServiceExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 2DX9GGF6S6;

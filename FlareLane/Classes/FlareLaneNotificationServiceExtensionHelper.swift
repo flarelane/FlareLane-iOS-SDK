@@ -2,7 +2,7 @@
 //  FlareLaneExtensionHelper.swift
 //  FlareLane
 //
-//  Copyright © 2021 FlareLabs. All rights reserved.
+//  Copyright © 2024 FlareLabs. All rights reserved.
 //
 
 import UserNotifications
@@ -19,6 +19,12 @@ import MobileCoreServices
     
     self.contentHandler = contentHandler
     bestAttemptContent = (request.content.mutableCopy() as? UNMutableNotificationContent)
+    
+    if let badgeCount = bestAttemptContent?.badge as? Int {
+        BadgeManager.setCount(badgeCount)
+    } else {
+        BadgeManager.setCount(BadgeManager.getCount() + 1)
+    }
     
     if let bestAttemptContent = bestAttemptContent {
       guard let flarelaneNotification = FlareLaneNotification.getFlareLaneNotificationFromUNNotificationContent(request.content),

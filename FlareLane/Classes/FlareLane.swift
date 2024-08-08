@@ -65,7 +65,13 @@ import UIKit
         UNUserNotificationCenter.current().delegate = FlareLaneNotificationCenter.shared
         appDelegate.swizzle()
       }
-
+      
+      if (BadgeManager.isBadgeEnabled == true) {
+        BadgeManager.setCount(0)
+        // When using applicationWillEnterForeground, if scenes are already in use, it will not be called. Use willEnterForegroundNotification.
+        NotificationCenter.default.addObserver(self, selector: #selector(badgeForegroundHandler), name:  UIApplication.willEnterForegroundNotification, object: nil)
+      }
+      
       ColdStartNotificationManager.process()
 
       if let deviceId = Globals.deviceIdInUserDefaults {
@@ -268,5 +274,9 @@ import UIKit
       
       completion(deviceId)
     }
+  }
+  
+  @objc private static func badgeForegroundHandler() {
+    BadgeManager.setCount(0)
   }
 }
