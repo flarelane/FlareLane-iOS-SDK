@@ -16,7 +16,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
 
   var window: UIWindow?
   private let FLARELANE_PROJECT_ID = "FLARELANE_PROJECT_ID"
-
   func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
     // FlareLane
     FlareLane.initWithLaunchOptions(launchOptions, projectId: FLARELANE_PROJECT_ID, requestPermissionOnLaunch: false)
