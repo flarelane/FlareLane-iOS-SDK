@@ -147,7 +147,6 @@ import UIKit
     afterInit { _ in
       EventService.trackEvent(type: type, data: data)
     }
-    
   }
 
   /// Request a permission and subscribe for notifications
@@ -166,33 +165,38 @@ import UIKit
 
   /// Request a permission and subscribe for notifications
   @objc public static func subscribe(fallbackToSettings: Bool = true, completion: ((Bool) -> Void)? = nil) {
-    UNUserNotificationCenter.current().getNotificationSettings { settings in
-      if settings.authorizationStatus == .notDetermined {
-        self.requestPermissionForNotifications(completion: completion)
-      } else if settings.authorizationStatus == .denied {
-        if fallbackToSettings {
-          DispatchQueue.main.async {
-            if #available(iOS 16.0, *) {
-              if let url = URL(string: UIApplication.openNotificationSettingsURLString) {
-                UIApplication.shared.open(url)
-              }
-            } else if #available(iOS 15.4, *) {
-              if let url = URL(string: UIApplicationOpenNotificationSettingsURLString) {
-                UIApplication.shared.open(url)
-              }
-            } else {
-              if let url = URL(string: "App-Prefs:root=NOTIFICATIONS_ID") {
-                UIApplication.shared.open(url)
+    afterInit { deviceId in
+      UNUserNotificationCenter.current().getNotificationSettings { settings in
+        if settings.authorizationStatus == .notDetermined {
+          self.requestPermissionForNotifications(completion: completion)
+        } else if settings.authorizationStatus == .denied {
+          if fallbackToSettings {
+            DispatchQueue.main.async {
+              if #available(iOS 16.0, *) {
+                if let url = URL(string: UIApplication.openNotificationSettingsURLString) {
+                  UIApplication.shared.open(url)
+                }
+              } else if #available(iOS 15.4, *) {
+                if let url = URL(string: UIApplicationOpenNotificationSettingsURLString) {
+                  UIApplication.shared.open(url)
+                }
+              } else {
+                if let url = URL(string: "App-Prefs:root=NOTIFICATIONS_ID") {
+                  UIApplication.shared.open(url)
+                }
               }
             }
           }
-        }
-      } else {
-        // Synchronize as much as possible to prevent cases where the token is absent in the DB
-        self.requestPermissionForNotifications()
-        self.setIsSubscribed(isSubscribed: true) { isSubscribed in
-          DispatchQueue.main.async {
-            completion?(isSubscribed)
+        } else {
+          // Synchronize as much as possible to prevent cases where the token is absent in the DB
+          self.requestPermissionForNotifications()
+          
+          if let pushToken = Globals.pushTokenInUserDefaults {
+            DeviceService.update(deviceId: deviceId, body: ["isSubscribed": true, "pushToken":pushToken]) { device in
+              DispatchQueue.main.sync {
+                completion?(device.isSubscribed)
+              }
+            }
           }
         }
       }
@@ -201,9 +205,11 @@ import UIKit
 
   /// Unsubscribe for notifications
   @objc public static func unsubscribe(completion: ((Bool) -> Void)? = nil) {
-    self.setIsSubscribed(isSubscribed: false) { isSubscribed in
-      DispatchQueue.main.async {
-        completion?(isSubscribed)
+    afterInit { deviceId in
+      DeviceService.update(deviceId: deviceId, body: ["isSubscribed": false]) { device in
+        DispatchQueue.main.sync {
+          completion?(device.isSubscribed)
+        }
       }
     }
   }
@@ -239,26 +245,6 @@ import UIKit
           completion?(true)
         } else {
           completion?(false)
-        }
-      }
-    }
-  }
-
-  /// Update isSubscribe of device
-  /// - Parameter isSubscribed: subscribed or not
-  private static func setIsSubscribed(isSubscribed: Bool, completion: ((Bool) -> Void)? = nil) {
-    afterInit { deviceId in
-      var body: [String: Any?] = [
-        "isSubscribed": isSubscribed
-      ]
-
-      if isSubscribed == true {
-        body["pushToken"] = Globals.pushTokenInUserDefaults
-      }
-
-      DeviceService.update(deviceId: deviceId, body: body) { device in
-        DispatchQueue.main.sync {
-          completion?(device.isSubscribed)
         }
       }
     }
