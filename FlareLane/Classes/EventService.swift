@@ -92,18 +92,21 @@ class EventService {
   /// - Parameters:
   ///   - type: event type
   ///   - data: event data
-  static func trackEvent(type: String , data: [String: Any]?) {
+  static func trackEvent(type: String, data: [String: Any]?, completion: (() -> Void)? = nil) {
     guard let deviceId = Globals.deviceIdInUserDefaults else {
       return
     }
     
     API.shared.trackEvent(deviceId: deviceId, type: type, data: data) { (error) in
+      completion?()
+      
       if error != nil {
         Logger.error("Failed send event request. \(type)")
         return
       }
       
       Logger.verbose("Succeed send event request. \(type)")
+      
     }
   }
 }
