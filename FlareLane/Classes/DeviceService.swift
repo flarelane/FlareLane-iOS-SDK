@@ -76,7 +76,12 @@ final class DeviceService {
   ///   - deviceId: FlareLane deviceId
   ///   - key: Data key
   ///   - value: Data value
-  static func update(deviceId: String, body: [String:Any?], completion: ((FlareLaneDevice)->())? = nil) {
+  static func update(body: [String:Any?], completion: ((FlareLaneDevice)->())? = nil) {
+    guard let deviceId = Globals.deviceIdInUserDefaults else {
+      Logger.error("Globals.deviceIdInUserDefaults is nil")
+      return
+    }
+    
     API.shared.updateDevice(deviceId: deviceId, body: body) { (response, error) in
       if error != nil {
         Logger.error("Failed update request. - \(body)")

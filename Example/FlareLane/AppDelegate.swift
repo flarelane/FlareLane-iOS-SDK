@@ -15,17 +15,10 @@ import FirebaseMessaging
 class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterDelegate {
 
   var window: UIWindow?
-  private let FLARELANE_PROJECT_ID = "a43cdc82-0ea5-4fdd-aebc-1940fe99b6c3"
+  private let FLARELANE_PROJECT_ID = "FLARELANE_PROJECT_ID"
   func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
     // FlareLane
     FlareLane.initWithLaunchOptions(launchOptions, projectId: FLARELANE_PROJECT_ID, requestPermissionOnLaunch: false)
-    FlareLane.subscribe()
-    FlareLane.setTags(tags: ["hello": "123"])
-    FlareLane.setTags(tags: ["444": "555"])
-    FlareLane.setTags(tags: ["1111": "33333"])
-    FlareLane.setTags(tags: ["444222": "4444"])
-    FlareLane.setTags(tags: ["3333": "555"])
-//    FlareLane.setUserId(userId: "444")
     FlareLane.setNotificationClickedHandler() { payload in
       print(payload)
     }

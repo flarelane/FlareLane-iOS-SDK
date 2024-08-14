@@ -73,7 +73,7 @@ import UIKit
           "pushToken": pushToken
         ]
         
-        DeviceService.update(deviceId: deviceId, body: body) { _ in
+        DeviceService.update(body: body) { _ in
           Globals.pushTokenInUserDefaults = pushToken
         }
       }
