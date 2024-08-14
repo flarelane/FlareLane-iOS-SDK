@@ -12,7 +12,7 @@ import UIKit
   static private var appDelegate = FlareLaneAppDelegate()
   static private let swizzlingEnabledKey = "FlareLaneSwizzlingEnabled"
   static private let inAppMessageThrottler = Throttler(interval: 5)
-  static private let taskManager = FlareLaneTaskManager()
+  static private let taskManager = FlareLaneTaskManager.shared
   
   // MARK: - Public Methods
   
@@ -72,16 +72,22 @@ import UIKit
     if let deviceId = Globals.deviceIdInUserDefaults {
       DeviceService.activate(deviceId: deviceId) {
         if (requestPermissionOnLaunch) {
-          requestPermissionForNotifications()
+          self.requestPermissionForNotifications() { _ in
+            taskManager.initializeComplete()
+          }
+        } else {
+          taskManager.initializeComplete()
         }
-        taskManager.initializeComplete()
       }
     } else {
       DeviceService.register(projectId: projectId) {
         if (requestPermissionOnLaunch) {
-          requestPermissionForNotifications()
+          self.requestPermissionForNotifications() { _ in
+            taskManager.initializeComplete()
+          }
+        } else {
+          taskManager.initializeComplete()
         }
-        taskManager.initializeComplete()
       }
     }
   }
@@ -167,42 +173,33 @@ import UIKit
   @objc public static func subscribe(fallbackToSettings: Bool = true, completion: ((Bool) -> Void)? = nil) {
     taskManager.addTaskAfterInit(taskName: "subscribe") { completionTask in
       UNUserNotificationCenter.current().getNotificationSettings { settings in
+        
         if settings.authorizationStatus == .notDetermined {
-          self.requestPermissionForNotifications(completion: completion)
+          self.requestPermissionForNotifications { granted in
+            completion?(granted)
+            completionTask()
+          }
         } else if settings.authorizationStatus == .denied {
           if fallbackToSettings {
             DispatchQueue.main.async {
-              if #available(iOS 16.0, *) {
-                if let url = URL(string: UIApplication.openNotificationSettingsURLString) {
-                  UIApplication.shared.open(url)
-                }
-              } else if #available(iOS 15.4, *) {
-                if let url = URL(string: UIApplicationOpenNotificationSettingsURLString) {
-                  UIApplication.shared.open(url)
-                }
-              } else {
-                if let url = URL(string: "App-Prefs:root=NOTIFICATIONS_ID") {
-                  UIApplication.shared.open(url)
-                }
-              }
+              self.openNotificationSettings()
             }
           }
+          completion?(false)
+          completionTask()
         } else {
-          // Synchronize as much as possible to prevent cases where the token is absent in the DB
-          self.requestPermissionForNotifications()
-          
-          if let pushToken = Globals.pushTokenInUserDefaults {
-            DeviceService.update(body: ["isSubscribed": true, "pushToken":pushToken]) { device in
-              DispatchQueue.main.async {
-                completion?(device.isSubscribed)
-              }
+          if Globals.pushTokenInUserDefaults == nil {
+            self.requestPermissionForNotifications { granted in
+              completionTask()
             }
+          } else {
+            self.updateDeviceWithPushToken(completion: completionTask)
           }
         }
       }
-      completionTask()
     }
   }
+  
   
   /// Unsubscribe for notifications
   @objc public static func unsubscribe(completion: ((Bool) -> Void)? = nil) {
@@ -237,6 +234,36 @@ import UIKit
   }
   
   // MARK: Private Methods
+  
+  private static func updateDeviceWithPushToken(completion: @escaping () -> Void) {
+    if let pushToken = Globals.pushTokenInUserDefaults {
+      DeviceService.update(body: ["isSubscribed": true, "pushToken": pushToken]) { device in
+        DispatchQueue.main.async {
+          completion()
+        }
+      }
+    } else {
+      completion()
+    }
+  }
+  
+  private static func openNotificationSettings() {
+    DispatchQueue.main.async {
+      if #available(iOS 16.0, *) {
+        if let url = URL(string: UIApplication.openNotificationSettingsURLString) {
+          UIApplication.shared.open(url)
+        }
+      } else if #available(iOS 15.4, *) {
+        if let url = URL(string: UIApplicationOpenNotificationSettingsURLString) {
+          UIApplication.shared.open(url)
+        }
+      } else {
+        if let url = URL(string: "App-Prefs:root=NOTIFICATIONS_ID") {
+          UIApplication.shared.open(url)
+        }
+      }
+    }
+  }
   
   private static func requestPermissionForNotifications(completion: ((Bool) -> Void)? = nil) {
     let options: UNAuthorizationOptions = [.badge, .alert, .sound]

@@ -6,6 +6,8 @@
 //
 
 class FlareLaneTaskManager {
+  static let shared = FlareLaneTaskManager()
+  
   private var taskQueue = OperationQueue()
   private var isInitialized = false
   
@@ -14,7 +16,7 @@ class FlareLaneTaskManager {
     taskQueue.isSuspended = true // Suspend task execution until initialization is complete
   }
   
-  func addTaskAfterInit(taskName: String, timeout: TimeInterval = 20.0, _ task: @escaping (_ completion: @escaping () -> Void) -> Void) {
+  func addTaskAfterInit(taskName: String, timeout: TimeInterval = 10.0, _ task: @escaping (_ completion: @escaping () -> Void) -> Void) {
     let operation = BlockOperation {
       let semaphore = DispatchSemaphore(value: 0)
       var taskCompleted = false
