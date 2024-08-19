@@ -92,7 +92,7 @@ class EventService {
   /// - Parameters:
   ///   - type: event type
   ///   - data: event data
-  static func trackEvent(type: String , data: [String: Any]?) {
+  static func trackEvent(type: String, data: [String: Any]?) {
     guard let deviceId = Globals.deviceIdInUserDefaults else {
       return
     }

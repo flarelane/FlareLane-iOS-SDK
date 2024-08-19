@@ -48,7 +48,7 @@ class InAppMessageView: UIView {
     webView.backgroundColor = .clear
     webView.scrollView.showsVerticalScrollIndicator = false
     webView.scrollView.pinchGestureRecognizer?.isEnabled = false
-    webView.scrollView.contentInsetAdjustmentBehavior = .automatic
+    webView.scrollView.contentInsetAdjustmentBehavior = .never
     webView.scrollView.bounces = false
     webView.scrollView.delegate = self
     webView.isOpaque = false
