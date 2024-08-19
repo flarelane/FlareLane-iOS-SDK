@@ -17,9 +17,13 @@ class FlareLaneTaskManager {
   }
   
   func addTaskAfterInit(taskName: String, timeout: TimeInterval = 10.0, _ task: @escaping (_ completion: @escaping () -> Void) -> Void) {
+    Logger.verbose("Task added to queue: '\(taskName)'. Queue size after adding: \(taskQueue.operationCount + 1)")
+    
     let operation = BlockOperation {
       let semaphore = DispatchSemaphore(value: 0)
       var taskCompleted = false
+      
+      Logger.verbose("Executing task: '\(taskName)'. Queue size before execution: \(self.taskQueue.operationCount)")
       
       // Execute the task on a background thread
       DispatchQueue.global(qos: .userInitiated).async {
@@ -51,6 +55,7 @@ class FlareLaneTaskManager {
   
   func initializeComplete() {
     isInitialized = true
+    Logger.verbose("Task queue initialized. Processing queued tasks.")
     taskQueue.isSuspended = false // Resume task execution after initialization is complete
   }
 }
