@@ -14,7 +14,7 @@ public enum SdkType: String {
 }
 
 final class Globals {
-  static var sdkVersion = "1.7.0"
+  static var sdkVersion = "1.7.1"
   static var sdkType: SdkType = .native
   static var sdkPlatform = "ios"
 
@@ -80,7 +80,7 @@ final class Globals {
       UserDefaults.standard.bool(forKey: isSubscribedKey)
     }
   }
-  
+
   private static var badgeCount = "flarelane_badgeCount"
   static var badgeCountUserDefaults: Int? {
     set {
@@ -97,26 +97,26 @@ final class Globals {
       }
     }
   }
-  
+
   static var shardUserDefaults: UserDefaults? {
     get {
       UserDefaults(suiteName: appGroupName)
     }
   }
-  
+
   static var appGroupName: String {
     let appGroupName = "group.\(bundleIdentifier ?? "").flarelane"
     return appGroupName.trimmingCharacters(in: .whitespaces)
   }
-  
+
   static var bundleIdentifier: String? {
     var bundle = Bundle.main
-    
+
     // If it is an extension, use the value of the parent bundle.
     if bundle.bundleURL.pathExtension == "appex" {
       bundle = Bundle(url: bundle.bundleURL.deletingLastPathComponent().deletingLastPathComponent())!
     }
-    
+
     return bundle.bundleIdentifier
   }
 
