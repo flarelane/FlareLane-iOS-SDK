@@ -39,6 +39,11 @@ class FlareLaneTaskManager {
       }
       
       semaphore.wait() // Wait for the task or timeout to complete
+      
+      // Ensure task completion is called even if the semaphore wait fails
+      if !taskCompleted {
+        Logger.error("Task '\(taskName)' did not complete properly, but semaphore was released.")
+      }
     }
     
     taskQueue.addOperation(operation)
