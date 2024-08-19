@@ -172,33 +172,39 @@ import UIKit
   /// Request a permission and subscribe for notifications
   @objc public static func subscribe(fallbackToSettings: Bool = true, completion: ((Bool) -> Void)? = nil) {
     taskManager.addTaskAfterInit(taskName: "subscribe") { completionTask in
+      let completeAll: (Bool) -> Void = { result in
+        completion?(result)
+        completionTask()
+      }
+      
       UNUserNotificationCenter.current().getNotificationSettings { settings in
-        
-        if settings.authorizationStatus == .notDetermined {
+        switch settings.authorizationStatus {
+        case .notDetermined:
           self.requestPermissionForNotifications { granted in
-            completion?(granted)
-            completionTask()
+            completeAll(granted)
           }
-        } else if settings.authorizationStatus == .denied {
+        case .denied:
           if fallbackToSettings {
             DispatchQueue.main.async {
               self.openNotificationSettings()
             }
           }
-          completion?(false)
-          completionTask()
-        } else {
+          completeAll(false)
+        default:
           if Globals.pushTokenInUserDefaults == nil {
             self.requestPermissionForNotifications { granted in
-              completionTask()
+              completeAll(granted)
             }
           } else {
-            self.updateDeviceWithPushToken(completion: completionTask)
+            self.updateDeviceWithPushToken {
+              completeAll(true)
+            }
           }
         }
       }
     }
   }
+  
   
   
   /// Unsubscribe for notifications
