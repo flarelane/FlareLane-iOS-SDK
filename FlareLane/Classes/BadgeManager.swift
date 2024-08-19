@@ -19,8 +19,6 @@ class BadgeManager {
     
     if #available(iOS 16.0, *) {
       UNUserNotificationCenter.current().setBadgeCount(_count)
-    } else {
-      UIApplication.shared.applicationIconBadgeNumber = _count
     }
     
     Globals.badgeCountUserDefaults = _count
