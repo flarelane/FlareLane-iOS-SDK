@@ -9,15 +9,11 @@ let package = Package(
     products: [
         .library(
             name: "FlareLane",
-            targets: ["FlareLaneObjc"]),
+            targets: ["FlareLane"]),
     ],
     targets: [
-        .target(name: "FlareLaneSwift",
-                path: "Sources/FlareLaneSwift"),
-        .target(name: "FlareLaneObjc",
-                dependencies: ["FlareLaneSwift"],
-                path: "Sources/FlareLaneObjc",
-                publicHeadersPath: "Include"),
+        .target(name: "FlareLane",
+                path: "Sources/FlareLaneSwift")
     ],
     swiftLanguageVersions: [.v5]
 )

@@ -80,7 +80,7 @@ SPEC CHECKSUMS:
   FirebaseCoreInternal: bcb5acffd4ea05e12a783ecf835f2210ce3dc6af
   FirebaseInstallations: 8f581fca6478a50705d2bd2abd66d306e0f5736e
   FirebaseMessaging: 4d52717dd820707cc4eadec5eb981b4832ec8d5d
-  FlareLane: 8ffdeb3ba10d4f4047872c950c4b802af3f8d5ea
+  FlareLane: c2a23b8a964aba0473233b30b9d3ab6f4e169bee
   GoogleDataTransport: 6c09b596d841063d76d4288cc2d2f42cc36e1e2a
   GoogleUtilities: d053d902a8edaa9904e1bd00c37535385b8ed152
   nanopb: 438bc412db1928dac798aa6fd75726007be04262
