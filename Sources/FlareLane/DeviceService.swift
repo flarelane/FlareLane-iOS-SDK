@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import FlareLaneUtil
 
 final class DeviceService {
   /// Get system infomation from device

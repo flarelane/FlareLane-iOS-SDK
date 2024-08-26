@@ -7,8 +7,8 @@
 
 import Foundation
 
-final class API {
-  static let shared: API = API()
+final public class API {
+  public static let shared: API = API()
 
   private let request = Request()
 
@@ -16,7 +16,7 @@ final class API {
   /// - Parameters:
   ///   - body: Body params
   ///   - completion: Completion callback
-  func createDevice(body: [String:Any?], completion: @escaping (String?, Error?) -> Void) {
+  public func createDevice(body: [String:Any?], completion: @escaping (String?, Error?) -> Void) {
 
     request.post(path: "/devices", body: body) { (response, error) in
       if (error != nil) {
@@ -34,7 +34,7 @@ final class API {
   /// - Parameters:
   ///   - body: Body params
   ///   - completion: Completion callback
-  func updateDevice(deviceId: String, body: [String:Any?], completion: @escaping ([String:Any?]?, Error?) -> Void) {
+  public func updateDevice(deviceId: String, body: [String:Any?], completion: @escaping ([String:Any?]?, Error?) -> Void) {
 
     request.patch(path: "/devices/\(deviceId)", body: body) { (response, error) in
       if (error != nil) {
@@ -53,7 +53,7 @@ final class API {
   ///   - type: Notification event type
   ///   - notificationId: NotificationId
   ///   - completion: Completion callback
-  func sendEvent(deviceId: String, type: String, notificationId: String, completion: @escaping (Error?) -> Void) {
+  public func sendEvent(deviceId: String, type: String, notificationId: String, completion: @escaping (Error?) -> Void) {
     var body: [String: Any] = [
       "notificationId":notificationId,
       "deviceId": deviceId,
@@ -79,7 +79,7 @@ final class API {
   ///   - subjectId: string
   ///   - type: event type
   ///   - data: event data
-  func trackEvent(deviceId: String, type: String, data: [String: Any]?, completion: @escaping (Error?) -> Void) {
+  public func trackEvent(deviceId: String, type: String, data: [String: Any]?, completion: @escaping (Error?) -> Void) {
     let userId = Globals.userIdInUserDefaults
     
     let subjectType = userId != nil ? "user": "device"
@@ -107,7 +107,7 @@ final class API {
     }
   }
     
-  func getInAppMessages(deviceId: String, group: String, completionHandler: @escaping (Result<[String: Any], Error>) -> Void) {
+  public func getInAppMessages(deviceId: String, group: String, completionHandler: @escaping (Result<[String: Any], Error>) -> Void) {
     request.post(
       path: "/devices/\(deviceId)/in-app-messages",
       body: ["group": group]

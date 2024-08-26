@@ -5,6 +5,7 @@
 //
 
 import WebKit
+import FlareLaneUtil
 
 @available(iOSApplicationExtension, unavailable)
 @objc public class FlareLaneJavascriptInterface: NSObject, WKScriptMessageHandler {

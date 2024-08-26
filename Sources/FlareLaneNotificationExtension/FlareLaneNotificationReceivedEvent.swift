@@ -6,13 +6,14 @@
 //
 
 import UIKit
+import FlareLaneUtil
 
 @objc open class FlareLaneNotificationReceivedEvent: NSObject {
   @objc public var notification: FlareLaneNotification
   private var application: UIApplication
   private var completionHandler: (UNNotificationPresentationOptions) -> Void
   
-  init(_ application: UIApplication, notification: FlareLaneNotification, completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+  public init(_ application: UIApplication, notification: FlareLaneNotification, completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
     self.application = application
     self.notification = notification
     self.completionHandler = completionHandler

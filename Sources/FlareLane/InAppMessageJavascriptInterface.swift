@@ -6,6 +6,8 @@
 //
 
 import WebKit
+import FlareLaneUtil
+import FlareLaneNotificationExtension
 
 @available(iOSApplicationExtension, unavailable)
 protocol InAppMessageJavascriptInterfaceDelegate: AnyObject {

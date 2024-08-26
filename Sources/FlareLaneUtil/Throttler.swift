@@ -7,15 +7,15 @@
 
 import Foundation
 
-class Throttler {
+public class Throttler {
   private var lastActionTime: Date = .distantPast
   private let interval: TimeInterval
   
-  init(interval: TimeInterval) {
+  public init(interval: TimeInterval) {
     self.interval = interval
   }
   
-  func throttle(action: @escaping () -> Void) {
+  public func throttle(action: @escaping () -> Void) {
     let now = Date()
     let distance = now.timeIntervalSince(self.lastActionTime)
     

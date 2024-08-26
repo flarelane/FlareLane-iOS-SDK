@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import FlareLaneNotificationExtension
 
 @available(iOSApplicationExtension, unavailable)
 class ColdStartNotificationManager {

@@ -7,6 +7,7 @@
 
 import UserNotifications
 import MobileCoreServices
+import FlareLaneUtil
 
 @objc public class FlareLaneNotificationServiceExtensionHelper: NSObject {
   @objc public static let shared = FlareLaneNotificationServiceExtensionHelper()

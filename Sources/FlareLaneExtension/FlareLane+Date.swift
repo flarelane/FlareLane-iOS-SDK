@@ -7,7 +7,7 @@
 
 import Foundation
 
-extension Date {
+public extension Date {
   func toString() -> String {
     let dateFormatter = ISO8601DateFormatter()
     dateFormatter.timeZone = TimeZone(abbreviation: "UTC")

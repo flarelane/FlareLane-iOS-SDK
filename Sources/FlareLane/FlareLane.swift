@@ -6,6 +6,8 @@
 //
 
 import UIKit
+import FlareLaneUtil
+import FlareLaneNotificationExtension
 
 @available(iOSApplicationExtension, unavailable)
 @objc open class FlareLane: NSObject {

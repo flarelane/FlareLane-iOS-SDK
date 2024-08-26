@@ -8,10 +8,10 @@
 import Foundation
 import UserNotifications
 
-class BadgeManager {
+public class BadgeManager {
   static private let badgeEnabledKey = "FlareLaneBadgeEnabled"
   
-  static func setCount(_ count: Int) {
+  public static func setCount(_ count: Int) {
     if (isBadgeEnabled == false) {
       return
     }
@@ -25,14 +25,14 @@ class BadgeManager {
     Globals.badgeCountUserDefaults = _count
   }
   
-  static func getCount() -> Int {
+  public static func getCount() -> Int {
     if let count = Globals.badgeCountUserDefaults {
       return count
     }
     return 0
   }
   
-  static var isBadgeEnabled: Bool {
+  public static var isBadgeEnabled: Bool {
     get {
       var bundle: Bundle = Bundle.main
       

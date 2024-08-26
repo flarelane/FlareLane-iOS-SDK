@@ -5,7 +5,7 @@
 //  Created by MinHyeok Kim on 2022/04/12.
 //
 #if !COCOAPODS
-@import FlareLaneSwift;
+@import FlareLaneNotificationExtension;
 #endif
 
 #import "FLNNotificationServiceExtension.h"

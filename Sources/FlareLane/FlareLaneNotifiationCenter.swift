@@ -7,6 +7,8 @@
 
 import UserNotifications
 import SafariServices
+import FlareLaneUtil
+import FlareLaneNotificationExtension
 
 @available(iOSApplicationExtension, unavailable)
 @objc public class FlareLaneNotificationCenter: NSObject, UNUserNotificationCenterDelegate {

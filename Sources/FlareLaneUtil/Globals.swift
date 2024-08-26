@@ -13,17 +13,17 @@ public enum SdkType: String {
   case flutter
 }
 
-final class Globals {
-  static var sdkVersion = "1.7.1"
-  static var sdkType: SdkType = .native
-  static var sdkPlatform = "ios"
+final public class Globals {
+  public static var sdkVersion = "1.7.1"
+  public static var sdkType: SdkType = .native
+  public static var sdkPlatform = "ios"
 
   /// projectId before initialization succeeds
-  static var projectId: String? = nil
+  public static var projectId: String? = nil
 
   /// Save projectId in local storage
   private static var projectIdKey = "flarelane_projectIdKey"
-  static var projectIdInUserDefaults: String? {
+  public static var projectIdInUserDefaults: String? {
     set {
       UserDefaults.standard.set(newValue, forKey: projectIdKey)
     }
@@ -35,7 +35,7 @@ final class Globals {
 
   /// Save deviceId in local storage
   private static var deviceIdKey = "flarelane_deviceIdKey"
-  static var deviceIdInUserDefaults: String? {
+  public static var deviceIdInUserDefaults: String? {
     set {
       UserDefaults.standard.set(newValue, forKey: deviceIdKey)
     }
@@ -47,7 +47,7 @@ final class Globals {
 
   /// Save userId in local storage
   private static var userIdKey = "flarelane_userIdKey"
-  static var userIdInUserDefaults: String? {
+  public static var userIdInUserDefaults: String? {
     set {
       UserDefaults.standard.set(newValue, forKey: userIdKey)
     }
@@ -59,7 +59,7 @@ final class Globals {
 
   /// Save pushToken in local storage
   private static var pushTokenKey = "flarelane_pushTokenKey"
-  static var pushTokenInUserDefaults: String? {
+  public static var pushTokenInUserDefaults: String? {
     set {
       UserDefaults.standard.set(newValue, forKey: pushTokenKey)
     }
@@ -71,7 +71,7 @@ final class Globals {
 
   /// Save isSubscribed in local storage
   private static var isSubscribedKey = "flarelane_isSubscribedKey"
-  static var isSubscribedInUserDefaults: Bool? {
+  public static var isSubscribedInUserDefaults: Bool? {
     set {
       UserDefaults.standard.set(newValue, forKey: isSubscribedKey)
     }
@@ -82,7 +82,7 @@ final class Globals {
   }
 
   private static var badgeCount = "flarelane_badgeCount"
-  static var badgeCountUserDefaults: Int? {
+  public static var badgeCountUserDefaults: Int? {
     set {
       if let userDefaults = shardUserDefaults {
         userDefaults.set(newValue, forKey: badgeCount)
@@ -98,18 +98,18 @@ final class Globals {
     }
   }
 
-  static var shardUserDefaults: UserDefaults? {
+  public static var shardUserDefaults: UserDefaults? {
     get {
       UserDefaults(suiteName: appGroupName)
     }
   }
 
-  static var appGroupName: String {
+  public static var appGroupName: String {
     let appGroupName = "group.\(bundleIdentifier ?? "").flarelane"
     return appGroupName.trimmingCharacters(in: .whitespaces)
   }
 
-  static var bundleIdentifier: String? {
+  public static var bundleIdentifier: String? {
     var bundle = Bundle.main
 
     // If it is an extension, use the value of the parent bundle.
@@ -121,8 +121,8 @@ final class Globals {
   }
 
   /// Current logLevel
-  static var logLevel: LogLevel = .verbose
+  public static var logLevel: LogLevel = .verbose
 
   /// Swizzled or not
-  static var swizzled: Bool = false
+  public static var swizzled: Bool = false
 }

@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import FlareLaneExtension
 
 @objc public enum LogLevel: IntegerLiteralType {
   case none = 0
@@ -18,14 +19,14 @@ enum LogEvent: String {
   case verbose = "[💬]"
 }
 
-final class Logger {
-  static func error( _ object: Any, filename: String = #file, line: Int = #line, column: Int = #column, funcName: String = #function) {
+final public class Logger {
+  static public func error( _ object: Any, filename: String = #file, line: Int = #line, column: Int = #column, funcName: String = #function) {
     if Globals.logLevel.rawValue >= LogLevel.error.rawValue {
       print("\(Date().toString()) [FlareLaneLogger]\(LogEvent.error.rawValue)[\(sourceFileName(filePath: filename))]:\(line) \(column) \(funcName) -> \(object)")
     }
   }
   
-  static func verbose( _ object: Any, filename: String = #file, line: Int = #line, column: Int = #column, funcName: String = #function) {
+  static public func verbose( _ object: Any, filename: String = #file, line: Int = #line, column: Int = #column, funcName: String = #function) {
     if Globals.logLevel.rawValue >= LogLevel.verbose.rawValue {
       print("\(Date().toString()) [FlareLaneLogger]\(LogEvent.verbose.rawValue)[\(sourceFileName(filePath: filename))]:\(line) \(column) \(funcName) -> \(object)")
     }

@@ -7,6 +7,7 @@
 
 import UserNotifications
 import UIKit
+import FlareLaneUtil
 
 @objc open class FlareLaneNotification: NSObject {
   // In case of structure, it is difficult to be compatible with Objective-C
@@ -31,7 +32,7 @@ import UIKit
     return "id:\(id)\nbody:\(body)\ntitle:\(String(describing: title))\nurl:\(String(describing: url))\nimageUrl:\(String(describing: imageUrl))\ndata:\(String(describing: data))"
   }
   
-  static func getFlareLaneNotificationFromUserInfo(userInfo: [AnyHashable: Any]) -> FlareLaneNotification? {
+  public static func getFlareLaneNotificationFromUserInfo(userInfo: [AnyHashable: Any]) -> FlareLaneNotification? {
     
     let isFlareLane = userInfo["isFlareLane"] as? Bool
     if (isFlareLane != true) {
@@ -58,7 +59,7 @@ import UIKit
     return notification
   }
   
-  static func getFlareLaneNotificationFromLaunchOptions (launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> FlareLaneNotification? {
+  public static func getFlareLaneNotificationFromLaunchOptions (launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> FlareLaneNotification? {
     guard let userInfo = launchOptions?[.remoteNotification] as? Dictionary<String, Any>,
           let notification = FlareLaneNotification.getFlareLaneNotificationFromUserInfo(userInfo: userInfo) else {
             return nil

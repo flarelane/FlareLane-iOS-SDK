@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import FlareLaneUtil
 
 class FlareLaneTaskManager {
   static let shared = FlareLaneTaskManager()

@@ -6,11 +6,12 @@
 //
 
 import Foundation
+import FlareLaneUtil
 
-class EventService {
+public class EventService {
   /// Processed when notification is clicked
   /// - Parameter notification: Received notification
-  static func createClicked(notification: FlareLaneNotification) {
+  public static func createClicked(notification: FlareLaneNotification) {
     guard let deviceId = Globals.deviceIdInUserDefaults else {
       Logger.error("deviceId does not set.")
       return
@@ -42,7 +43,7 @@ class EventService {
   
   /// Processed when notification background received
   /// - Parameter notificationId: ID of received notification
-  static func createBackgroundReceived(notificationId: String) {
+  public static func createBackgroundReceived(notificationId: String) {
     guard let deviceId = Globals.deviceIdInUserDefaults else {
       Logger.error("deviceId does not set.")
       return
@@ -66,7 +67,7 @@ class EventService {
   
   /// Processed when notification foreground received
   /// - Parameter notificationId: ID of received notification
-  static func createForegroundReceived(notificationId: String) {
+  public static func createForegroundReceived(notificationId: String) {
     guard let deviceId = Globals.deviceIdInUserDefaults else {
       Logger.error("deviceId does not set.")
       return
@@ -92,7 +93,7 @@ class EventService {
   /// - Parameters:
   ///   - type: event type
   ///   - data: event data
-  static func trackEvent(type: String, data: [String: Any]?) {
+  public static func trackEvent(type: String, data: [String: Any]?) {
     guard let deviceId = Globals.deviceIdInUserDefaults else {
       return
     }
