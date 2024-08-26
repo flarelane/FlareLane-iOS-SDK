@@ -10,6 +10,9 @@ let package = Package(
         .library(
             name: "FlareLane",
             targets: ["FlareLane"]),
+        .library(
+            name: "FlareLaneExtension",
+            targets: ["FlareLane"])
     ],
     targets: [
         .target(name: "FlareLane",
