@@ -18,7 +18,7 @@ Pod::Spec.new do |s|
 
   s.ios.deployment_target = '12.0'
 
-  s.source_files = 'FlareLane/Classes/**/*'
+  s.source_files = 'Sources/**/*'
 
   # by default
   s.swift_versions = '5.0'
