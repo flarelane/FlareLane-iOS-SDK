@@ -208,12 +208,17 @@ import UIKit
   
   /// Unsubscribe for notifications
   @objc public static func unsubscribe(completion: ((Bool) -> Void)? = nil) {
-    taskManager.addTaskAfterInit(taskName: "unsubscribe") { completionTask in
-      DeviceService.update(body: ["isSubscribed": false]) { device in
-        DispatchQueue.main.async {
-          completion?(device.isSubscribed)
+    FlareLane.hasPermissionForNotifications { hasPermission in
+      taskManager.addTaskAfterInit(taskName: "unsubscribe") { completionTask in
+        DeviceService.update(body: [
+          "isSubscribed": false,
+          "notificationPermission": hasPermission
+        ]) { device in
+          DispatchQueue.main.async {
+            completion?(device.isSubscribed)
+          }
+          completionTask()
         }
-        completionTask()
       }
     }
   }
@@ -241,14 +246,20 @@ import UIKit
   // MARK: Private Methods
   
   private static func updateDeviceWithPushToken(completion: @escaping () -> Void) {
-    if let pushToken = Globals.pushTokenInUserDefaults {
-      DeviceService.update(body: ["isSubscribed": true, "pushToken": pushToken]) { device in
-        DispatchQueue.main.async {
-          completion()
+    FlareLane.hasPermissionForNotifications { hasPermission in
+      if let pushToken = Globals.pushTokenInUserDefaults {
+        DeviceService.update(body: [
+          "isSubscribed": true,
+          "pushToken": pushToken,
+          "notificationPermission": hasPermission
+        ]) { device in
+          DispatchQueue.main.async {
+            completion()
+          }
         }
+      } else {
+        completion()
       }
-    } else {
-      completion()
     }
   }
   
