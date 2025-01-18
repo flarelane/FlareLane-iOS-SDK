@@ -55,19 +55,22 @@ final class DeviceService {
   ///   - deviceId: FlareLane deviceId
   static func activate(deviceId: String, completion: @escaping (() -> Void) = {}) {
     Logger.verbose("Start update device request.")
+    
+    FlareLane.hasPermissionForNotifications { hasPermission in
+      var body = self.getSystemInfo()
+      // Save recent activations of the device
+      body["lastActiveAt"] = Date().toString()
+      body["notificationPermission"] = hasPermission
 
-    var body = self.getSystemInfo()
-    // Save recent activations of the device
-    body["lastActiveAt"] = Date().toString()
+      API.shared.updateDevice(deviceId: deviceId, body: body) { (device, error) in
+        if error != nil {
+          Logger.error("Failed update device request.")
+          return
+        }
 
-    API.shared.updateDevice(deviceId: deviceId, body: body) { (device, error) in
-      if error != nil {
-        Logger.error("Failed update device request.")
-        return
+        Logger.verbose("Succeed update device request.")
+        completion()
       }
-
-      Logger.verbose("Succeed update device request.")
-      completion()
     }
   }
 
