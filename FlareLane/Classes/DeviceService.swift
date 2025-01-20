@@ -7,6 +7,7 @@
 
 import Foundation
 
+@available(iOSApplicationExtension, unavailable)
 final class DeviceService {
   /// Get system infomation from device
   static func getSystemInfo() -> [String: Any?] {
