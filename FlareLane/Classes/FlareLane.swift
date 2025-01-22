@@ -214,8 +214,10 @@ import UIKit
           "isSubscribed": false,
           "notificationPermission": hasPermission
         ]) { device in
+          let isSubscribed = (device?.isSubscribed ?? Globals.isSubscribedInUserDefaults) ?? false
+          
           DispatchQueue.main.async {
-            completion?(device.isSubscribed)
+            completion?(isSubscribed)
           }
           completionTask()
         }
