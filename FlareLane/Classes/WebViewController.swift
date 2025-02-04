@@ -5,7 +5,7 @@
 //  Copyright © 2024 FlareLabs. All rights reserved.
 //
 
-import WebKit
+@preconcurrency import WebKit
 
 @available(iOSApplicationExtension, unavailable)
 final class WebViewController: UIViewController, WKNavigationDelegate {
