@@ -14,11 +14,17 @@ final class DeviceService {
     // Select the preferred language to avoid errors when the device language and languageCode are different
     let languageCode = Locale.preferredLanguages.count > 0 ? Locale(identifier: Locale.preferredLanguages.first!).languageCode : nil
     
+    
+    let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
+    let semVerRegex = #"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$"#
+    let validVersion = appVersion?.range(of: semVerRegex, options: .regularExpression) != nil ? appVersion : nil
+
     return [
       "platform": Globals.sdkPlatform,
       "deviceModel":  UIDevice.modelName,
       "osVersion":  UIDevice.current.systemVersion,
       "sdkVersion": Globals.sdkVersion,
+      "appVersion": validVersion,
       "languageCode": languageCode,
       "countryCode": Locale.current.regionCode,
       "timeZone": TimeZone.current.identifier,
