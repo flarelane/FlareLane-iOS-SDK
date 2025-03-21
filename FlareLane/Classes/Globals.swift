@@ -14,115 +14,107 @@ public enum SdkType: String {
 }
 
 final class Globals {
-  static var sdkVersion = "1.7.3"
+  static var sdkVersion = "1.7.4"
   static var sdkType: SdkType = .native
   static var sdkPlatform = "ios"
-
-  /// projectId before initialization succeeds
-  static var projectId: String? = nil
-
-  /// Save projectId in local storage
-  private static var projectIdKey = "flarelane_projectIdKey"
+  
+  /// App Group Suite Name
+  private static var appGroupSuiteName: String {
+    "group.\(bundleIdentifier ?? "").flarelane".trimmingCharacters(in: .whitespaces)
+  }
+  
+  /// Shared UserDefaults instance for App Group
+  private static var sharedUserDefaults: UserDefaults? {
+    UserDefaults(suiteName: appGroupSuiteName)
+  }
+  
+  /// Standard UserDefaults fallback
+  private static var standardDefaults: UserDefaults {
+    UserDefaults.standard
+  }
+  
+  // MARK: - Keys
+  private enum DefaultsKey: String {
+    case projectId = "flarelane_projectIdKey"
+    case deviceId = "flarelane_deviceIdKey"
+    case userId = "flarelane_userIdKey"
+    case pushToken = "flarelane_pushTokenKey"
+    case isSubscribed = "flarelane_isSubscribedKey"
+    case badgeCount = "flarelane_badgeCount"
+  }
+  
+  /// Generalized Dual Storage Getter
+  private static func getValue<T>(forKey key: DefaultsKey) -> T? {
+    let sharedValue = sharedUserDefaults?.object(forKey: key.rawValue) as? T
+    let standardValue = standardDefaults.object(forKey: key.rawValue) as? T
+    
+    if sharedValue == nil, let standardValue = standardValue {
+      sharedUserDefaults?.set(standardValue, forKey: key.rawValue)
+      return standardValue
+    }
+    
+    if standardValue == nil, let sharedValue = sharedValue {
+      standardDefaults.set(sharedValue, forKey: key.rawValue)
+    }
+    
+    return sharedValue ?? standardValue
+  }
+  
+  /// Generalized Dual Storage Setter
+  private static func setValue<T>(_ value: T?, forKey key: DefaultsKey) {
+    sharedUserDefaults?.set(value, forKey: key.rawValue)
+    standardDefaults.set(value, forKey: key.rawValue)
+  }
+  
+  /// projectId
   static var projectIdInUserDefaults: String? {
-    set {
-      UserDefaults.standard.set(newValue, forKey: projectIdKey)
-    }
-
-    get {
-      UserDefaults.standard.string(forKey: projectIdKey)
-    }
+    get { getValue(forKey: .projectId) }
+    set { setValue(newValue, forKey: .projectId) }
   }
-
-  /// Save deviceId in local storage
-  private static var deviceIdKey = "flarelane_deviceIdKey"
+  
+  /// deviceId
   static var deviceIdInUserDefaults: String? {
-    set {
-      UserDefaults.standard.set(newValue, forKey: deviceIdKey)
-    }
-
-    get {
-      UserDefaults.standard.string(forKey: deviceIdKey)
-    }
+    get { getValue(forKey: .deviceId) }
+    set { setValue(newValue, forKey: .deviceId) }
   }
-
-  /// Save userId in local storage
-  private static var userIdKey = "flarelane_userIdKey"
+  
+  /// userId
   static var userIdInUserDefaults: String? {
-    set {
-      UserDefaults.standard.set(newValue, forKey: userIdKey)
-    }
-
-    get {
-      UserDefaults.standard.string(forKey: userIdKey)
-    }
+    get { getValue(forKey: .userId) }
+    set { setValue(newValue, forKey: .userId) }
   }
-
-  /// Save pushToken in local storage
-  private static var pushTokenKey = "flarelane_pushTokenKey"
+  
+  /// pushToken
   static var pushTokenInUserDefaults: String? {
-    set {
-      UserDefaults.standard.set(newValue, forKey: pushTokenKey)
-    }
-
-    get {
-      UserDefaults.standard.string(forKey: pushTokenKey)
-    }
+    get { getValue(forKey: .pushToken) }
+    set { setValue(newValue, forKey: .pushToken) }
   }
-
-  /// Save isSubscribed in local storage
-  private static var isSubscribedKey = "flarelane_isSubscribedKey"
+  
+  /// isSubscribed
   static var isSubscribedInUserDefaults: Bool? {
-    set {
-      UserDefaults.standard.set(newValue, forKey: isSubscribedKey)
-    }
-
-    get {
-      UserDefaults.standard.bool(forKey: isSubscribedKey)
-    }
+    get { getValue(forKey: .isSubscribed) }
+    set { setValue(newValue, forKey: .isSubscribed) }
   }
-
-  private static var badgeCount = "flarelane_badgeCount"
+  
+  /// badgeCount
   static var badgeCountUserDefaults: Int? {
-    set {
-      if let userDefaults = shardUserDefaults {
-        userDefaults.set(newValue, forKey: badgeCount)
-      }
-    }
-
-    get {
-      if let userDefaults = shardUserDefaults {
-        return userDefaults.integer(forKey: badgeCount)
-      } else {
-        return nil
-      }
-    }
+    get { getValue(forKey: .badgeCount) }
+    set { setValue(newValue, forKey: .badgeCount) }
   }
-
-  static var shardUserDefaults: UserDefaults? {
-    get {
-      UserDefaults(suiteName: appGroupName)
-    }
-  }
-
-  static var appGroupName: String {
-    let appGroupName = "group.\(bundleIdentifier ?? "").flarelane"
-    return appGroupName.trimmingCharacters(in: .whitespaces)
-  }
-
+  
   static var bundleIdentifier: String? {
     var bundle = Bundle.main
-
-    // If it is an extension, use the value of the parent bundle.
+    
     if bundle.bundleURL.pathExtension == "appex" {
       bundle = Bundle(url: bundle.bundleURL.deletingLastPathComponent().deletingLastPathComponent())!
     }
-
+    
     return bundle.bundleIdentifier
   }
-
+  
   /// Current logLevel
   static var logLevel: LogLevel = .verbose
-
+  
   /// Swizzled or not
   static var swizzled: Bool = false
 }

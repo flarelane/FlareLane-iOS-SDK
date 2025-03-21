@@ -22,10 +22,11 @@ import Foundation
     Logger.verbose("notification received: \(self.notification)")
     completionHandler([.alert, .sound])
     
-    if application.applicationState == .active {
-      EventService.createForegroundReceived(notificationId: self.notification.id)
-    } else {
-      // TODO: Needs EventService.createBackgroundReceived
-    }
+//  Invoke Received Event in extension
+//    if application.applicationState == .active {
+//      EventService.createForegroundReceived(notificationId: self.notification.id)
+//    } else {
+//      // TODO: Needs EventService.createBackgroundReceived
+//    }
   }
 }

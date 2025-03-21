@@ -21,35 +21,40 @@ import MobileCoreServices
     bestAttemptContent = (request.content.mutableCopy() as? UNMutableNotificationContent)
     
     if let badgeCount = bestAttemptContent?.badge as? Int {
-        BadgeManager.setCount(badgeCount)
+      BadgeManager.setCount(badgeCount)
     } else {
-        BadgeManager.setCount(BadgeManager.getCount() + 1)
+      BadgeManager.setCount(BadgeManager.getCount() + 1)
     }
     
-    if let bestAttemptContent = bestAttemptContent {
-      guard let flarelaneNotification = FlareLaneNotification.getFlareLaneNotificationFromUNNotificationContent(request.content),
-            let imageUrl = flarelaneNotification.imageUrl,
-            let attachmentUrl = URL(string: imageUrl) else {
-        contentHandler(bestAttemptContent)
-        return
-      }
-      
-      let task = URLSession.shared.downloadTask(with: attachmentUrl) { (downloadedUrl, response, error) in
-        if let _ = error {
-          contentHandler(bestAttemptContent)
-          return
-        }
-        
-        if let downloadedUrl = downloadedUrl, let attachment = try? UNNotificationAttachment(identifier: "flarelane_notification_attachment", url: downloadedUrl, options: [UNNotificationAttachmentOptionsTypeHintKey: kUTTypePNG]) {
-          bestAttemptContent.attachments = [attachment]
-        }
-        
-        contentHandler(bestAttemptContent)
-      }
-      
-      task.resume()
+    guard let bestAttemptContent = bestAttemptContent,
+          let flarelaneNotification = FlareLaneNotification.getFlareLaneNotificationFromUNNotificationContent(request.content) else {
+      contentHandler(self.bestAttemptContent ?? request.content)
+      return
     }
+    
+    // Only Background. Cannot split background~foreground in extension.
+    EventService.createBackgroundReceived(notificationId: flarelaneNotification.id)
+    
+    guard let imageUrl = flarelaneNotification.imageUrl,
+          let attachmentUrl = URL(string: imageUrl) else {
+      contentHandler(bestAttemptContent)
+      return
+    }
+    
+    let task = URLSession.shared.downloadTask(with: attachmentUrl) { downloadedUrl, response, error in
+      defer { contentHandler(bestAttemptContent) }
+      
+      if let downloadedUrl = downloadedUrl,
+         let attachment = try? UNNotificationAttachment(identifier: "flarelane_notification_attachment",
+                                                        url: downloadedUrl,
+                                                        options: [UNNotificationAttachmentOptionsTypeHintKey: kUTTypePNG]) {
+        bestAttemptContent.attachments = [attachment]
+      }
+    }
+    
+    task.resume()
   }
+  
   
   @objc public func serviceExtensionTimeWillExpire() {
     Logger.verbose("INVOKED")
