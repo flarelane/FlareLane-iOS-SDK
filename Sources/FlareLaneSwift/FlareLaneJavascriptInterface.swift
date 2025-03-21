@@ -8,7 +8,7 @@ import WebKit
 
 @available(iOSApplicationExtension, unavailable)
 @objc public class FlareLaneJavascriptInterface: NSObject, WKScriptMessageHandler {
-    @objc private var webView: WKWebView?
+    @objc private weak var webView: WKWebView?
     @objc public static let BRIDGE_NAME = "FlareLaneBridge"
   
     public init(_ webView: WKWebView) {
