@@ -5,7 +5,7 @@
 //  Copyright © 2024 FlareLabs. All rights reserved.
 //
 
-import UIKit
+import Foundation
 
 @available(iOSApplicationExtension, unavailable)
 final class InAppMessageService {

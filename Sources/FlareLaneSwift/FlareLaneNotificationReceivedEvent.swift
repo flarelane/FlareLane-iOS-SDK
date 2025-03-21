@@ -5,7 +5,7 @@
 //  Created by MinHyeok Kim on 12/18/23.
 //
 
-import UIKit
+import Foundation
 
 @objc open class FlareLaneNotificationReceivedEvent: NSObject {
   @objc public var notification: FlareLaneNotification
