@@ -49,7 +49,7 @@ import UIKit
     }
     
     // Set projectId before device is registered
-    Globals.projectId = projectId
+    Globals.projectIdInUserDefaults = projectId
     
     
     ColdStartNotificationManager.setColdStartNotification(launchOptions: launchOptions)

@@ -23,7 +23,7 @@ import SafariServices
     }
 
     if let notification = FlareLaneNotification.getFlareLaneNotificationFromUNNotificationContent(response.notification.request.content) {
-      if Globals.projectId == nil {
+      if Globals.projectIdInUserDefaults == nil {
         Logger.verbose("projectId is nil. Too early clicked? process later when cold start.")
         ColdStartNotificationManager.coldStartNotification = notification
       } else if (ColdStartNotificationManager.coldStartNotification?.id == notification.id) {
