@@ -5,12 +5,12 @@
 //  Copyright © 2021 FlareLabs. All rights reserved.
 //
 
-import Foundation
+import UIKit
 
 @available(iOSApplicationExtension, unavailable)
 class ColdStartNotificationManager {
   static var coldStartNotification: FlareLaneNotification?
-  
+
   /// Set coldStartNotification in launchOptions
   /// - Parameter launchOptions: AppDelegate didFinishLaunchingWithOptions
   static func setColdStartNotification(launchOptions: [UIApplication.LaunchOptionsKey: Any]?) {
@@ -18,13 +18,13 @@ class ColdStartNotificationManager {
       self.coldStartNotification = flarelaneNotification
     }
   }
-  
+
   /// Check and execute coldStartNotification
   static func process() {
     guard let notification = coldStartNotification else {
       return
     }
-    
+
     if (UIApplication.shared.applicationState == .background) {
       // When called in the background, the app is not turned on
       // Set coldStartNotification to null to be clicked in notificationCenter
