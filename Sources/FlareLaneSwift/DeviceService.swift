@@ -5,7 +5,7 @@
 //  Copyright © 2021 FlareLabs. All rights reserved.
 //
 
-import Foundation
+import UIKit
 
 @available(iOSApplicationExtension, unavailable)
 final class DeviceService {
@@ -13,8 +13,8 @@ final class DeviceService {
   static func getSystemInfo() -> [String: Any?] {
     // Select the preferred language to avoid errors when the device language and languageCode are different
     let languageCode = Locale.preferredLanguages.count > 0 ? Locale(identifier: Locale.preferredLanguages.first!).languageCode : nil
-    
-    
+
+
     let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
     let semVerRegex = #"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$"#
     let validVersion = appVersion?.range(of: semVerRegex, options: .regularExpression) != nil ? appVersion : nil
@@ -33,16 +33,16 @@ final class DeviceService {
       "sdkType": Globals.sdkType.rawValue
     ]
   }
-  
+
   /// Register device information to FlareLane
   /// - Parameters:
   ///   - projectId: FlareLane projectId
   ///   - pushToken: PushToken from Swizzled delegate
   static func register(projectId: String, completion: @escaping (() -> Void) = {}) {
     Logger.verbose("Start create device request.")
-    
+
     let body = self.getSystemInfo()
-    
+
     API.shared.createDevice(body: body) { (deviceId, error) in
       if let error = error {
         Logger.error("Failed create device request. error: \(error.localizedDescription)")
@@ -53,36 +53,36 @@ final class DeviceService {
       } else {
         Logger.error("createDevice returned no error but deviceId is nil.")
       }
-      
+
       completion()
     }
   }
-  
-  
+
+
   /// Update device information to the latest
   /// - Parameters:
   ///   - deviceId: FlareLane deviceId
   static func activate(deviceId: String, completion: @escaping (() -> Void) = {}) {
     Logger.verbose("Start update device request.")
-    
+
     FlareLane.hasPermissionForNotifications { hasPermission in
       var body = self.getSystemInfo()
       // Save recent activations of the device
       body["lastActiveAt"] = Date().toString()
       body["notificationPermission"] = hasPermission
-      
+
       API.shared.updateDevice(deviceId: deviceId, body: body) { (device, error) in
         if let error = error {
           Logger.error("Failed update device request. error: \(error.localizedDescription)")
         } else {
           Logger.verbose("Succeed update device request.")
         }
-        
+
         completion()
       }
     }
   }
-  
+
   /// Update device data such as key and value pair (e.g. tags, userId ...)
   /// - Parameters:
   ///   - deviceId: FlareLane deviceId
@@ -95,28 +95,28 @@ final class DeviceService {
       completion?(nil)
       return
     }
-    
+
     API.shared.updateDevice(deviceId: deviceId, body: body) { response, error in
       var device: FlareLaneDevice? = nil
-      
+
       if let error = error {
         Logger.error("Failed update request. - \(body), error: \(error)")
       } else if
         let response = response,
         let id = response["id"] as? String,
         let isSubscribed = response["isSubscribed"] as? Bool {
-        
+
         device = FlareLaneDevice(id: id, isSubscribed: isSubscribed)
         self.saveData(body: response)
         Logger.verbose("Succeed update request. - \(body)")
       } else {
         Logger.error("Unexpected response or missing data. - \(body)")
       }
-      
+
       completion?(device)
     }
   }
-  
+
   // Save data to the local storage.
   private static func saveData(body: [String: Any?]?) {
     if let userIdValue = body?["userId"] {
@@ -126,7 +126,7 @@ final class DeviceService {
         Globals.userIdInUserDefaults = nil
       }
     }
-    
+
     if let isSubscribedValue = body?["isSubscribed"] {
       if let valid = isSubscribedValue as? Bool  {
         Globals.isSubscribedInUserDefaults = valid

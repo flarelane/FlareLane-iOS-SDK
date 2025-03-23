@@ -5,31 +5,31 @@
 //  Copyright © 2024 FlareLabs. All rights reserved.
 //
 
-import Foundation
+import UIKit
 
 @available(iOSApplicationExtension, unavailable)
 final class InAppMessageService {
-  
+
   static let shared = InAppMessageService()
-  
+
   var window: UIWindow?
   var viewController: InAppMessageViewController?
-  
+
   private var isDisplaying: Bool = false
-  
+
   private init() {}
-  
+
   func showInAppMessageIfNeeded(group: String) {
     guard let deviceId = Globals.deviceIdInUserDefaults else {
       Logger.error("deviceId does not set.")
       return
     }
-    
+
     if isDisplaying {
       Logger.verbose("InAppMessage is already displaying")
       return
     }
-    
+
     API.shared.getInAppMessages(deviceId: deviceId, group: group) { result in
       switch result {
       case let .success(data):
@@ -39,24 +39,24 @@ final class InAppMessageService {
       }
     }
   }
-  
+
   private func processInAppMessages(data: [String: Any]) {
     guard let inAppMessagesData = data["data"] as? [[String: Any]],
           let firstData = inAppMessagesData.first else {
       Logger.verbose("There is no displayable IAM")
       return
     }
-    
+
     guard let messageId = firstData["id"] as? String,
           let htmlString = firstData["htmlString"] as? String else {
       Logger.error("Failed to process in app message: invalid data (\(firstData))")
       return
     }
-    
+
     let message = FlareLaneInAppMessage(id: messageId, htmlString: htmlString)
     self.show(message: message)
   }
-  
+
   private func show(message: FlareLaneInAppMessage) {
     DispatchQueue.main.async {
       let viewController = InAppMessageViewController(message: message)
@@ -66,7 +66,7 @@ final class InAppMessageService {
       self.isDisplaying = true
     }
   }
-  
+
   func dismissInAppMessage() {
     DispatchQueue.main.async {
       self.window?.isHidden = true
@@ -82,19 +82,19 @@ final class InAppMessageService {
 
 @available(iOSApplicationExtension, unavailable)
 extension InAppMessageService: InAppMessageViewControllerDelegate {
-  
+
   func messageViewControllerDidFinishLoading(_ message: FlareLaneInAppMessage) {
-    
+
     guard let viewController = self.viewController else { return }
-    
+
     if self.window == nil {
       self.window = createAndConfigureWindow()
     }
-    
+
     guard let window else { return }
-    
+
     window.rootViewController = viewController
-    
+
     if #available(iOS 15.0, *) {
       UIView.animate(withDuration: 0.25) {
         window.isHidden = false
@@ -102,9 +102,9 @@ extension InAppMessageService: InAppMessageViewControllerDelegate {
     } else {
       window.isHidden = false
     }
-    
+
   }
-  
+
   private func createAndConfigureWindow() -> UIWindow {
       let window = UIWindow(frame: UIScreen.main.bounds)
       window.windowLevel = .alert
@@ -120,5 +120,5 @@ extension InAppMessageService: InAppMessageViewControllerDelegate {
 
       return window
   }
-  
+
 }
