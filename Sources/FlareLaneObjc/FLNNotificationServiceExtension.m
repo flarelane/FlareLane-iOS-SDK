@@ -4,12 +4,19 @@
 //
 //  Created by MinHyeok Kim on 2022/04/12.
 //
+#if !COCOAPODS
+@import FlareLaneSwift;
+#endif
 
 #import "FLNNotificationServiceExtension.h"
 #if __has_include("FlareLane-Swift.h")
 #import "FlareLane-Swift.h"
 #else
-#import <FlareLane/FlareLane-Swift.h>
+  #if !COCOAPODS
+  #import "Include/FlareLane.h"
+  #else
+  #import "FlareLane/FlareLane-Swift.h"
+  #endif
 #endif
 
 @implementation FLNNotificationServiceExtension
