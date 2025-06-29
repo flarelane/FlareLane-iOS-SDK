@@ -14,7 +14,7 @@ public enum SdkType: String {
 }
 
 final class Globals {
-  static var sdkVersion = "1.7.4"
+  static var sdkVersion = "1.9.0"
   static var sdkType: SdkType = .native
   static var sdkPlatform = "ios"
   
@@ -114,7 +114,4 @@ final class Globals {
   
   /// Current logLevel
   static var logLevel: LogLevel = .verbose
-  
-  /// Swizzled or not
-  static var swizzled: Bool = false
 }

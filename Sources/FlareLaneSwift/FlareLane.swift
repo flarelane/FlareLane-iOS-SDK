@@ -10,7 +10,6 @@ import UIKit
 @available(iOSApplicationExtension, unavailable)
 @objc open class FlareLane: NSObject {
   static private var appDelegate = FlareLaneAppDelegate()
-  static private let swizzlingEnabledKey = "FlareLaneSwizzlingEnabled"
   static private let inAppMessageThrottler = Throttler(interval: 5)
   static private let taskManager = FlareLaneTaskManager.shared
   
@@ -53,13 +52,6 @@ import UIKit
     
     
     ColdStartNotificationManager.setColdStartNotification(launchOptions: launchOptions)
-    
-    let swizzlingEnabled = Bundle.main.object(forInfoDictionaryKey: swizzlingEnabledKey) as? Bool
-    Logger.verbose("FlareLaneSwizzlingEnabled: \(String(describing: swizzlingEnabled))")
-    if swizzlingEnabled != false {
-      UNUserNotificationCenter.current().delegate = FlareLaneNotificationCenter.shared
-      appDelegate.swizzle()
-    }
     
     if (BadgeManager.isBadgeEnabled == true) {
       BadgeManager.setCount(0)
