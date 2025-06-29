@@ -37,7 +37,7 @@ final class DeviceService {
   /// Register device information to FlareLane
   /// - Parameters:
   ///   - projectId: FlareLane projectId
-  ///   - pushToken: PushToken from Swizzled delegate
+  ///   - pushToken: PushToken from delegate
   static func register(projectId: String, completion: @escaping (() -> Void) = {}) {
     Logger.verbose("Start create device request.")
 
