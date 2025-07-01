@@ -19,7 +19,7 @@ final class InAppMessageService {
 
   private init() {}
 
-  func showInAppMessageIfNeeded(group: String) {
+  func showInAppMessageIfNeeded(group: String, data: [String: Any]?) {
     guard let deviceId = Globals.deviceIdInUserDefaults else {
       Logger.error("deviceId does not set.")
       return
@@ -30,7 +30,7 @@ final class InAppMessageService {
       return
     }
 
-    API.shared.getInAppMessages(deviceId: deviceId, group: group) { result in
+    API.shared.getInAppMessages(deviceId: deviceId, group: group, data: data) { result in
       switch result {
       case let .success(data):
         self.processInAppMessages(data: data)
