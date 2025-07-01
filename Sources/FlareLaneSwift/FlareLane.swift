@@ -228,10 +228,10 @@ import UIKit
     }
   }
   
-  @objc public static func displayInApp(group: String) {
+  @objc public static func displayInApp(group: String, data: [String: Any]? = nil) {
     taskManager.addTaskAfterInit(taskName: "displayInApp") { completionTask in
       inAppMessageThrottler.throttle {
-        InAppMessageService.shared.showInAppMessageIfNeeded(group: group)
+        InAppMessageService.shared.showInAppMessageIfNeeded(group: group, data: data)
       }
       completionTask()
     }

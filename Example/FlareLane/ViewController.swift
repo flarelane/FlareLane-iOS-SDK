@@ -14,7 +14,7 @@ class ViewController: UIViewController {
   
   override func viewDidAppear(_ animated: Bool) {
     super.viewDidAppear(animated)
-    FlareLane.displayInApp(group: "home")
+    FlareLane.displayInApp(group: "home", data: ["data1": "d1", "data2": 2, "data3": nil])
   }
 
   @IBAction func ToggleUserID(_ sender: Any) {
@@ -57,7 +57,7 @@ class ViewController: UIViewController {
   }
   
   @IBAction func displayInApp(_ sender: Any) {
-    FlareLane.displayInApp(group: "home")
+    FlareLane.displayInApp(group: "home", data: ["data1": "d1", "data2": 2, "data3": nil])
   }
 
   override func didReceiveMemoryWarning() {

@@ -107,10 +107,10 @@ final class API {
     }
   }
     
-  func getInAppMessages(deviceId: String, group: String, completionHandler: @escaping (Result<[String: Any], Error>) -> Void) {
+  func getInAppMessages(deviceId: String, group: String, data: [String: Any]?, completionHandler: @escaping (Result<[String: Any], Error>) -> Void) {
     request.post(
       path: "/devices/\(deviceId)/in-app-messages",
-      body: ["group": group]
+      body: ["group": group, "data": data]
     ) { result, error in
       if let error {
         completionHandler(.failure(error))
