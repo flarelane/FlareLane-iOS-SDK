@@ -41,5 +41,16 @@
 		<string>UIInterfaceOrientationPortrait</string>
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 	</array>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.flarelane.example</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>flarelane-example</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>
