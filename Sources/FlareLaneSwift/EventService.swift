@@ -8,27 +8,9 @@
 import Foundation
 
 class EventService {
-  // Track processed notification IDs to prevent duplicate clicks across different execution paths
-  // This prevents issues in React Native where didReceive may be called before process()
-  private static var processedNotificationIds: Set<String> = []
-  
-  /// Processed when notification is clicked
+  /// Processed when notification is clicked (sends clicked event only)
   /// - Parameter notification: Received notification
   static func createClicked(notification: FlareLaneNotification) {
-    // Check for duplicate prevention
-    if processedNotificationIds.contains(notification.id) {
-      Logger.verbose("Duplicate notification click prevented: \(notification.id)")
-      return
-    }
-    
-    // Mark as processed
-    processedNotificationIds.insert(notification.id)
-    
-    // Clean up old entries to prevent memory leaks (keep only last 1000 entries)
-    if processedNotificationIds.count > 1000 {
-      processedNotificationIds.removeAll()
-    }
-    
     guard let deviceId = Globals.deviceIdInUserDefaults else {
       Logger.error("deviceId does not set.")
       return
@@ -46,16 +28,6 @@ class EventService {
       
       Logger.verbose("Succeed send event request.")
     }
-    
-    guard let clickedHandler = EventHandlers.notificationClicked else {
-      Logger.verbose("unhandledNotification saved")
-      // If notificationClicked handler is nil, the last notification is saved and executed when the handler is registered.
-      EventHandlers.unhandledNotification = notification
-      return
-    }
-    
-    Logger.verbose("clickedHandler found, execute handler")
-    clickedHandler(notification)
   }
   
   /// Processed when notification background received
@@ -125,9 +97,7 @@ class EventService {
     }
   }
   
-  /// Clear processed notification tracking cache (useful for testing)
-  static func clearProcessedNotifications() {
-    processedNotificationIds.removeAll()
-    Logger.verbose("Notification tracking cache cleared")
-  }
+
+  
+
 }

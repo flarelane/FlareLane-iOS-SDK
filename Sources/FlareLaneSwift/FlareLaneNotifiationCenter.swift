@@ -31,24 +31,8 @@ import SafariServices
         Logger.verbose("ColdStartNotification is exists. skip didReceive")
       } else {
         Logger.verbose("Clicked user notification.")
-        EventService.createClicked(notification: notification)
+        NotificationClickProcessor.shared.processNotificationClick(notification: notification)
       }
-
-      if let infoDictionary = Bundle.main.infoDictionary,
-         let flarelane_dismiss_launch_url = infoDictionary["flarelane_dismiss_launch_url"] as? Bool, flarelane_dismiss_launch_url == true {
-        Logger.verbose("launch url dismissed cause flarelane_dismiss_launch_url in Info.plist is YES.")
-        return
-      }
-
-      if let flarelane_dismiss_launch_url = notification.data?["flarelane_dismiss_launch_url"] as? String, flarelane_dismiss_launch_url == "true" {
-        Logger.verbose("launch url dismissed cause flarelane_dismiss_launch_url is true.")
-        return
-      }
-
-      if let urlString = notification.url, let url = URL(string: urlString) {
-        handleReceivedURL(url: url)
-      }
-
     }
   }
 
@@ -76,8 +60,10 @@ import SafariServices
     }
   }
   
-  func handleReceivedURL(url: URL) {
+  @objc public func handleReceivedURL(url: URL) {
     let scheme = url.scheme
+    Logger.verbose("Handling received URL: \(url.absoluteString)")
+    
     switch scheme {
     case "http", "https":
       // presentWebView(url: url)
@@ -142,6 +128,17 @@ import SafariServices
   }
 
   private func presentApplication(url: URL) {
-    UIApplication.shared.open(url, options: [:])
+    Logger.verbose("Opening URL with UIApplication: \(url.absoluteString)")
+    
+    // Add delay for cold start to ensure app is fully initialized
+    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+      UIApplication.shared.open(url, options: [:]) { success in
+        if success {
+          Logger.verbose("Successfully opened URL: \(url.absoluteString)")
+        } else {
+          Logger.verbose("Failed to open URL: \(url.absoluteString)")
+        }
+      }
+    }
   }
 }

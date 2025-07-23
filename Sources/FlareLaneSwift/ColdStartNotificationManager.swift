@@ -31,7 +31,7 @@ class ColdStartNotificationManager {
       self.coldStartNotification = nil
     } else {
       // If it is not in the background state, process clicked and keep coldStartNotification to avoid duplicate processing in notificationCenter
-      EventService.createClicked(notification: notification)
+      NotificationClickProcessor.shared.processNotificationClick(notification: notification)
     }
   }
 }
