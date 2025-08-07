@@ -14,6 +14,7 @@
 		04863E192C4C049300C9009D /* WebViewBridgeController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04863E182C4C049300C9009D /* WebViewBridgeController.swift */; };
 		04938C102803D3AD00CED062 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04938C0F2803D3AD00CED062 /* NotificationService.swift */; };
 		04938C142803D3AD00CED062 /* FlareLaneNotificationServiceExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 04938C0D2803D3AD00CED062 /* FlareLaneNotificationServiceExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		04DE9B6A2E3088C9000FD39D /* DeepLinkViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04DE9B692E3088C9000FD39D /* DeepLinkViewController.swift */; };
 		1D56987808B3E53EB9560115 /* Pods_FlareLane_Tests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 83B662CB5E220FDBE962EF6D /* Pods_FlareLane_Tests.framework */; };
 		607FACD61AFB9204008FA782 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACD51AFB9204008FA782 /* AppDelegate.swift */; };
 		607FACD81AFB9204008FA782 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACD71AFB9204008FA782 /* ViewController.swift */; };
@@ -67,6 +68,7 @@
 		04938C0F2803D3AD00CED062 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 		04938C112803D3AD00CED062 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		049DEF5129226A52000A5572 /* OneSignal.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = OneSignal.xcframework; path = Pods/OneSignalXCFramework/iOS_SDK/OneSignalSDK/OneSignal_XCFramework/OneSignal.xcframework; sourceTree = "<group>"; };
+		04DE9B692E3088C9000FD39D /* DeepLinkViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeepLinkViewController.swift; sourceTree = "<group>"; };
 		04E5BE952923820D0082F18F /* OneSignalCore.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = OneSignalCore.xcframework; path = Pods/OneSignalXCFramework/iOS_SDK/OneSignalSDK/OneSignal_Core/OneSignalCore.xcframework; sourceTree = "<group>"; };
 		07B08EAB0A0BA231908BA6B8 /* Pods-FlareLane_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-FlareLane_Example.release.xcconfig"; path = "Target Support Files/Pods-FlareLane_Example/Pods-FlareLane_Example.release.xcconfig"; sourceTree = "<group>"; };
 		238EC773F386DEF04ED3A6E3 /* Pods-FlareLaneNotificationServiceExtension.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-FlareLaneNotificationServiceExtension.release.xcconfig"; path = "Target Support Files/Pods-FlareLaneNotificationServiceExtension/Pods-FlareLaneNotificationServiceExtension.release.xcconfig"; sourceTree = "<group>"; };
@@ -173,6 +175,7 @@
 			isa = PBXGroup;
 			children = (
 				607FACD51AFB9204008FA782 /* AppDelegate.swift */,
+				04DE9B692E3088C9000FD39D /* DeepLinkViewController.swift */,
 				607FACD71AFB9204008FA782 /* ViewController.swift */,
 				8F7605482B68F38100FBAABB /* WebViewController.swift */,
 				04863E182C4C049300C9009D /* WebViewBridgeController.swift */,
@@ -498,6 +501,7 @@
 				607FACD61AFB9204008FA782 /* AppDelegate.swift in Sources */,
 				04863E192C4C049300C9009D /* WebViewBridgeController.swift in Sources */,
 				8F7605492B68F38100FBAABB /* WebViewController.swift in Sources */,
+				04DE9B6A2E3088C9000FD39D /* DeepLinkViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

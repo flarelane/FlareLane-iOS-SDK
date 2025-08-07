@@ -16,10 +16,12 @@
                         <viewControllerLayoutGuide type="top" id="jyV-Pf-zRb"/>
                         <viewControllerLayoutGuide type="bottom" id="2fi-mo-0CV"/>
                     </layoutGuides>
+
                     <view key="view" contentMode="scaleToFill" id="kh9-bI-dsS">
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <subviews>
+
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" translatesAutoresizingMaskIntoConstraints="NO" id="EA4-u1-1Cd">
                                 <rect key="frame" x="16" y="259" width="361" height="359"/>
                                 <subviews>
@@ -92,6 +94,7 @@
                                             <segue destination="2VA-8W-AYh" kind="show" id="oO8-Uy-z1M"/>
                                         </connections>
                                     </button>
+
                                 </subviews>
                             </stackView>
                         </subviews>
@@ -173,6 +176,25 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="1tx-dL-RnU" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="-132" y="-906"/>
+        </scene>
+        <!--Deep Link View Controller-->
+        <scene sceneID="deepLinkScene">
+            <objects>
+                <viewController id="deepLinkVC" customClass="DeepLinkViewController" customModule="FlareLane_Example" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="deepLinkTop"/>
+                        <viewControllerLayoutGuide type="bottom" id="deepLinkBottom"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="deepLinkView">
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                    </view>
+                    <navigationItem key="navigationItem" id="deepLinkNavItem"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="deepLinkFirstResponder" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-132" y="-1708"/>
         </scene>
     </scenes>
     <resources>
