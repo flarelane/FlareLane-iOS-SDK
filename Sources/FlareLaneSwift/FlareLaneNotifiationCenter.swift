@@ -26,11 +26,7 @@ import SafariServices
       if Globals.projectIdInUserDefaults == nil {
         Logger.verbose("projectId is nil. Too early clicked? process later when cold start.")
         ColdStartNotificationManager.coldStartNotification = notification
-      } else if (ColdStartNotificationManager.coldStartNotification?.id == notification.id) {
-        // If the id of coldStartNotification is the same as notificationId, it stops to avoid duplicate execution
-        Logger.verbose("ColdStartNotification is exists. skip didReceive")
       } else {
-        Logger.verbose("Clicked user notification.")
         NotificationClickProcessor.shared.processNotificationClick(notification: notification)
       }
     }
@@ -39,16 +35,16 @@ import SafariServices
   /// To handle notification foreground received
   @objc public func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
     if let flarelaneNotification = FlareLaneNotification.getFlareLaneNotificationFromUNNotificationContent(notification.request.content) {
-      
+
       BadgeManager.setCount(0)
-      
+
       if let flarelane_dismiss_foreground_notification = flarelaneNotification.data?["flarelane_dismiss_foreground_notification"] as? String,
          flarelane_dismiss_foreground_notification == "true" {
 
         Logger.verbose("notification dismissed cause flarelane_dismiss_foreground_notification is true.")
         return
       }
-      
+
       let event = FlareLaneNotificationReceivedEvent(UIApplication.shared, notification: flarelaneNotification, completionHandler: completionHandler)
 
       if let handler = EventHandlers.notificationForegroundReceived {
@@ -59,11 +55,11 @@ import SafariServices
       }
     }
   }
-  
+
   @objc public func handleReceivedURL(url: URL) {
     let scheme = url.scheme
     Logger.verbose("Handling received URL: \(url.absoluteString)")
-    
+
     switch scheme {
     case "http", "https":
       // presentWebView(url: url)
@@ -129,7 +125,7 @@ import SafariServices
 
   private func presentApplication(url: URL) {
     Logger.verbose("Opening URL with UIApplication: \(url.absoluteString)")
-    
+
     // Add delay for cold start to ensure app is fully initialized
     DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
       UIApplication.shared.open(url, options: [:]) { success in
