@@ -10,7 +10,7 @@ import UIKit
 @available(iOSApplicationExtension, unavailable)
 @objc open class FlareLane: NSObject {
   static private var appDelegate = FlareLaneAppDelegate()
-  static private let inAppMessageThrottler = Throttler(interval: 5)
+  static private let inAppMessageThrottler = Throttler(interval: 0.5)
   static private let taskManager = FlareLaneTaskManager.shared
   
   // MARK: - Public Methods
