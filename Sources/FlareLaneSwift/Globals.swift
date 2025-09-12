@@ -14,7 +14,7 @@ public enum SdkType: String {
 }
 
 final class Globals {
-  static var sdkVersion = "1.9.3"
+  static var sdkVersion = "1.9.4"
   static var sdkType: SdkType = .native
   static var sdkPlatform = "ios"
   

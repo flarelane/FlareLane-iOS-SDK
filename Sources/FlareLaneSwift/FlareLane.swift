@@ -12,16 +12,16 @@ import UIKit
   static private var appDelegate = FlareLaneAppDelegate()
   static private let inAppMessageThrottler = Throttler(interval: 0.5)
   static private let taskManager = FlareLaneTaskManager.shared
-  
+
   // MARK: - Public Methods
-  
+
   /// Set level to logging
   /// - Parameter level: LogLevel, Default is verbose
   @objc public static func setLogLevel(level: LogLevel) {
     Logger.verbose("Change log level to \(level)")
     Globals.logLevel = level
   }
-  
+
   /// Set sdk info
   /// - Parameters:
   ///   - sdkType: Platform in which the SDK runs
@@ -32,7 +32,7 @@ import UIKit
     Globals.sdkType = sdkType
     Globals.sdkVersion = sdkVersion
   }
-  
+
   /// Initialize FlareLane SDK
   /// - Parameters:
   ///   - projectId: FlareLane projectId
@@ -40,27 +40,27 @@ import UIKit
   ///   - requestPermissionOnLaunch: Request permission for notifications on launch
   @objc public static func initWithLaunchOptions(_ launchOptions: [UIApplication.LaunchOptionsKey: Any]?, projectId: String, requestPermissionOnLaunch: Bool = true) {
     Logger.verbose("Initialize FlareLane")
-    
+
     if (Globals.projectIdInUserDefaults != projectId) {
       // If the previous projectId and the current projectId are not the same, set deviceId to nil for device creation
       Globals.deviceIdInUserDefaults = nil
       Globals.isSubscribedInUserDefaults = nil
     }
-    
+
     // Set projectId before device is registered
     Globals.projectIdInUserDefaults = projectId
-    
-    
+
+
     ColdStartNotificationManager.setColdStartNotification(launchOptions: launchOptions)
-    
+
     if (BadgeManager.isBadgeEnabled == true) {
       BadgeManager.setCount(0)
       // When using applicationWillEnterForeground, if scenes are already in use, it will not be called. Use willEnterForegroundNotification.
       NotificationCenter.default.addObserver(self, selector: #selector(badgeForegroundHandler), name:  UIApplication.willEnterForegroundNotification, object: nil)
     }
-    
+
     ColdStartNotificationManager.process()
-    
+
     if let deviceId = Globals.deviceIdInUserDefaults {
       DeviceService.activate(deviceId: deviceId) {
         if (requestPermissionOnLaunch) {
@@ -83,13 +83,13 @@ import UIKit
       }
     }
   }
-  
+
   /// Set the handler when notification is clicked
   /// - Parameter callback: Handler callback
   @objc public static func setNotificationClickedHandler(callback: @escaping (FlareLaneNotification) -> Void) {
     EventHandlers.notificationClicked = callback
     Logger.verbose("NotificationClickedHandler has been registered.")
-    
+
     if let unhandledNotification = EventHandlers.unhandledNotification {
       Logger.verbose("found unhandledNotification and execute handler")
       // If the notification is clicked before the handler is set, execute the callback once with unhandledNotification and set unhandledNotification to nil.
@@ -97,19 +97,19 @@ import UIKit
       EventHandlers.unhandledNotification = nil
     }
   }
-  
+
   /// Set the handler when notification foreground received
   /// - Parameter callback: Handler callback
   @objc public static func setNotificationForegroundReceivedHandler(callback: @escaping (FlareLaneNotificationReceivedEvent) -> Void) {
     EventHandlers.notificationForegroundReceived = callback
     Logger.verbose("NotificationForegroundReceivedHandler has been registered.")
   }
-  
+
   @objc public static func setInAppMessageActionHandler(callback: @escaping (FlareLaneInAppMessage, _ actionId: String) -> Void) {
     EventHandlers.inAppMessageActionHandler = callback
     Logger.verbose("InAppMessageClickedHandler has been registered.")
   }
-  
+
   /// Set userId of device
   /// - Parameter userId: userId
   @objc public static func setUserId(userId: String?) {
@@ -119,7 +119,7 @@ import UIKit
       }
     }
   }
-  
+
   /// Set tags of device
   /// - Parameter tags: tags
   @objc public static func setTags(tags: [String: Any]) {
@@ -129,12 +129,12 @@ import UIKit
       }
     }
   }
-  
+
   /// Get id of device
   @objc public static func getDeviceId() -> String? {
     return Globals.deviceIdInUserDefaults
   }
-  
+
   // Track event
   /// - Parameters:
   ///   - type: event type
@@ -145,7 +145,7 @@ import UIKit
       completionTask()
     }
   }
-  
+
   /// Request a permission and subscribe for notifications
   @objc public static func isSubscribed(completion: @escaping (Bool) -> Void) {
     self.hasPermissionForNotifications() { hasPermission in
@@ -159,7 +159,7 @@ import UIKit
       }
     }
   }
-  
+
   /// Request a permission and subscribe for notifications
   @objc public static func subscribe(fallbackToSettings: Bool = true, completion: ((Bool) -> Void)? = nil) {
     taskManager.addTaskAfterInit(taskName: "subscribe") { completionTask in
@@ -167,7 +167,7 @@ import UIKit
         completion?(result)
         completionTask()
       }
-      
+
       UNUserNotificationCenter.current().getNotificationSettings { settings in
         switch settings.authorizationStatus {
         case .notDetermined:
@@ -195,9 +195,9 @@ import UIKit
       }
     }
   }
-  
-  
-  
+
+
+
   /// Unsubscribe for notifications
   @objc public static func unsubscribe(completion: ((Bool) -> Void)? = nil) {
     FlareLane.hasPermissionForNotifications { hasPermission in
@@ -207,7 +207,7 @@ import UIKit
           "notificationPermission": hasPermission
         ]) { device in
           let isSubscribed = (device?.isSubscribed ?? Globals.isSubscribedInUserDefaults) ?? false
-          
+
           DispatchQueue.main.async {
             completion?(isSubscribed)
           }
@@ -216,7 +216,7 @@ import UIKit
       }
     }
   }
-  
+
   static func hasPermissionForNotifications(completion: @escaping (Bool) -> Void) {
     UNUserNotificationCenter.current().getNotificationSettings { settings in
       if settings.authorizationStatus == .notDetermined || settings.authorizationStatus == .denied {
@@ -227,18 +227,43 @@ import UIKit
       }
     }
   }
-  
+
   @objc public static func displayInApp(group: String, data: [String: Any]? = nil) {
-    taskManager.addTaskAfterInit(taskName: "displayInApp") { completionTask in
-      inAppMessageThrottler.throttle {
+    inAppMessageThrottler.throttle {
+      taskManager.addTaskAfterInit(taskName: "displayInApp") { completionTask in
         InAppMessageService.shared.showInAppMessageIfNeeded(group: group, data: data)
+        completionTask()
       }
-      completionTask()
     }
   }
-  
+
+  /// Reset device data and clear all cached information
+  @objc public static func resetDevice() {
+    Logger.verbose("resetDevice: Clearing all cached device data")
+    
+    FlareLane.unsubscribe { _ in
+      FlareLane.setUserId(userId: nil)
+      
+      taskManager.addTaskAfterInit(taskName: "resetDevice") { completionTask in
+        // Clear all cached device data
+        Globals.deviceIdInUserDefaults = nil
+        Globals.userIdInUserDefaults = nil
+        Globals.isSubscribedInUserDefaults = nil
+        Globals.pushTokenInUserDefaults = nil
+        Globals.badgeCountUserDefaults = nil
+        Globals.projectIdInUserDefaults = nil
+        // Reset task queue state
+        taskManager.reset()
+        Logger.verbose("resetDevice: Device data and task queue cleared successfully")
+        
+        completionTask()
+      }
+
+    }
+  }
+
   // MARK: Private Methods
-  
+
   private static func updateDeviceWithPushToken(completion: @escaping () -> Void) {
     FlareLane.hasPermissionForNotifications { hasPermission in
       if let pushToken = Globals.pushTokenInUserDefaults {
@@ -256,7 +281,7 @@ import UIKit
       }
     }
   }
-  
+
   private static func openNotificationSettings() {
     DispatchQueue.main.async {
       if #available(iOS 16.0, *) {
@@ -274,10 +299,10 @@ import UIKit
       }
     }
   }
-  
+
   private static func requestPermissionForNotifications(completion: ((Bool) -> Void)? = nil) {
     let options: UNAuthorizationOptions = [.badge, .alert, .sound]
-    
+
     UNUserNotificationCenter.current().requestAuthorization(options: options) { (granted, error) in
       DispatchQueue.main.async {
         if granted {
@@ -289,7 +314,7 @@ import UIKit
       }
     }
   }
-  
+
   @objc private static func badgeForegroundHandler() {
     BadgeManager.setCount(0)
   }
