@@ -240,25 +240,20 @@ import UIKit
   /// Reset device data and clear all cached information
   @objc public static func resetDevice() {
     Logger.verbose("resetDevice: Clearing all cached device data")
-    
-    FlareLane.unsubscribe { _ in
-      FlareLane.setUserId(userId: nil)
-      
-      taskManager.addTaskAfterInit(taskName: "resetDevice") { completionTask in
-        // Clear all cached device data
-        Globals.deviceIdInUserDefaults = nil
-        Globals.userIdInUserDefaults = nil
-        Globals.isSubscribedInUserDefaults = nil
-        Globals.pushTokenInUserDefaults = nil
-        Globals.badgeCountUserDefaults = nil
-        Globals.projectIdInUserDefaults = nil
-        // Reset task queue state
-        taskManager.reset()
-        Logger.verbose("resetDevice: Device data and task queue cleared successfully")
-        
-        completionTask()
-      }
 
+    taskManager.addTaskAfterInit(taskName: "resetDevice") { completionTask in
+      // Clear all cached device data
+      Globals.deviceIdInUserDefaults = nil
+      Globals.userIdInUserDefaults = nil
+      Globals.isSubscribedInUserDefaults = nil
+      Globals.pushTokenInUserDefaults = nil
+      Globals.badgeCountUserDefaults = nil
+      Globals.projectIdInUserDefaults = nil
+      // Reset task queue state
+      taskManager.reset()
+      Logger.verbose("resetDevice: Device data and task queue cleared successfully")
+
+      completionTask()
     }
   }
 
