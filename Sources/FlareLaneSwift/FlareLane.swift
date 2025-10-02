@@ -45,6 +45,7 @@ import UIKit
       // If the previous projectId and the current projectId are not the same, set deviceId to nil for device creation
       Globals.deviceIdInUserDefaults = nil
       Globals.isSubscribedInUserDefaults = nil
+      Globals.userIdInUserDefaults = nil // prevent cross-project linkage
     }
 
     // Set projectId before device is registered
