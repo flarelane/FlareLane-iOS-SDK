@@ -60,17 +60,12 @@ class FlareLaneTaskManager {
     Logger.verbose("Task queue initialized. Processing queued tasks.")
     taskQueue.isSuspended = false // Resume task execution after initialization is complete
   }
-
   func reset() {
     Logger.verbose("Resetting task queue state")
-
-    // Cancel all pending operations
+    // Prevent new operations from starting, then cancel pending ones.
+    taskQueue.isSuspended = true
     taskQueue.cancelAllOperations()
-
-    // Reset initialization state
     isInitialized = false
-    taskQueue.isSuspended = true // Suspend task execution until re-initialization
-
     Logger.verbose("Task queue reset completed")
   }
 }
