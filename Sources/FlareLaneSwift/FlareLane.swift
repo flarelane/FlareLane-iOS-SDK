@@ -241,20 +241,18 @@ import UIKit
   @objc public static func resetDevice() {
     Logger.verbose("resetDevice: Clearing all cached device data")
 
-    taskManager.addTaskAfterInit(taskName: "resetDevice") { completionTask in
-      // Clear all cached device data
-      Globals.deviceIdInUserDefaults = nil
-      Globals.userIdInUserDefaults = nil
-      Globals.isSubscribedInUserDefaults = nil
-      Globals.pushTokenInUserDefaults = nil
-      Globals.badgeCountUserDefaults = nil
-      Globals.projectIdInUserDefaults = nil
-      // Reset task queue state
-      taskManager.reset()
-      Logger.verbose("resetDevice: Device data and task queue cleared successfully")
-
-      completionTask()
-    }
+    // Clear all cached device data
+    Globals.deviceIdInUserDefaults = nil
+    Globals.userIdInUserDefaults = nil
+    Globals.isSubscribedInUserDefaults = nil
+    Globals.pushTokenInUserDefaults = nil
+    Globals.badgeCountUserDefaults = nil
+    Globals.projectIdInUserDefaults = nil
+    
+    // Reset task queue state
+    taskManager.reset()
+    
+    Logger.verbose("resetDevice: Device data and task queue cleared successfully")
   }
 
   // MARK: Private Methods
