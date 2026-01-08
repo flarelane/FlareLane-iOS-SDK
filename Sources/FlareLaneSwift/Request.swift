@@ -57,6 +57,11 @@ final class Request {
       return nil
     }
     
+    guard JSONSerialization.isValidJSONObject(body) else {
+      Logger.error("Invalid JSON object in request body: \(body)")
+      return nil
+    }
+    
     var request = URLRequest(url: url)
     request.httpMethod = method.rawValue
     request.httpBody = try? JSONSerialization.data(withJSONObject: body, options: [])
@@ -84,7 +89,14 @@ final class Request {
         return
       }
       
-      let responseObject = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any]
+      guard let jsonObject = try? JSONSerialization.jsonObject(with: data),
+            JSONSerialization.isValidJSONObject(jsonObject),
+            let responseObject = jsonObject as? [String: Any] else {
+        Logger.error("Invalid JSON response data: \(String(data: data, encoding: .utf8) ?? "unable to decode")")
+        completion(nil, nil)
+        return
+      }
+      
       completion(responseObject, nil)
     }
     
@@ -107,7 +119,13 @@ final class Request {
       }
       
       if ((200 ..< 300) ~= response.statusCode) {
-        let responseObject = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any]
+        guard let jsonObject = try? JSONSerialization.jsonObject(with: data),
+              JSONSerialization.isValidJSONObject(jsonObject),
+              let responseObject = jsonObject as? [String: Any] else {
+          Logger.error("Invalid JSON response data: \(String(data: data, encoding: .utf8) ?? "unable to decode")")
+          completion(nil, nil)
+          return
+        }
         completion(responseObject, nil)
       } else {
         Logger.error(String(data: data, encoding: .utf8) ?? "post error")
@@ -134,7 +152,13 @@ final class Request {
       }
       
       if ((200 ..< 300) ~= response.statusCode) {
-        let responseObject = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any]
+        guard let jsonObject = try? JSONSerialization.jsonObject(with: data),
+              JSONSerialization.isValidJSONObject(jsonObject),
+              let responseObject = jsonObject as? [String: Any] else {
+          Logger.error("Invalid JSON response data: \(String(data: data, encoding: .utf8) ?? "unable to decode")")
+          completion(nil, nil)
+          return
+        }
         completion(responseObject, nil)
       } else {
         Logger.error(String(data: data, encoding: .utf8) ?? "patch error")
@@ -161,7 +185,13 @@ final class Request {
       }
       
       if ((200 ..< 300) ~= response.statusCode) {
-        let responseObject = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any]
+        guard let jsonObject = try? JSONSerialization.jsonObject(with: data),
+              JSONSerialization.isValidJSONObject(jsonObject),
+              let responseObject = jsonObject as? [String: Any] else {
+          Logger.error("Invalid JSON response data: \(String(data: data, encoding: .utf8) ?? "unable to decode")")
+          completion(nil, nil)
+          return
+        }
         completion(responseObject, nil)
       } else {
         Logger.error(String(data: data, encoding: .utf8) ?? "delete error")

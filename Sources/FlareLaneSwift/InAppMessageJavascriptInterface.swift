@@ -34,7 +34,9 @@ class InAppMessageJavascriptInterface: NSObject, WKScriptMessageHandler {
   func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
     
     guard let body = message.body as? [String: Any],
+          JSONSerialization.isValidJSONObject(body),
           let method = body["method"] as? String else {
+      Logger.error("Invalid message body from JavaScript: \(message.body)")
       return
     }
     

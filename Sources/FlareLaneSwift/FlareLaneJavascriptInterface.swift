@@ -17,7 +17,9 @@ import WebKit
 
     public func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
         guard let body = message.body as? [String: Any],
+              JSONSerialization.isValidJSONObject(body),
               let method = body["method"] as? String else {
+            Logger.error("Invalid message body from JavaScript: \(message.body)")
             return
         }
         
@@ -40,6 +42,11 @@ import WebKit
   
     private func syncDeviceData() {
       let data = ["platform":Globals.sdkPlatform, "deviceId":Globals.deviceIdInUserDefaults, "userId":Globals.userIdInUserDefaults, "projectId":Globals.projectIdInUserDefaults]
+      guard JSONSerialization.isValidJSONObject(data) else {
+        Logger.error("Invalid JSON object in syncDeviceData: \(data)")
+        return
+      }
+      
       if let jsonData = try? JSONSerialization.data(withJSONObject: data, options: []),
          let jsonString = String(data: jsonData, encoding: .utf8) {
         let jsCode = "FlareLane.syncDeviceDataCallback(\(jsonString))"

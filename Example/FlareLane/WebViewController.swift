@@ -32,7 +32,7 @@ class WebViewController: UIViewController, WKUIDelegate, WKNavigationDelegate {
             name: FlareLaneJavascriptInterface.BRIDGE_NAME
         )
         
-        let request = URLRequest(url: URL(string: "https://minhyeok4dev.github.io/")!)
+        let request = URLRequest(url: URL(string: "https://www.lotteimall.com/")!)
         webView.load(request)
     }
 }
