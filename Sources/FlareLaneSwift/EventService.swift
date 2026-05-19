@@ -15,17 +15,28 @@ class EventService {
       Logger.error("deviceId does not set.")
       return
     }
-    
-    API.shared.sendEvent(   
+
+    var data: [String: Any] = [:]
+    if let button = notification.clickedButton, let idx = notification.clickedButtonIdx {
+      data["isButton"] = true
+      data["buttonIndex"] = idx
+      data["buttonLabel"] = button.label
+    }
+    if let clickedUrl = notification.clickedUrl, clickedUrl.isEmpty == false {
+      data["url"] = clickedUrl
+    }
+
+    API.shared.sendEvent(
       deviceId: deviceId,
       type: "CLICKED",
-      notificationId: notification.id
+      notificationId: notification.id,
+      data: data.isEmpty ? nil : data
     ) { error in
       if error != nil {
         Logger.error("Failed send event request.")
         return
       }
-      
+
       Logger.verbose("Succeed send event request.")
     }
   }

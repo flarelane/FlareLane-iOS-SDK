@@ -8,9 +8,6 @@
 
 import UIKit
 import FlareLane
-import FirebaseCore
-import FirebaseMessaging
-
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
@@ -39,25 +36,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     UNUserNotificationCenter.current().delegate = self
 
-    // Test with FCM
-    FirebaseApp.configure()
-
     return true
   }
 
   // If you are not swizzled, must input this matched methods.
   func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
     FlareLaneAppDelegate.shared.application(application, didRegisterForRemoteNotificationsWithDeviceToken: deviceToken)
-
-    // Test with FCM
-    Messaging.messaging().apnsToken = deviceToken
-    Messaging.messaging().token { token, error in
-      if let error = error {
-        print("Error fetching FCM registration token: \(error)")
-      } else if let token = token {
-        print("FCM registration token: \(token)")
-      }
-    }
   }
   
   // MARK: - Deep Link Handling

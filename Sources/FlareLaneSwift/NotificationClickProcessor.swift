@@ -67,7 +67,8 @@ import Foundation
   }
 
   private func handleDeepLink(notification: FlareLaneNotification) {
-    if let urlString = notification.url, let url = URL(string: urlString) {
+    // When a button was clicked, prefer the button's link over the notification's base url.
+    if let urlString = notification.clickedUrl, let url = URL(string: urlString) {
       Logger.verbose("Processing deep link for notification: \(notification.id)")
       FlareLaneNotificationCenter.shared.handleReceivedURL(url: url)
     }

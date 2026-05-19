@@ -16,8 +16,10 @@ import UIKit
   public var url: String?
   public var imageUrl: String?
   public var data: Dictionary<String, Any>?
+  public var buttons: [FlareLaneNotificationButton]?
+  public var clickedButtonIdx: Int?
 
-  public init(id: String, body: String, title: String?, url: String?, imageUrl: String?, data: Dictionary<String, Any>?) {
+  public init(id: String, body: String, title: String?, url: String?, imageUrl: String?, data: Dictionary<String, Any>?, buttons: [FlareLaneNotificationButton]? = nil, clickedButtonIdx: Int? = nil) {
     self.id = id
     self.body = body
     self.data = data
@@ -25,10 +27,42 @@ import UIKit
     self.title = title == "" ? nil : title
     self.url = url == "" ? nil : url
     self.imageUrl = imageUrl == "" ? nil : imageUrl
+    self.buttons = buttons
+    self.clickedButtonIdx = clickedButtonIdx
   }
 
   open override var description: String {
-    return "id:\(id)\nbody:\(body)\ntitle:\(String(describing: title))\nurl:\(String(describing: url))\nimageUrl:\(String(describing: imageUrl))\ndata:\(String(describing: data))"
+    return "id:\(id)\nbody:\(body)\ntitle:\(String(describing: title))\nurl:\(String(describing: url))\nimageUrl:\(String(describing: imageUrl))\ndata:\(String(describing: data))\nbuttons:\(String(describing: buttons))\nclickedButtonIdx:\(String(describing: clickedButtonIdx))"
+  }
+
+  public var clickedButton: FlareLaneNotificationButton? {
+    guard let idx = clickedButtonIdx,
+          let buttons = buttons,
+          idx >= 0,
+          idx < buttons.count else {
+      return nil
+    }
+    return buttons[idx]
+  }
+
+  public var clickedUrl: String? {
+    if clickedButtonIdx != nil {
+      return clickedButton?.link
+    }
+    return url
+  }
+
+  public func withClickedButtonIdx(_ idx: Int) -> FlareLaneNotification {
+    return FlareLaneNotification(
+      id: id,
+      body: body,
+      title: title,
+      url: url,
+      imageUrl: imageUrl,
+      data: data,
+      buttons: buttons,
+      clickedButtonIdx: idx
+    )
   }
 
   static func getFlareLaneNotificationFromUserInfo(userInfo: [AnyHashable: Any]) -> FlareLaneNotification? {
@@ -47,12 +81,15 @@ import UIKit
             return nil
           }
 
+    let buttons = FlareLaneNotificationButton.parseButtons(from: userInfo["buttons"])
+
     let notification = FlareLaneNotification(id: notificationId,
                                              body:body,
                                              title:alert["title"] as? String,
                                              url: userInfo["url"] as? String,
                                              imageUrl: userInfo["imageUrl"] as? String,
-                                             data: userInfo["data"] as? Dictionary<String, Any>
+                                             data: userInfo["data"] as? Dictionary<String, Any>,
+                                             buttons: buttons
     )
 
     return notification
@@ -76,15 +113,35 @@ import UIKit
   }
 
   public func toDictionary() -> [String: Optional<Any>] {
+    let clicked = clickedButton
     let dict: [String: Optional<Any>] = [
       "id": id,
       "title": title,
       "body": body,
       "url": url,
       "imageUrl": imageUrl,
-      "data": data
+      "data": data,
+      "buttons": buttonsJsonString(),
+      "clickedButtonIdx": clickedButtonIdx,
+      "clickedButtonLabel": clicked?.label,
+      "clickedButtonLink": clicked?.link
     ]
 
     return dict
+  }
+
+  /// Serialize buttons array back to JSON string (matches Android `Notification.buttons` shape for Flutter/RN bridge).
+  private func buttonsJsonString() -> String? {
+    guard let buttons = buttons else { return nil }
+    let array: [[String: Any]] = buttons.map { button in
+      var item: [String: Any] = ["label": button.label]
+      if let link = button.link { item["link"] = link }
+      return item
+    }
+    guard let data = try? JSONSerialization.data(withJSONObject: array),
+          let json = String(data: data, encoding: .utf8) else {
+      return nil
+    }
+    return json
   }
 }

@@ -23,11 +23,22 @@ import SafariServices
     }
     
     if let notification = FlareLaneNotification.getFlareLaneNotificationFromUNNotificationContent(response.notification.request.content) {
+      // If an action button was tapped, response.actionIdentifier carries the button index
+      // we set in the NSE ("0", "1", ...). Default/dismiss identifiers are passed through unchanged.
+      let resolved: FlareLaneNotification
+      if let idx = Int(response.actionIdentifier),
+         response.actionIdentifier != UNNotificationDefaultActionIdentifier,
+         response.actionIdentifier != UNNotificationDismissActionIdentifier {
+        resolved = notification.withClickedButtonIdx(idx)
+      } else {
+        resolved = notification
+      }
+
       if Globals.projectIdInUserDefaults == nil {
         Logger.verbose("projectId is nil. Too early clicked? process later when cold start.")
-        ColdStartNotificationManager.coldStartNotification = notification
+        ColdStartNotificationManager.coldStartNotification = resolved
       } else {
-        NotificationClickProcessor.shared.processNotificationClick(notification: notification)
+        NotificationClickProcessor.shared.processNotificationClick(notification: resolved)
       }
     }
   }
