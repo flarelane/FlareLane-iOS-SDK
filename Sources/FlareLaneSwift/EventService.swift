@@ -78,6 +78,11 @@ class EventService {
       Logger.verbose("Duplicate \(eventType) prevented: \(notificationId)")
       return
     }
+    // Guarantee afterEmit runs even if the server event step is skipped or throws — the user
+    // action (deep link, click handler / unhandledNotification fallback) must not be dropped
+    // because of a transient state like a missing deviceId or a network error.
+    defer { afterEmit?() }
+
     guard let deviceId = Globals.deviceIdInUserDefaults else {
       Logger.error("deviceId does not set.")
       return
@@ -95,7 +100,6 @@ class EventService {
       }
       Logger.verbose("Succeed send event request.")
     }
-    afterEmit?()
   }
 
   // MARK: - Click-only helpers (host-app process)
