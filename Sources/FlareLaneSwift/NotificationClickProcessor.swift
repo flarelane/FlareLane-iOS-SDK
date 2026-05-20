@@ -21,7 +21,7 @@ import Foundation
   /// duplicate prevention internally via `EventDeduplicator`.
   /// - Parameter notification: Received notification
   @objc public func processNotificationClick(notification: FlareLaneNotification) {
-    Logger.verbose("Clicked user notification: \(notification.id)")
+    Logger.info("Notification", "notification clicked", ["notificationId": notification.id])
     EventService.createClicked(notification: notification)
   }
 }

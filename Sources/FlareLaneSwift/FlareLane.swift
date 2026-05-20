@@ -18,7 +18,7 @@ import UIKit
   /// Set level to logging
   /// - Parameter level: LogLevel, Default is verbose
   @objc public static func setLogLevel(level: LogLevel) {
-    Logger.verbose("Change log level to \(level)")
+    Logger.info("Init", "log level changed", ["level": "\(level)"])
     Globals.logLevel = level
   }
 
@@ -28,7 +28,7 @@ import UIKit
   ///   - sdkVersion: Version of SDK by Platform
   /// Must called before initWithLaunchOptions
   public static func setSdkInfo(sdkType: SdkType, sdkVersion: String) {
-    Logger.verbose("Set sdk info to \(sdkType), \(sdkVersion)")
+    Logger.info("Init", "sdk info set", ["type": "\(sdkType)", "version": sdkVersion])
     Globals.sdkType = sdkType
     Globals.sdkVersion = sdkVersion
   }
@@ -39,7 +39,7 @@ import UIKit
   ///   - launchOptions: AppDelegate didFinishLaunchingWithOptions
   ///   - requestPermissionOnLaunch: Request permission for notifications on launch
   @objc public static func initWithLaunchOptions(_ launchOptions: [UIApplication.LaunchOptionsKey: Any]?, projectId: String, requestPermissionOnLaunch: Bool = true) {
-    Logger.verbose("Initialize FlareLane")
+    Logger.info("Init", "FlareLane initialized", ["projectId": projectId])
 
     if (Globals.projectIdInUserDefaults != projectId) {
       // If the previous projectId and the current projectId are not the same, set deviceId to nil for device creation
@@ -89,10 +89,10 @@ import UIKit
   /// - Parameter callback: Handler callback
   @objc public static func setNotificationClickedHandler(callback: @escaping (FlareLaneNotification) -> Void) {
     EventHandlers.notificationClicked = callback
-    Logger.verbose("NotificationClickedHandler has been registered.")
+    Logger.info("Init", "notificationClickedHandler registered")
 
     if let unhandledNotification = EventHandlers.unhandledNotification {
-      Logger.verbose("found unhandledNotification and execute handler")
+      Logger.verbose("Init", "unhandledNotification found, executing handler")
       // If the notification is clicked before the handler is set, execute the callback once with unhandledNotification and set unhandledNotification to nil.
       callback(unhandledNotification)
       EventHandlers.unhandledNotification = nil
@@ -103,12 +103,12 @@ import UIKit
   /// - Parameter callback: Handler callback
   @objc public static func setNotificationForegroundReceivedHandler(callback: @escaping (FlareLaneNotificationReceivedEvent) -> Void) {
     EventHandlers.notificationForegroundReceived = callback
-    Logger.verbose("NotificationForegroundReceivedHandler has been registered.")
+    Logger.info("Init", "notificationForegroundReceivedHandler registered")
   }
 
   @objc public static func setInAppMessageActionHandler(callback: @escaping (FlareLaneInAppMessage, _ actionId: String) -> Void) {
     EventHandlers.inAppMessageActionHandler = callback
-    Logger.verbose("InAppMessageClickedHandler has been registered.")
+    Logger.info("Init", "inAppMessageActionHandler registered")
   }
 
   /// Set userId of device
@@ -240,7 +240,7 @@ import UIKit
 
   /// Reset device data and clear all cached information
   @objc public static func resetDevice() {
-    Logger.verbose("resetDevice: Clearing all cached device data")
+    Logger.info("Device", "resetDevice started: clearing cached data")
 
     // Clear all cached device data
     Globals.deviceIdInUserDefaults = nil
@@ -253,7 +253,7 @@ import UIKit
     // Reset task queue state
     taskManager.reset()
     
-    Logger.verbose("resetDevice: Device data and task queue cleared successfully")
+    Logger.info("Device", "resetDevice completed")
   }
 
   // MARK: Private Methods

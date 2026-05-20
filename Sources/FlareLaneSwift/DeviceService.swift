@@ -39,19 +39,19 @@ final class DeviceService {
   ///   - projectId: FlareLane projectId
   ///   - pushToken: PushToken from delegate
   static func register(projectId: String, completion: @escaping (() -> Void) = {}) {
-    Logger.verbose("Start create device request.")
+    Logger.verbose("Device", "create request started")
 
     let body = self.getSystemInfo()
 
     API.shared.createDevice(body: body) { (deviceId, error) in
       if let error = error {
-        Logger.error("Failed create device request. error: \(error.localizedDescription)")
+        Logger.error("Device", "create request failed", ["error": error.localizedDescription])
       } else if let deviceId = deviceId {
         Globals.deviceIdInUserDefaults = deviceId
         Globals.projectIdInUserDefaults = projectId
-        Logger.verbose("Succeed create device request.")
+        Logger.info("Device", "device created", ["deviceId": deviceId])
       } else {
-        Logger.error("createDevice returned no error but deviceId is nil.")
+        Logger.error("Device", "create returned no error but deviceId is nil")
       }
 
       completion()
@@ -63,7 +63,7 @@ final class DeviceService {
   /// - Parameters:
   ///   - deviceId: FlareLane deviceId
   static func activate(deviceId: String, completion: @escaping (() -> Void) = {}) {
-    Logger.verbose("Start update device request.")
+    Logger.verbose("Device", "activate request started", ["deviceId": deviceId])
 
     FlareLane.hasPermissionForNotifications { hasPermission in
       var body = self.getSystemInfo()
@@ -73,9 +73,9 @@ final class DeviceService {
 
       API.shared.updateDevice(deviceId: deviceId, body: body) { (device, error) in
         if let error = error {
-          Logger.error("Failed update device request. error: \(error.localizedDescription)")
+          Logger.error("Device", "activate request failed", ["error": error.localizedDescription])
         } else {
-          Logger.verbose("Succeed update device request.")
+          Logger.info("Device", "device activated", ["deviceId": deviceId])
         }
 
         completion()
@@ -91,7 +91,7 @@ final class DeviceService {
   static func update(body: [String: Any?],
                      completion: ((FlareLaneDevice?) -> Void)? = nil) {
     guard let deviceId = Globals.deviceIdInUserDefaults else {
-      Logger.error("Globals.deviceIdInUserDefaults is nil")
+      Logger.error("Device", "update blocked: deviceId not set")
       completion?(nil)
       return
     }
@@ -100,7 +100,7 @@ final class DeviceService {
       var device: FlareLaneDevice? = nil
 
       if let error = error {
-        Logger.error("Failed update request. - \(body), error: \(error)")
+        Logger.error("Device", "update request failed", ["body": "\(body)", "error": "\(error)"])
       } else if
         let response = response,
         let id = response["id"] as? String,
@@ -108,9 +108,9 @@ final class DeviceService {
 
         device = FlareLaneDevice(id: id, isSubscribed: isSubscribed)
         self.saveData(body: response)
-        Logger.verbose("Succeed update request. - \(body)")
+        Logger.info("Device", "device updated", ["body": "\(body)"])
       } else {
-        Logger.error("Unexpected response or missing data. - \(body)")
+        Logger.error("Device", "unexpected response or missing data", ["body": "\(body)"])
       }
 
       completion?(device)

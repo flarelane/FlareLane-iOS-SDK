@@ -16,8 +16,8 @@ import SafariServices
   
   /// To handle notification clicked
   @objc public func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
-    Logger.verbose("INVOKED")
-    
+    Logger.verbose("Notification", "didReceive response invoked")
+
     defer {
       completionHandler()
     }
@@ -35,7 +35,7 @@ import SafariServices
       }
 
       if Globals.projectIdInUserDefaults == nil {
-        Logger.verbose("projectId is nil. Too early clicked? process later when cold start.")
+        Logger.verbose("Notification", "projectId is nil; deferring click to cold start")
         ColdStartNotificationManager.coldStartNotification = resolved
       } else {
         NotificationClickProcessor.shared.processNotificationClick(notification: resolved)
@@ -52,14 +52,14 @@ import SafariServices
       if let flarelane_dismiss_foreground_notification = flarelaneNotification.data?["flarelane_dismiss_foreground_notification"] as? String,
          flarelane_dismiss_foreground_notification == "true" {
         
-        Logger.verbose("notification dismissed cause flarelane_dismiss_foreground_notification is true.")
+        Logger.verbose("Notification", "foreground notification dismissed", ["reason": "flarelane_dismiss_foreground_notification"])
         return
       }
       
       let event = FlareLaneNotificationReceivedEvent(UIApplication.shared, notification: flarelaneNotification, completionHandler: completionHandler)
       
       if let handler = EventHandlers.notificationForegroundReceived {
-        Logger.verbose("notificationForegroundReceivedHandler exists, you can control the display timing.")
+        Logger.verbose("Notification", "foreground handler exists, delegating display control")
         handler(event)
       } else {
         event.display()
@@ -69,7 +69,7 @@ import SafariServices
   
   @objc public func handleReceivedURL(url: URL) {
     let scheme = url.scheme
-    Logger.verbose("Handling received URL: \(url.absoluteString)")
+    Logger.verbose("Notification", "handling received url", ["url": url.absoluteString])
     
     switch scheme {
     case "http", "https":
@@ -89,13 +89,13 @@ import SafariServices
       presentWebViewWithController(url: url, topViewController: topViewController)
     } else {
       // If top view controller is not available (cold push scenario), retry with delay
-      Logger.verbose("Top view controller not available, retrying with delay for cold push scenario")
+      Logger.verbose("Notification", "top view controller unavailable, retrying", ["context": "webView"])
       DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
         if let topViewController = self.getTopViewController() {
           self.presentWebViewWithController(url: url, topViewController: topViewController)
         } else {
           // If still not available, fallback to Safari app
-          Logger.verbose("Top view controller still not available, falling back to Safari app")
+          Logger.verbose("Notification", "top view controller still unavailable, falling back to Safari app", ["context": "webView"])
           self.presentSafariApp(url: url)
         }
       }
@@ -118,13 +118,13 @@ import SafariServices
       presentSafariViewWithController(url: url, topViewController: topViewController)
     } else {
       // If top view controller is not available (cold push scenario), retry with delay
-      Logger.verbose("Top view controller not available, retrying with delay for cold push scenario")
+      Logger.verbose("Notification", "top view controller unavailable, retrying", ["context": "safariView"])
       DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
         if let topViewController = self.getTopViewController() {
           self.presentSafariViewWithController(url: url, topViewController: topViewController)
         } else {
           // If still not available, fallback to Safari app
-          Logger.verbose("Top view controller still not available, falling back to Safari app")
+          Logger.verbose("Notification", "top view controller still unavailable, falling back to Safari app", ["context": "safariView"])
           self.presentSafariApp(url: url)
         }
       }
@@ -165,15 +165,15 @@ import SafariServices
   }
   
   private func presentApplication(url: URL) {
-    Logger.verbose("Opening URL with UIApplication: \(url.absoluteString)")
+    Logger.verbose("Notification", "opening url with UIApplication", ["url": url.absoluteString])
     
     // Add delay for cold start to ensure app is fully initialized
     DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
       UIApplication.shared.open(url, options: [:]) { success in
         if success {
-          Logger.verbose("Successfully opened URL: \(url.absoluteString)")
+          Logger.info("Notification", "url opened", ["url": url.absoluteString])
         } else {
-          Logger.verbose("Failed to open URL: \(url.absoluteString)")
+          Logger.error("Notification", "failed to open url", ["url": url.absoluteString])
         }
       }
     }

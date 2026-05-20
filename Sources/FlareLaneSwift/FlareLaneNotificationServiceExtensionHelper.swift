@@ -15,7 +15,7 @@ import MobileCoreServices
   var bestAttemptContent: UNMutableNotificationContent?
   
   @objc public func didReceive(_ request: UNNotificationRequest, withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void) {
-    Logger.verbose("INVOKED")
+    Logger.verbose("NSE", "didReceive invoked")
 
     self.contentHandler = contentHandler
     bestAttemptContent = (request.content.mutableCopy() as? UNMutableNotificationContent)
@@ -69,7 +69,7 @@ import MobileCoreServices
 
 
   @objc public func serviceExtensionTimeWillExpire() {
-    Logger.verbose("INVOKED")
+    Logger.verbose("NSE", "serviceExtensionTimeWillExpire invoked")
 
     if let bestAttemptContent = bestAttemptContent {
       deliverContent(bestAttemptContent)
@@ -168,7 +168,7 @@ import MobileCoreServices
         }
         kept.insert(category)
         center.setNotificationCategories(kept)
-        Logger.verbose("Registered notification category \(categoryIdentifier) with \(buttons.count) action(s). Live FlareLane categories: \(kept.filter { $0.identifier.hasPrefix(prefix) }.count)")
+        Logger.info("NSE", "notification category registered", ["categoryId": categoryIdentifier, "actionCount": buttons.count, "liveCategories": kept.filter { $0.identifier.hasPrefix(prefix) }.count])
         completion()
       }
     }

@@ -20,7 +20,7 @@ class Throttler {
     let distance = now.timeIntervalSince(self.lastActionTime)
     
     guard distance > self.interval else {
-      Logger.verbose("Throttler exceeded.")
+      Logger.verbose("Throttler", "action throttled", ["interval": self.interval, "distance": distance])
       return
     }
     self.lastActionTime = now

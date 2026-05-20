@@ -19,19 +19,19 @@ class FlareLaneTaskManager {
   }
 
   func addTaskAfterInit(taskName: String, timeout: TimeInterval = 10.0, _ task: @escaping (_ completion: @escaping () -> Void) -> Void) {
-    Logger.verbose("Task added to queue: '\(taskName)'. Queue size after adding: \(taskQueue.operationCount + 1)")
+    Logger.verbose("TaskQueue", "task added", ["name": taskName, "size": taskQueue.operationCount + 1])
 
     let operation = BlockOperation {
       let semaphore = DispatchSemaphore(value: 0)
       var taskCompleted = false
 
-      Logger.verbose("Executing task: '\(taskName)'. Queue size before execution: \(self.taskQueue.operationCount)")
+      Logger.verbose("TaskQueue", "task executing", ["name": taskName, "size": self.taskQueue.operationCount])
 
       // Execute the task on a background thread
       DispatchQueue.global(qos: .userInitiated).async {
         task {
           taskCompleted = true
-          Logger.verbose("Task '\(taskName)' completed successfully.")
+          Logger.verbose("TaskQueue", "task completed", ["name": taskName])
           semaphore.signal() // Signal that the task is complete
         }
       }
@@ -39,7 +39,7 @@ class FlareLaneTaskManager {
       // Set up the timeout
       DispatchQueue.global(qos: .userInitiated).asyncAfter(deadline: .now() + timeout) {
         if !taskCompleted {
-          Logger.verbose("Task '\(taskName)' timed out.")
+          Logger.error("TaskQueue", "task timed out", ["name": taskName, "timeout": timeout])
           semaphore.signal() // Signal that the timeout has occurred
         }
       }
@@ -48,7 +48,7 @@ class FlareLaneTaskManager {
 
       // Ensure task completion is called even if the semaphore wait fails
       if !taskCompleted {
-        Logger.error("Task '\(taskName)' did not complete properly, but semaphore was released.")
+        Logger.error("TaskQueue", "task did not complete but semaphore released", ["name": taskName])
       }
     }
 
@@ -57,15 +57,15 @@ class FlareLaneTaskManager {
 
   func initializeComplete() {
     isInitialized = true
-    Logger.verbose("Task queue initialized. Processing queued tasks.")
+    Logger.info("TaskQueue", "queue initialized, processing queued tasks")
     taskQueue.isSuspended = false // Resume task execution after initialization is complete
   }
   func reset() {
-    Logger.verbose("Resetting task queue state")
+    Logger.info("TaskQueue", "reset started")
     // Prevent new operations from starting, then cancel pending ones.
     taskQueue.isSuspended = true
     taskQueue.cancelAllOperations()
     isInitialized = false
-    Logger.verbose("Task queue reset completed")
+    Logger.info("TaskQueue", "reset completed")
   }
 }

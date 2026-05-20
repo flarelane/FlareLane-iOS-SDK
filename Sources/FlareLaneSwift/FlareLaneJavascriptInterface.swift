@@ -33,7 +33,7 @@ import WebKit
         case "openUrl":
             openUrl(body: body)
         default:
-            Logger.error("userContentController() method not found")
+            Logger.error("WebView", "userContentController method not found", ["method": method])
             break
         }
     }
@@ -44,7 +44,7 @@ import WebKit
          let jsonString = String(data: jsonData, encoding: .utf8) {
         let jsCode = "FlareLane.syncDeviceDataCallback(\(jsonString))"
         
-        Logger.verbose("executed syncDeviceData from webView: \(jsCode)")
+        Logger.verbose("WebView", "syncDeviceData executed", ["jsCode": jsCode])
         
         webView?.evaluateJavaScript(jsCode, completionHandler: { result, error in
             if let error = error {
@@ -59,7 +59,7 @@ import WebKit
             let userId = body["userId"] as? String
             FlareLane.setUserId(userId: userId)
         } else {
-            Logger.error("setUserId() userId not found")
+            Logger.error("WebView", "setUserId: userId not found")
         }
     }
     
@@ -67,7 +67,7 @@ import WebKit
         if let tags = body["tags"] as? [String: Any] {
             FlareLane.setTags(tags: tags)
         } else {
-            Logger.error("setTags() tags not found")
+            Logger.error("WebView", "setTags: tags not found")
         }
     }
     
@@ -76,7 +76,7 @@ import WebKit
             let data = body["data"] as? [String: Any]
             FlareLane.trackEvent(type, data: data)
         } else {
-            Logger.error("trackEvent() type not found")
+            Logger.error("WebView", "trackEvent: type not found")
         }
     }
   
@@ -87,7 +87,7 @@ import WebKit
           self.webView?.load(URLRequest(url: url))
         }
       } else {
-          Logger.error("openUrl() url not found")
+          Logger.error("WebView", "openUrl: url not found")
       }
     }
 }

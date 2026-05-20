@@ -19,7 +19,7 @@ import UIKit
   }
 
   @objc public func display() {
-    Logger.verbose("notification received: \(self.notification)")
+    Logger.verbose("Notification", "notification displayed", ["notificationId": self.notification.id])
     completionHandler([.alert, .sound])
 
 //  Invoke Received Event in extension

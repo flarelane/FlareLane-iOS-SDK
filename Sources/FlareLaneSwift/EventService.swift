@@ -55,11 +55,11 @@ class EventService {
 
     API.shared.trackEvent(deviceId: deviceId, type: type, data: data) { (error) in
       if error != nil {
-        Logger.error("Failed send event request. \(type)")
+        Logger.error("Event", "trackEvent failed", ["type": type])
         return
       }
 
-      Logger.verbose("Succeed send event request. \(type)")
+      Logger.info("Event", "event sent", ["type": type])
     }
   }
 
@@ -75,7 +75,7 @@ class EventService {
     afterEmit: (() -> Void)? = nil
   ) {
     if EventDeduplicator.markAndCheckDuplicate(eventType: eventType, notificationId: notificationId) {
-      Logger.verbose("Duplicate \(eventType) prevented: \(notificationId)")
+      Logger.verbose("Event", "duplicate prevented", ["type": eventType, "notificationId": notificationId])
       return
     }
     // Guarantee afterEmit runs even if the server event step is skipped or throws — the user
@@ -84,10 +84,10 @@ class EventService {
     defer { afterEmit?() }
 
     guard let deviceId = Globals.deviceIdInUserDefaults else {
-      Logger.error("deviceId does not set.")
+      Logger.error("Event", "deviceId not set", ["type": eventType])
       return
     }
-    Logger.verbose("Send \(eventType) event")
+    Logger.verbose("Event", "sending event", ["type": eventType, "notificationId": notificationId])
     API.shared.sendEvent(
       deviceId: deviceId,
       type: eventType,
@@ -95,10 +95,10 @@ class EventService {
       data: dataBuilder?()
     ) { error in
       if error != nil {
-        Logger.error("Failed send event request.")
+        Logger.error("Event", "send event failed", ["type": eventType])
         return
       }
-      Logger.verbose("Succeed send event request.")
+      Logger.info("Event", "event sent", ["type": eventType])
     }
   }
 
@@ -109,12 +109,12 @@ class EventService {
     if let infoDictionary = Bundle.main.infoDictionary,
        let flarelane_dismiss_launch_url = infoDictionary["flarelane_dismiss_launch_url"] as? Bool,
        flarelane_dismiss_launch_url == true {
-      Logger.verbose("launch url dismissed cause flarelane_dismiss_launch_url in Info.plist is YES.")
+      Logger.verbose("Event", "launch url dismissed", ["source": "Info.plist", "key": "flarelane_dismiss_launch_url"])
       return true
     }
     if let flarelane_dismiss_launch_url = notification.data?["flarelane_dismiss_launch_url"] as? String,
        flarelane_dismiss_launch_url == "true" {
-      Logger.verbose("launch url dismissed cause flarelane_dismiss_launch_url is true.")
+      Logger.verbose("Event", "launch url dismissed", ["source": "payload", "key": "flarelane_dismiss_launch_url"])
       return true
     }
     return false
@@ -124,7 +124,7 @@ class EventService {
   private static func handleDeepLink(notification: FlareLaneNotification) {
     // When a button was clicked, prefer the button's link over the notification's base url.
     if let urlString = notification.clickedUrl, let url = URL(string: urlString) {
-      Logger.verbose("Processing deep link for notification: \(notification.id)")
+      Logger.verbose("Event", "processing deep link", ["notificationId": notification.id])
       FlareLaneNotificationCenter.shared.handleReceivedURL(url: url)
     }
   }
@@ -132,12 +132,12 @@ class EventService {
   @available(iOSApplicationExtension, unavailable)
   private static func executeClickHandler(notification: FlareLaneNotification) {
     guard let clickedHandler = EventHandlers.notificationClicked else {
-      Logger.verbose("unhandledNotification saved")
+      Logger.verbose("Event", "unhandledNotification saved", ["notificationId": notification.id])
       // If notificationClicked handler is nil, the last notification is saved and executed when the handler is registered.
       EventHandlers.unhandledNotification = notification
       return
     }
-    Logger.verbose("clickedHandler found, execute handler")
+    Logger.verbose("Event", "clickedHandler found, executing")
     clickedHandler(notification)
   }
 }

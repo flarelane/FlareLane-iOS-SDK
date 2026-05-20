@@ -24,7 +24,7 @@ import UIKit
         FlareLaneTaskManager.shared.addTaskAfterInit(taskName: "didRegisterForRemoteNotificationsWithDeviceToken") { completionTask in
           // Convert token to string
           let newPushToken = deviceToken.reduce("", {$0 + String(format: "%02X", $1)})
-          Logger.verbose("APNs device token: \(newPushToken)")
+          Logger.info("Device", "APNs token received", ["pushToken": newPushToken])
           
           // 기존 토큰과 비교하여 다를 경우에만 업데이트
           if Globals.pushTokenInUserDefaults != newPushToken {

@@ -53,7 +53,7 @@ class InAppMessageJavascriptInterface: NSObject, WKScriptMessageHandler {
       case "executeAction":
         self.executeAction(body: body)
       default:
-        Logger.error("userContentController() method not found")
+        Logger.error("IAM", "userContentController method not found", ["method": method])
         break
       }
     }
@@ -65,7 +65,7 @@ private extension InAppMessageJavascriptInterface {
   
   func setTags(body: [String: Any]) {
     guard let tags = body["tags"] as? [String: Any] else {
-      Logger.error("setTags() tags not found")
+      Logger.error("IAM", "setTags: tags not found")
       return
     }
     FlareLane.setTags(tags: tags)
@@ -73,7 +73,7 @@ private extension InAppMessageJavascriptInterface {
   
   func trackEvent(body: [String: Any]) {
     guard let type = body["type"] as? String else {
-      Logger.error("trackEvent() type not found")
+      Logger.error("IAM", "trackEvent: type not found")
       return
     }
     let data = body["data"] as? [String: Any]
@@ -92,7 +92,7 @@ private extension InAppMessageJavascriptInterface {
   
   func openURL(body: [String: Any]) {
     guard let urlString = body["url"] as? String, let url = URL(string: urlString) else {
-      Logger.error("openURL() URL is invalid")
+      Logger.error("IAM", "openURL: invalid url", ["url": "\(body["url"] ?? "")"])
       return
     }
     DispatchQueue.main.async {
@@ -110,7 +110,7 @@ private extension InAppMessageJavascriptInterface {
   
   func executeAction(body: [String: Any]) {
     guard let actionId = body["actionId"] as? String else {
-      Logger.error("executeAction() actionId not found")
+      Logger.error("IAM", "executeAction: actionId not found")
       return
     }
     DispatchQueue.main.async {

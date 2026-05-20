@@ -22,7 +22,7 @@ final class Request {
   
   func getBaseURL () -> String? {
     guard let projectId = Globals.projectIdInUserDefaults else {
-      Logger.error("Cannot request when FlareLane has not been initialized yet.")
+      Logger.error("HTTP", "request blocked: not initialized")
       return nil
     }
     
@@ -73,7 +73,7 @@ final class Request {
       return
     }
     
-    Logger.verbose("GET Request - path:\(path) parameters:\(parameters.description))")
+    Logger.verbose("HTTP", "GET \(path)", ["parameters": "\(parameters)"])
     
     let task = URLSession.shared.dataTask(with: request) { (data, response, error) in
       guard let data = data,
@@ -96,7 +96,7 @@ final class Request {
       return
     }
     
-    Logger.verbose("POST Request - path:\(path) body:\(body.description))")
+    Logger.verbose("HTTP", "POST \(path)", ["body": "\(body)"])
     
     let task = URLSession.shared.dataTask(with: request) { (data, response, error) in
       guard let data = data,
@@ -110,20 +110,20 @@ final class Request {
         let responseObject = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any]
         completion(responseObject, nil)
       } else {
-        Logger.error(String(data: data, encoding: .utf8) ?? "post error")
+        Logger.error("HTTP", "POST failed", ["path": path, "status": response.statusCode, "response": String(data: data, encoding: .utf8) ?? ""])
         completion(nil, HTTPError.serverSideError(response.statusCode))
       }
     }
-    
+
     task.resume()
   }
-  
+
   func patch(path: String, body: [String: Any?], completion: @escaping ([String: Any]?, Error?) -> Void) {
     guard let request = self.getRequestWithBody(method: WithBodyMethod.PATCH, path: path, body: body) else {
       return
     }
     
-    Logger.verbose("PATCH Request - path:\(path) body:\(body.description))")
+    Logger.verbose("HTTP", "PATCH \(path)", ["body": "\(body)"])
     
     let task = URLSession.shared.dataTask(with: request) { (data, response, error) in
       guard let data = data,
@@ -137,7 +137,7 @@ final class Request {
         let responseObject = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any]
         completion(responseObject, nil)
       } else {
-        Logger.error(String(data: data, encoding: .utf8) ?? "patch error")
+        Logger.error("HTTP", "PATCH failed", ["path": path, "status": response.statusCode, "response": String(data: data, encoding: .utf8) ?? ""])
         completion(nil, HTTPError.serverSideError(response.statusCode))
       }
     }
@@ -150,7 +150,7 @@ final class Request {
       return
     }
     
-    Logger.verbose("DELETE Request - path:\(path) body:\(body.description))")
+    Logger.verbose("HTTP", "DELETE \(path)", ["body": "\(body)"])
     
     let task = URLSession.shared.dataTask(with: request) { (data, response, error) in
       guard let data = data,
@@ -164,7 +164,7 @@ final class Request {
         let responseObject = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any]
         completion(responseObject, nil)
       } else {
-        Logger.error(String(data: data, encoding: .utf8) ?? "delete error")
+        Logger.error("HTTP", "DELETE failed", ["path": path, "status": response.statusCode, "response": String(data: data, encoding: .utf8) ?? ""])
         completion(nil, HTTPError.serverSideError(response.statusCode))
         
       }

@@ -69,7 +69,7 @@ import UIKit
 
     let isFlareLane = userInfo["isFlareLane"] as? Bool
     if (isFlareLane != true) {
-      Logger.error("Not a notification from FlareLane.")
+      Logger.error("Notification", "not a FlareLane notification")
       return nil
     }
 
@@ -77,7 +77,7 @@ import UIKit
           let alert = aps["alert"] as? Dictionary<String, Any>,
           let notificationId = userInfo["notificationId"] as? String,
           let body = alert["body"] as? String else {
-            Logger.error("Failed to get FlareLaneNotification: Missing required keys")
+            Logger.error("Notification", "failed to parse FlareLaneNotification: missing required keys")
             return nil
           }
 

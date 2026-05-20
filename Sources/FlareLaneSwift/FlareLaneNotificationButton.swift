@@ -42,7 +42,7 @@ import Foundation
       do {
         array = try JSONSerialization.jsonObject(with: data) as? [[String: Any]]
       } catch {
-        Logger.error("Failed to parse notification buttons: \(error)")
+        Logger.error("Notification", "failed to parse buttons", ["error": "\(error)"])
         return nil
       }
     } else if let arrayValue = raw as? [[String: Any]] {

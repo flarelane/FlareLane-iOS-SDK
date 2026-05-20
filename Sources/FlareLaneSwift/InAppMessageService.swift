@@ -21,12 +21,12 @@ final class InAppMessageService {
 
   func showInAppMessageIfNeeded(group: String, data: [String: Any]?) {
     guard let deviceId = Globals.deviceIdInUserDefaults else {
-      Logger.error("deviceId does not set.")
+      Logger.error("IAM", "deviceId not set")
       return
     }
 
     if isDisplaying {
-      Logger.verbose("InAppMessage is already displaying")
+      Logger.verbose("IAM", "already displaying, skipping")
       return
     }
 
@@ -35,7 +35,7 @@ final class InAppMessageService {
       case let .success(data):
         self.processInAppMessages(data: data)
       case let .failure(error):
-        Logger.error("Failed to get in app messages: \(error.localizedDescription)")
+        Logger.error("IAM", "fetch failed", ["error": error.localizedDescription])
       }
     }
   }
@@ -43,13 +43,13 @@ final class InAppMessageService {
   private func processInAppMessages(data: [String: Any]) {
     guard let inAppMessagesData = data["data"] as? [[String: Any]],
           let firstData = inAppMessagesData.first else {
-      Logger.verbose("There is no displayable IAM")
+      Logger.verbose("IAM", "no displayable message")
       return
     }
 
     guard let messageId = firstData["id"] as? String,
           let htmlString = firstData["htmlString"] as? String else {
-      Logger.error("Failed to process in app message: invalid data (\(firstData))")
+      Logger.error("IAM", "process failed: invalid data", ["data": "\(firstData)"])
       return
     }
 
