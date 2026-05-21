@@ -45,30 +45,31 @@ import SafariServices
   
   /// To handle notification foreground received
   @objc public func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
-    if let flarelaneNotification = FlareLaneNotification.getFlareLaneNotificationFromUNNotificationContent(notification.request.content) {
-      
-      BadgeManager.setCount(0)
-      
-      if let flarelane_dismiss_foreground_notification = flarelaneNotification.data?["flarelane_dismiss_foreground_notification"] as? String,
-         flarelane_dismiss_foreground_notification == "true" {
+    // UNUserNotificationCenterDelegate contract: completionHandler MUST be invoked exactly
+    // once on every willPresent call. For non-FlareLane notifications we pass [] to satisfy
+    // the contract; without it the OS holds the presentation queue and eventually times out.
+    guard let flarelaneNotification = FlareLaneNotification.getFlareLaneNotificationFromUNNotificationContent(notification.request.content) else {
+      completionHandler([])
+      return
+    }
 
-        Logger.verbose("Notification", "foreground notification dismissed", ["reason": "flarelane_dismiss_foreground_notification"])
-        // UNUserNotificationCenterDelegate contract: completionHandler MUST be invoked exactly
-        // once on every willPresent call. Passing [] = "do not present this notification" while
-        // still satisfying the contract — without it the OS holds the presentation queue and
-        // eventually times out / logs a warning.
-        completionHandler([])
-        return
-      }
-      
-      let event = FlareLaneNotificationReceivedEvent(UIApplication.shared, notification: flarelaneNotification, completionHandler: completionHandler)
-      
-      if let handler = EventHandlers.notificationForegroundReceived {
-        Logger.verbose("Notification", "foreground handler exists, delegating display control")
-        handler(event)
-      } else {
-        event.display()
-      }
+    BadgeManager.setCount(0)
+
+    if let flarelane_dismiss_foreground_notification = flarelaneNotification.data?["flarelane_dismiss_foreground_notification"] as? String,
+       flarelane_dismiss_foreground_notification == "true" {
+
+      Logger.verbose("Notification", "foreground notification dismissed", ["reason": "flarelane_dismiss_foreground_notification"])
+      completionHandler([])
+      return
+    }
+
+    let event = FlareLaneNotificationReceivedEvent(UIApplication.shared, notification: flarelaneNotification, completionHandler: completionHandler)
+
+    if let handler = EventHandlers.notificationForegroundReceived {
+      Logger.verbose("Notification", "foreground handler exists, delegating display control")
+      handler(event)
+    } else {
+      event.display()
     }
   }
   
