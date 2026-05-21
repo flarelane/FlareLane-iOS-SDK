@@ -53,7 +53,7 @@ final class API {
   ///   - type: Notification event type
   ///   - notificationId: NotificationId
   ///   - completion: Completion callback
-  func sendEvent(deviceId: String, type: String, notificationId: String, completion: @escaping (Error?) -> Void) {
+  func sendEvent(deviceId: String, type: String, notificationId: String, data: [String: Any]? = nil, completion: @escaping (Error?) -> Void) {
     var body: [String: Any] = [
       "notificationId":notificationId,
       "deviceId": deviceId,
@@ -61,12 +61,15 @@ final class API {
       "createdAt": Date().toString(),
       "platform" : Globals.sdkPlatform
     ]
-    
+
     let userId = Globals.userIdInUserDefaults
     if (userId != nil) {
       body["userId"] = userId
     }
 
+    if let data = data, data.isEmpty == false {
+      body["data"] = data
+    }
 
     request.post(path: "/events", body: body) { (response, error) in
       completion(error)

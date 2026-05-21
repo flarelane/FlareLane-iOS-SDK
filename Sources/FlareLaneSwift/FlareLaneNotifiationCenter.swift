@@ -23,11 +23,25 @@ import SafariServices
     }
     
     if let notification = FlareLaneNotification.getFlareLaneNotificationFromUNNotificationContent(response.notification.request.content) {
+      // Resolve which action button (if any) the user tapped. The NSE registered each action with
+      // its index as the identifier ("0", "1", ...), so anything that parses as an Int and isn't
+      // the system default/dismiss identifier is a button click. The idx is baked into the
+      // notification before we hand it off — no out-of-band parameter, mirroring Android.
+      let resolved: FlareLaneNotification
+      if response.actionIdentifier != UNNotificationDefaultActionIdentifier,
+         response.actionIdentifier != UNNotificationDismissActionIdentifier,
+         let idx = Int(response.actionIdentifier) {
+        resolved = notification.withClickedButtonIndex(idx)
+      } else {
+        resolved = notification
+      }
+
+      let event = FlareLaneNotificationClickedEvent(notification: resolved)
       if Globals.projectIdInUserDefaults == nil {
         Logger.verbose("projectId is nil. Too early clicked? process later when cold start.")
-        ColdStartNotificationManager.coldStartNotification = notification
+        ColdStartNotificationManager.coldStartNotification = resolved
       } else {
-        NotificationClickProcessor.shared.processNotificationClick(notification: notification)
+        event.process()
       }
     }
   }

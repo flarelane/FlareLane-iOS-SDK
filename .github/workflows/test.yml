@@ -1,0 +1,89 @@
+name: Tests
+
+on:
+  pull_request:
+
+concurrency:
+  group: tests-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  xctest:
+    name: XCTest (iOS Simulator)
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode
+        # macos-15 runner has multiple Xcode versions; pin to the latest stable so the SDK build
+        # uses a known toolchain. Falls back to xcode-select default if 16.x not installed.
+        run: sudo xcode-select -s /Applications/Xcode_16.4.app || sudo xcode-select -s /Applications/Xcode.app
+
+      - name: Show toolchain
+        run: |
+          xcodebuild -version
+          xcrun simctl list devices available | grep -E "iPhone (15|16|17) " | head -3
+
+      - name: Cache CocoaPods
+        uses: actions/cache@v4
+        with:
+          path: Example/Pods
+          key: pods-${{ hashFiles('Example/Podfile.lock') }}
+
+      - name: Install CocoaPods deps
+        working-directory: Example
+        run: pod install
+
+      - name: Install xcbeautify
+        run: which xcbeautify || brew install xcbeautify
+
+      - name: Run XCTest
+        # Xcode 16 runner ships iPhone 16 simulators, so destination is pinned to match the
+        # toolchain selected above. If the Xcode pin changes, update the iPhone here too.
+        working-directory: Example
+        run: |
+          set -o pipefail
+          xcodebuild test \
+            -workspace FlareLane.xcworkspace \
+            -scheme FlareLane-Example \
+            -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest' \
+            CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" CODE_SIGNING_ALLOWED=NO \
+            -resultBundlePath build/TestResults.xcresult \
+            | xcbeautify --renderer github-actions
+
+      - name: Upload xcresult bundle
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: xcresult
+          path: Example/build/TestResults.xcresult
+
+  framework-build:
+    name: Framework build (generic iOS)
+    runs-on: macos-15
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_16.4.app || sudo xcode-select -s /Applications/Xcode.app
+
+      - name: Cache CocoaPods
+        uses: actions/cache@v4
+        with:
+          path: Example/Pods
+          key: pods-${{ hashFiles('Example/Podfile.lock') }}
+
+      - name: Install CocoaPods deps
+        working-directory: Example
+        run: pod install
+
+      - name: Build FlareLane framework (generic iOS device, no signing)
+        working-directory: Example
+        run: |
+          xcodebuild build \
+            -workspace FlareLane.xcworkspace \
+            -scheme FlareLane \
+            -destination 'generic/platform=iOS' \
+            CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" CODE_SIGNING_ALLOWED=NO

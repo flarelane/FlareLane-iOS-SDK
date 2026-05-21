@@ -67,10 +67,11 @@ import Foundation
   }
 
   private func handleDeepLink(notification: FlareLaneNotification) {
-    if let urlString = notification.url, let url = URL(string: urlString) {
-      Logger.verbose("Processing deep link for notification: \(notification.id)")
-      FlareLaneNotificationCenter.shared.handleReceivedURL(url: url)
-    }
+    // `clickedUrl` already picks the right source — button.link for button clicks, body url
+    // for body clicks, nil when neither is set. No extra fallback needed here.
+    guard let urlString = notification.clickedUrl, let url = URL(string: urlString) else { return }
+    Logger.verbose("Processing deep link for notification: \(notification.id)")
+    FlareLaneNotificationCenter.shared.handleReceivedURL(url: url)
   }
 
   private func executeClickHandler(notification: FlareLaneNotification) {

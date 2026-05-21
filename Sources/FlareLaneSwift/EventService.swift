@@ -16,16 +16,37 @@ class EventService {
       return
     }
     
-    API.shared.sendEvent(   
+    // If the OS reported a button-slot tap, attach button info. Gate is the index (the
+    // "was a button clicked" question), so out-of-range / stale-category cases still send
+    // isButton=true plus the index; the button label/url are filled in best-effort via
+    // the resolved button object. Body-only clicks leave `data` nil — preserves the
+    // pre-buttons payload shape.
+    var data: [String: Any]? = nil
+    if let idx = notification.clickedButtonIndex {
+      var d: [String: Any] = [
+        "isButton": true,
+        "buttonIndex": idx
+      ]
+      if let button = notification.clickedButton {
+        d["buttonLabel"] = button.label
+      }
+      if let url = notification.clickedUrl, url.isEmpty == false {
+        d["url"] = url
+      }
+      data = d
+    }
+
+    API.shared.sendEvent(
       deviceId: deviceId,
       type: "CLICKED",
-      notificationId: notification.id
+      notificationId: notification.id,
+      data: data
     ) { error in
       if error != nil {
         Logger.error("Failed send event request.")
         return
       }
-      
+
       Logger.verbose("Succeed send event request.")
     }
   }
