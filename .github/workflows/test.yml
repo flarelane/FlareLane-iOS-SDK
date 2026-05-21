@@ -1,0 +1,137 @@
+name: Tests
+
+on:
+  push:
+    branches:
+      - master
+      - 'dev-**'
+  pull_request:
+    branches:
+      - master
+      - 'dev-**'
+
+concurrency:
+  group: tests-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  xctest:
+    name: XCTest (iOS Simulator)
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode
+        # macos-15 runner has multiple Xcode versions; pin to the latest stable so the SDK build
+        # uses a known toolchain. Falls back to xcode-select default if 16.x not installed.
+        run: sudo xcode-select -s /Applications/Xcode_16.app || sudo xcode-select -s /Applications/Xcode.app
+
+      - name: Show toolchain
+        run: |
+          xcodebuild -version
+          xcrun simctl list devices available | grep -E "iPhone (15|16) " | head -3
+
+      - name: Cache CocoaPods
+        uses: actions/cache@v4
+        with:
+          path: Example/Pods
+          key: pods-${{ hashFiles('Example/Podfile.lock') }}
+
+      - name: Install CocoaPods deps
+        working-directory: Example
+        run: pod install
+
+      - name: Provide dummy GoogleService-Info.plist
+        # Sample app's Copy Bundle Resources phase references
+        # `Example/FlareLane.xcodeproj/../../../GoogleService-Info.plist` — three levels above
+        # the .xcodeproj. On dev machines this lands at the `SDKs/` parent folder; on the CI
+        # runner the equivalent path is two levels above $GITHUB_WORKSPACE. CI doesn't ship
+        # Firebase keys and the SDK itself doesn't read this file, so a placeholder is enough to
+        # satisfy the build phase.
+        run: |
+          TARGET="$(dirname "$(dirname "$GITHUB_WORKSPACE")")/GoogleService-Info.plist"
+          cat > "$TARGET" <<'PLIST'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>CI_PLACEHOLDER</key>
+            <true/>
+          </dict>
+          </plist>
+          PLIST
+          echo "wrote placeholder to $TARGET"
+
+      - name: Run XCTest
+        working-directory: Example
+        run: |
+          set -o pipefail
+          xcodebuild test \
+            -workspace FlareLane.xcworkspace \
+            -scheme FlareLane-Example \
+            -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest' \
+            CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" CODE_SIGNING_ALLOWED=NO \
+            -resultBundlePath build/TestResults.xcresult \
+            | xcbeautify --renderer github-actions \
+            || (xcodebuild test \
+                  -workspace FlareLane.xcworkspace \
+                  -scheme FlareLane-Example \
+                  -destination 'platform=iOS Simulator,name=iPhone 15,OS=latest' \
+                  CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" CODE_SIGNING_ALLOWED=NO \
+                  -resultBundlePath build/TestResults.xcresult)
+        # The `||` fallback covers runner images where iPhone 16 isn't available; iPhone 15 is the
+        # stable secondary destination on macos-15.
+
+      - name: Install xcbeautify (if missing)
+        if: failure()
+        run: brew install xcbeautify || true
+
+      - name: Upload xcresult bundle
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: xcresult
+          path: Example/build/TestResults.xcresult
+
+  framework-build:
+    name: Framework build (generic iOS)
+    runs-on: macos-15
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_16.app || sudo xcode-select -s /Applications/Xcode.app
+
+      - name: Cache CocoaPods
+        uses: actions/cache@v4
+        with:
+          path: Example/Pods
+          key: pods-${{ hashFiles('Example/Podfile.lock') }}
+
+      - name: Install CocoaPods deps
+        working-directory: Example
+        run: pod install
+
+      - name: Provide dummy GoogleService-Info.plist
+        run: |
+          cat > "$GITHUB_WORKSPACE/../GoogleService-Info.plist" <<'PLIST'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>CI_PLACEHOLDER</key>
+            <true/>
+          </dict>
+          </plist>
+          PLIST
+
+      - name: Build FlareLane framework (generic iOS device, no signing)
+        working-directory: Example
+        run: |
+          xcodebuild build \
+            -workspace FlareLane.xcworkspace \
+            -scheme FlareLane \
+            -destination 'generic/platform=iOS' \
+            CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" CODE_SIGNING_ALLOWED=NO

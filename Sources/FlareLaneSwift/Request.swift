@@ -84,7 +84,14 @@ final class Request {
         return
       }
       
-      let responseObject = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any]
+      // Defensive JSON parse — log + nil if server returned non-JSON body. Ported from dev-1.9.5.
+      guard let jsonObject = try? JSONSerialization.jsonObject(with: data),
+            JSONSerialization.isValidJSONObject(jsonObject),
+            let responseObject = jsonObject as? [String: Any] else {
+        Logger.error("HTTP", "invalid JSON response", ["raw": String(data: data, encoding: .utf8) ?? "<undecodable>"])
+        completion(nil, nil)
+        return
+      }
       completion(responseObject, nil)
     }
     
@@ -107,7 +114,14 @@ final class Request {
       }
       
       if ((200 ..< 300) ~= response.statusCode) {
-        let responseObject = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any]
+        // Defensive JSON parse — log + nil if server returned non-JSON body. Ported from dev-1.9.5.
+        guard let jsonObject = try? JSONSerialization.jsonObject(with: data),
+              JSONSerialization.isValidJSONObject(jsonObject),
+              let responseObject = jsonObject as? [String: Any] else {
+          Logger.error("HTTP", "invalid JSON response", ["raw": String(data: data, encoding: .utf8) ?? "<undecodable>"])
+          completion(nil, nil)
+          return
+        }
         completion(responseObject, nil)
       } else {
         Logger.error("HTTP", "POST failed", ["path": path, "status": response.statusCode, "response": String(data: data, encoding: .utf8) ?? ""])
@@ -134,7 +148,14 @@ final class Request {
       }
       
       if ((200 ..< 300) ~= response.statusCode) {
-        let responseObject = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any]
+        // Defensive JSON parse — log + nil if server returned non-JSON body. Ported from dev-1.9.5.
+        guard let jsonObject = try? JSONSerialization.jsonObject(with: data),
+              JSONSerialization.isValidJSONObject(jsonObject),
+              let responseObject = jsonObject as? [String: Any] else {
+          Logger.error("HTTP", "invalid JSON response", ["raw": String(data: data, encoding: .utf8) ?? "<undecodable>"])
+          completion(nil, nil)
+          return
+        }
         completion(responseObject, nil)
       } else {
         Logger.error("HTTP", "PATCH failed", ["path": path, "status": response.statusCode, "response": String(data: data, encoding: .utf8) ?? ""])
@@ -161,7 +182,14 @@ final class Request {
       }
       
       if ((200 ..< 300) ~= response.statusCode) {
-        let responseObject = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any]
+        // Defensive JSON parse — log + nil if server returned non-JSON body. Ported from dev-1.9.5.
+        guard let jsonObject = try? JSONSerialization.jsonObject(with: data),
+              JSONSerialization.isValidJSONObject(jsonObject),
+              let responseObject = jsonObject as? [String: Any] else {
+          Logger.error("HTTP", "invalid JSON response", ["raw": String(data: data, encoding: .utf8) ?? "<undecodable>"])
+          completion(nil, nil)
+          return
+        }
         completion(responseObject, nil)
       } else {
         Logger.error("HTTP", "DELETE failed", ["path": path, "status": response.statusCode, "response": String(data: data, encoding: .utf8) ?? ""])

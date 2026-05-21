@@ -32,9 +32,12 @@ class InAppMessageJavascriptInterface: NSObject, WKScriptMessageHandler {
   }
   
   func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
-    
+
+    // Same WebView-payload validation as FlareLaneJavascriptInterface (ported from dev-1.9.5).
     guard let body = message.body as? [String: Any],
+          JSONSerialization.isValidJSONObject(body),
           let method = body["method"] as? String else {
+      Logger.error("InAppMessage", "invalid message body", ["body": "\(message.body)"])
       return
     }
     

@@ -16,8 +16,12 @@ import WebKit
     }
 
     public func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+        // Verify against malformed WebView payloads (e.g. cyclic graphs, non-JSON-encodable values
+        // injected by foreign content). Ported from dev-1.9.5 `Add isValidJSONObject`.
         guard let body = message.body as? [String: Any],
+              JSONSerialization.isValidJSONObject(body),
               let method = body["method"] as? String else {
+            Logger.error("WebView", "invalid message body", ["body": "\(message.body)"])
             return
         }
         
@@ -40,6 +44,11 @@ import WebKit
   
     private func syncDeviceData() {
       let data = ["platform":Globals.sdkPlatform, "deviceId":Globals.deviceIdInUserDefaults, "userId":Globals.userIdInUserDefaults, "projectId":Globals.projectIdInUserDefaults]
+      // Pre-validate so JSONSerialization.data won't throw inside the if-let chain.
+      guard JSONSerialization.isValidJSONObject(data) else {
+        Logger.error("WebView", "invalid JSON in syncDeviceData", ["data": "\(data)"])
+        return
+      }
       if let jsonData = try? JSONSerialization.data(withJSONObject: data, options: []),
          let jsonString = String(data: jsonData, encoding: .utf8) {
         let jsCode = "FlareLane.syncDeviceDataCallback(\(jsonString))"
