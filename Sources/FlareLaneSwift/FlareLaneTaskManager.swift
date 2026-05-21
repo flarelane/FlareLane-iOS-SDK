@@ -23,14 +23,24 @@ class FlareLaneTaskManager {
 
     let operation = BlockOperation {
       let semaphore = DispatchSemaphore(value: 0)
+      // taskCompleted is read by both the task callback (background) and the timeout closure
+      // (background); guard with a lock so concurrent read/write is well-defined under the
+      // Swift memory model (Bool reads aren't formally atomic even when word-aligned).
+      let flagLock = NSLock()
       var taskCompleted = false
+      func markCompleted() {
+        flagLock.lock(); taskCompleted = true; flagLock.unlock()
+      }
+      func isCompleted() -> Bool {
+        flagLock.lock(); let v = taskCompleted; flagLock.unlock(); return v
+      }
 
       Logger.verbose("TaskQueue", "task executing", ["name": taskName, "size": self.taskQueue.operationCount])
 
       // Execute the task on a background thread
       DispatchQueue.global(qos: .userInitiated).async {
         task {
-          taskCompleted = true
+          markCompleted()
           Logger.verbose("TaskQueue", "task completed", ["name": taskName])
           semaphore.signal() // Signal that the task is complete
         }
@@ -38,7 +48,7 @@ class FlareLaneTaskManager {
 
       // Set up the timeout
       DispatchQueue.global(qos: .userInitiated).asyncAfter(deadline: .now() + timeout) {
-        if !taskCompleted {
+        if !isCompleted() {
           Logger.error("TaskQueue", "task timed out", ["name": taskName, "timeout": timeout])
           semaphore.signal() // Signal that the timeout has occurred
         }
@@ -47,7 +57,7 @@ class FlareLaneTaskManager {
       semaphore.wait() // Wait for the task or timeout to complete
 
       // Ensure task completion is called even if the semaphore wait fails
-      if !taskCompleted {
+      if !isCompleted() {
         Logger.error("TaskQueue", "task did not complete but semaphore released", ["name": taskName])
       }
     }

@@ -51,8 +51,13 @@ import SafariServices
       
       if let flarelane_dismiss_foreground_notification = flarelaneNotification.data?["flarelane_dismiss_foreground_notification"] as? String,
          flarelane_dismiss_foreground_notification == "true" {
-        
+
         Logger.verbose("Notification", "foreground notification dismissed", ["reason": "flarelane_dismiss_foreground_notification"])
+        // UNUserNotificationCenterDelegate contract: completionHandler MUST be invoked exactly
+        // once on every willPresent call. Passing [] = "do not present this notification" while
+        // still satisfying the contract — without it the OS holds the presentation queue and
+        // eventually times out / logs a warning.
+        completionHandler([])
         return
       }
       

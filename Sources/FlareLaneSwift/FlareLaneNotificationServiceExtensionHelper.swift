@@ -10,9 +10,13 @@ import MobileCoreServices
 
 @objc public class FlareLaneNotificationServiceExtensionHelper: NSObject {
   @objc public static let shared = FlareLaneNotificationServiceExtensionHelper()
-  
+
   var contentHandler: ((UNNotificationContent) -> Void)?
   var bestAttemptContent: UNMutableNotificationContent?
+  /// Protects the exactly-once capture-and-clear of `contentHandler`. Without this, the async
+  /// `group.notify(.global())` path and `serviceExtensionTimeWillExpire()` (main thread) can
+  /// both pass the nil-check and double-invoke the OS handler — formally a contract violation.
+  private let contentHandlerLock = NSLock()
   
   @objc public func didReceive(_ request: UNNotificationRequest, withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void) {
     Logger.verbose("NSE", "didReceive invoked")
@@ -79,10 +83,16 @@ import MobileCoreServices
   /// Invokes the OS-provided contentHandler exactly once. Either the async normal path
   /// (image download + category registration) or `serviceExtensionTimeWillExpire` may reach this
   /// first; whichever wins releases the handler so the other becomes a no-op.
+  ///
+  /// The lock atomically captures-and-clears the handler so the two paths can't both observe a
+  /// non-nil value. The handler itself is invoked *outside* the lock to avoid re-entrancy if
+  /// the OS callback triggers further extension work synchronously.
   private func deliverContent(_ content: UNNotificationContent) {
-    guard let handler = self.contentHandler else { return }
+    contentHandlerLock.lock()
+    let handler = self.contentHandler
     self.contentHandler = nil
-    handler(content)
+    contentHandlerLock.unlock()
+    handler?(content)
   }
   
   @objc public func isFlareLaneNotification(_ request: UNNotificationRequest) -> Bool {
