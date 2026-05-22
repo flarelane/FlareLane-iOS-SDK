@@ -45,7 +45,7 @@ final class DeviceService {
 
     API.shared.createDevice(body: body) { (deviceId, error) in
       if let error = error {
-        Logger.error("Failed create device request. error: \(error.localizedDescription)")
+        Logger.error("Failed create device request.", error: error)
       } else if let deviceId = deviceId {
         Globals.deviceIdInUserDefaults = deviceId
         Globals.projectIdInUserDefaults = projectId
@@ -73,7 +73,7 @@ final class DeviceService {
 
       API.shared.updateDevice(deviceId: deviceId, body: body) { (device, error) in
         if let error = error {
-          Logger.error("Failed update device request. error: \(error.localizedDescription)")
+          Logger.error("Failed update device request.", error: error)
         } else {
           Logger.verbose("Succeed update device request.")
         }
@@ -100,7 +100,7 @@ final class DeviceService {
       var device: FlareLaneDevice? = nil
 
       if let error = error {
-        Logger.error("Failed update request. - \(body), error: \(error)")
+        Logger.error("Failed update request. - \(body)", error: error)
       } else if
         let response = response,
         let id = response["id"] as? String,
@@ -134,7 +134,7 @@ final class DeviceService {
 
     API.shared.setUserAttributes(deviceId: deviceId, userId: userId, attributes: attributes) { error in
       if let error = error {
-        Logger.error("Failed setUserAttributes. - \(attributes), error: \(error)")
+        Logger.error("Failed setUserAttributes. - \(attributes)", error: error)
       } else {
         Logger.verbose("Succeed setUserAttributes. - \(attributes)")
       }

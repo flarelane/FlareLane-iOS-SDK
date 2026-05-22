@@ -35,7 +35,7 @@ final class InAppMessageService {
       case let .success(data):
         self.processInAppMessages(data: data)
       case let .failure(error):
-        Logger.error("Failed to get in app messages: \(error.localizedDescription)")
+        Logger.error("Failed to get in app messages.", error: error)
       }
     }
   }
