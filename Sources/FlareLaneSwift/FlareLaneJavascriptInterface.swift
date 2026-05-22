@@ -16,8 +16,13 @@ import WebKit
     }
 
     public func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+        // Validate the bridge payload before downstream consumers attempt to
+        // re-serialize it: `isValidJSONObject` rejects NaN / Infinity / non-JSON
+        // types that would otherwise escape `try?` and crash via NSException.
         guard let body = message.body as? [String: Any],
+              JSONSerialization.isValidJSONObject(body),
               let method = body["method"] as? String else {
+            Logger.error("Invalid message body from JavaScript: \(message.body)")
             return
         }
         
@@ -42,6 +47,13 @@ import WebKit
   
     private func syncDeviceData() {
       let data = ["platform":Globals.sdkPlatform, "deviceId":Globals.deviceIdInUserDefaults, "userId":Globals.userIdInUserDefaults, "projectId":Globals.projectIdInUserDefaults]
+      // Even though the dict is composed of SDK-controlled strings, guard against
+      // NSException from `data(withJSONObject:)` should one of the Globals ever be
+      // an unexpected type — `try?` cannot recover from that exception.
+      guard JSONSerialization.isValidJSONObject(data) else {
+        Logger.error("Invalid JSON object in syncDeviceData: \(data)")
+        return
+      }
       if let jsonData = try? JSONSerialization.data(withJSONObject: data, options: []),
          let jsonString = String(data: jsonData, encoding: .utf8) {
         let jsCode = "FlareLane.syncDeviceDataCallback(\(jsonString))"

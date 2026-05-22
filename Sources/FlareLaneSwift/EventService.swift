@@ -54,11 +54,22 @@ class EventService {
   /// Processed when notification background received
   /// - Parameter notificationId: ID of received notification
   static func createBackgroundReceived(notificationId: String) {
+    // deviceId check runs FIRST so a missing deviceId doesn't accidentally
+    // mark the (id, BACKGROUND_RECEIVED) pair as processed — that would
+    // permanently block the next legitimate retry once deviceId is available.
     guard let deviceId = Globals.deviceIdInUserDefaults else {
       Logger.error("deviceId does not set.")
       return
     }
-    
+
+    // NSE may be invoked more than once for the same push payload; gate at the
+    // event emission point so backend never sees more than one BACKGROUND_RECEIVED
+    // per notification. RECEIVED and CLICKED live on different dedup keys.
+    if !NotificationEventDedup.shouldProcess(notificationId: notificationId, eventType: "BACKGROUND_RECEIVED") {
+      Logger.verbose("Duplicate notification BACKGROUND_RECEIVED prevented: \(notificationId)")
+      return
+    }
+
     Logger.verbose("Send BACKGROUND_RECEIVED event")
     
     API.shared.sendEvent(
@@ -78,11 +89,21 @@ class EventService {
   /// Processed when notification foreground received
   /// - Parameter notificationId: ID of received notification
   static func createForegroundReceived(notificationId: String) {
+    // deviceId check runs FIRST — see createBackgroundReceived for rationale.
     guard let deviceId = Globals.deviceIdInUserDefaults else {
       Logger.error("deviceId does not set.")
       return
     }
-    
+
+    // Foreground delegate or `notificationCenter(_:willPresent:...)` can fire
+    // more than once for the same payload (silent push race, scene re-entry);
+    // gate alongside the BACKGROUND_RECEIVED path so RECEIVED stays single-fire
+    // per (notificationId, lifecycle).
+    if !NotificationEventDedup.shouldProcess(notificationId: notificationId, eventType: "FOREGROUND_RECEIVED") {
+      Logger.verbose("Duplicate notification FOREGROUND_RECEIVED prevented: \(notificationId)")
+      return
+    }
+
     Logger.verbose("Send FOREGROUND_RECEIVED event")
     
     API.shared.sendEvent(
