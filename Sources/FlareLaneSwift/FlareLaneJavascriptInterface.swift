@@ -30,6 +30,8 @@ import WebKit
             setTags(body: body)
         case "trackEvent":
             trackEvent(body: body)
+        case "setUserAttributes":
+            setUserAttributes(body: body)
         case "openUrl":
             openUrl(body: body)
         default:
@@ -77,6 +79,14 @@ import WebKit
             FlareLane.trackEvent(type, data: data)
         } else {
             Logger.error("trackEvent() type not found")
+        }
+    }
+
+    private func setUserAttributes(body: [String: Any]) {
+        if let attributes = body["attributes"] as? [String: Any] {
+            FlareLane.setUserAttributes(attributes: attributes)
+        } else {
+            Logger.error("setUserAttributes() attributes not found")
         }
     }
   

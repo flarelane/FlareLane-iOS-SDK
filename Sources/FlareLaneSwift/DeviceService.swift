@@ -117,6 +117,31 @@ final class DeviceService {
     }
   }
 
+  /// Set user attributes — sends attributes with deviceId/userId to backend.
+  /// Matches Web SDK behavior: skip when userId is missing.
+  static func setUserAttributes(attributes: [String: Any],
+                                completion: ((Error?) -> Void)? = nil) {
+    guard let deviceId = Globals.deviceIdInUserDefaults else {
+      Logger.error("Globals.deviceIdInUserDefaults is nil")
+      completion?(nil)
+      return
+    }
+    guard let userId = Globals.userIdInUserDefaults else {
+      Logger.verbose("There is no userId. setUserAttributes is skipped.")
+      completion?(nil)
+      return
+    }
+
+    API.shared.setUserAttributes(deviceId: deviceId, userId: userId, attributes: attributes) { error in
+      if let error = error {
+        Logger.error("Failed setUserAttributes. - \(attributes), error: \(error)")
+      } else {
+        Logger.verbose("Succeed setUserAttributes. - \(attributes)")
+      }
+      completion?(error)
+    }
+  }
+
   // Save data to the local storage.
   private static func saveData(body: [String: Any?]?) {
     if let userIdValue = body?["userId"] {

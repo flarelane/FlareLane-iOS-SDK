@@ -131,9 +131,30 @@ import UIKit
     }
   }
 
+  /// Set user attributes (name/email/phoneNumber/dob/timeZone/country/language, etc.).
+  /// Sent only when userId is set, matching Web SDK behavior.
+  /// - Parameter attributes: User attribute key-value pairs
+  @objc public static func setUserAttributes(attributes: [String: Any]) {
+    taskManager.addTaskAfterInit(taskName: "setUserAttributes") { completionTask in
+      DeviceService.setUserAttributes(attributes: attributes) { _ in
+        completionTask()
+      }
+    }
+  }
+
   /// Get id of device
   @objc public static func getDeviceId() -> String? {
     return Globals.deviceIdInUserDefaults
+  }
+
+  /// Get projectId. Used by Flutter/RN plugins to build the hybrid WebView bridge sync payload.
+  @objc public static func getProjectId() -> String? {
+    return Globals.projectIdInUserDefaults
+  }
+
+  /// Get userId. Used by Flutter/RN plugins to build the hybrid WebView bridge sync payload.
+  @objc public static func getUserId() -> String? {
+    return Globals.userIdInUserDefaults
   }
 
   // Track event

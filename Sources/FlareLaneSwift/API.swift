@@ -110,6 +110,21 @@ final class API {
     }
   }
     
+  /// API to set user attributes
+  /// - Parameters:
+  ///   - deviceId: FlareLane deviceId
+  ///   - userId: FlareLane userId (required by backend)
+  ///   - attributes: User attribute key-value pairs (name/email/phoneNumber/dob/timeZone/country/language)
+  func setUserAttributes(deviceId: String, userId: String, attributes: [String: Any], completion: @escaping (Error?) -> Void) {
+    var body: [String: Any?] = attributes
+    body["deviceId"] = deviceId
+    body["userId"] = userId
+
+    request.patch(path: "/user-attributes", body: body) { (_, error) in
+      completion(error)
+    }
+  }
+
   func getInAppMessages(deviceId: String, group: String, data: [String: Any]?, completionHandler: @escaping (Result<[String: Any], Error>) -> Void) {
     request.post(
       path: "/devices/\(deviceId)/in-app-messages",
