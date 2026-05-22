@@ -33,7 +33,9 @@ import Foundation
 @objc public class NotificationEventDedup: NSObject {
 
   /// Hash set for O(1) `contains` lookup of dedup keys. Kept in sync with [order]
-  /// — both structures must be updated together under [lock].
+  /// — both structures are rebuilt from UserDefaults on every `shouldProcess`
+  /// call (see `reloadCache`) so cross-process writes (main app ↔ NSE) are
+  /// always visible.
   private static var processedKeys: Set<String> = []
 
   /// Insertion-ordered list of the same dedup keys. Lets eviction drop the
@@ -42,8 +44,6 @@ import Foundation
   /// seen notification could fire again). Matches the Android FIFO trim policy
   /// in `NotificationEventProcessor.trimToMax`.
   private static var order: [String] = []
-
-  private static var cacheLoaded = false
 
   private static let maxSize = 1000
   private static let lock = NSLock()
@@ -60,7 +60,11 @@ import Foundation
     lock.lock()
     defer { lock.unlock() }
 
-    loadCacheIfNeeded()
+    // Refresh from shared storage on every call so a write made by the
+    // NotificationServiceExtension (separate process) is observed by the main
+    // app (and vice versa). Without this, a once-loaded cache would let the
+    // same notification be processed independently in each process.
+    reloadCache()
 
     let key = "\(notificationId)#\(eventType)"
     if processedKeys.contains(key) {
@@ -82,16 +86,16 @@ import Foundation
     return true
   }
 
-  /// Lazy hydrate from `Globals.processedEventKeysInUserDefaults` on the first
-  /// call. Filters empty tokens defensively in case the stored value was
-  /// corrupted (leading / trailing / repeated commas).
-  private static func loadCacheIfNeeded() {
-    guard !cacheLoaded else { return }
-    cacheLoaded = true
-
+  /// Re-hydrate in-memory state from `Globals.processedEventKeysInUserDefaults`.
+  /// Filters empty tokens defensively in case the stored value was corrupted
+  /// (leading / trailing / repeated commas). Called under [lock] on every access.
+  private static func reloadCache() {
     let stored = Globals.processedEventKeysInUserDefaults ?? ""
-    guard !stored.isEmpty else { return }
-
+    guard !stored.isEmpty else {
+      processedKeys = []
+      order = []
+      return
+    }
     let tokens = stored.split(separator: ",").map(String.init).filter { !$0.isEmpty }
     processedKeys = Set(tokens)
     order = tokens
@@ -110,7 +114,6 @@ import Foundation
     defer { lock.unlock() }
     processedKeys.removeAll()
     order.removeAll()
-    cacheLoaded = false
     Globals.processedEventKeysInUserDefaults = nil
   }
 }

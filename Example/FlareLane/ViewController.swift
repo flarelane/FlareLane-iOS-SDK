@@ -32,8 +32,15 @@ class ViewController: UIViewController {
 
   override func viewDidLoad() {
     super.viewDidLoad()
-    // Reset titles to reflect initial false state.
-    // (Storyboard titles are static; runtime sync keeps them in lockstep.)
+    // Seed `isSubscribed` from the persisted SDK state so the first tap branches
+    // correctly (subscribe vs unsubscribe). Storyboard titles are static; the
+    // runtime label only updates after the user taps, which is intentional —
+    // syncing the title here would require an IBOutlet per toggle button.
+    FlareLane.isSubscribed { [weak self] subscribed in
+      DispatchQueue.main.async {
+        self?.isSubscribed = subscribed
+      }
+    }
   }
 
   @IBAction func ToggleUserID(_ sender: Any) {

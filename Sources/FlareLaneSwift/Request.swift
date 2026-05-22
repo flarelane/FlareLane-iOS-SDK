@@ -79,6 +79,7 @@ final class Request {
   
   func get(path: String, parameters: [String: String], completion: @escaping ([String: Any]?, Error?) -> Void) {
     guard let request = self.getRequest(path: path, parameters: parameters) else {
+      completion(nil, nil)
       return
     }
     
@@ -110,6 +111,9 @@ final class Request {
 
   func post(path: String, body: [String: Any?], completion: @escaping ([String: Any]?, Error?) -> Void) {
     guard let request = self.getRequestWithBody(method: WithBodyMethod.POST, path: path, body: body) else {
+      // Surface an explicit failure to the caller so a malformed body doesn't
+      // leave dependent tasks (event queue, NSE handlers) waiting forever.
+      completion(nil, nil)
       return
     }
     
@@ -143,6 +147,7 @@ final class Request {
 
   func patch(path: String, body: [String: Any?], completion: @escaping ([String: Any]?, Error?) -> Void) {
     guard let request = self.getRequestWithBody(method: WithBodyMethod.PATCH, path: path, body: body) else {
+      completion(nil, nil)
       return
     }
     
@@ -176,6 +181,7 @@ final class Request {
 
   func delete(path: String, body: [String: Any?], completion: @escaping ([String: Any]?, Error?) -> Void) {
     guard let request = self.getRequestWithBody(method: WithBodyMethod.DELETE, path: path, body: body) else {
+      completion(nil, nil)
       return
     }
     

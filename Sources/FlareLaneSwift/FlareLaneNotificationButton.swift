@@ -20,11 +20,14 @@ import Foundation
     return "label:\(label)\nlink:\(String(describing: link))"
   }
 
-  public func toDictionary() -> [String: Optional<Any>] {
-    return [
-      "label": label,
-      "link": link
-    ]
+  /// JSON-serializable representation for the cross-platform bridge.
+  /// Returns `[String: Any]` (never `Optional<Any>`) so `JSONSerialization` accepts
+  /// the dictionary; the optional `link` is omitted when nil rather than carrying
+  /// an `Optional.none` value that would fail validation.
+  public func toDictionary() -> [String: Any] {
+    var dict: [String: Any] = ["label": label]
+    if let link = link { dict["link"] = link }
+    return dict
   }
 
   /// Parse buttons from a push payload. Accepts either:

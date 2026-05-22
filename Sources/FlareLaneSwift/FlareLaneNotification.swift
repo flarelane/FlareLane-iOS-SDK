@@ -122,28 +122,34 @@ import UIKit
     return flarelaneNotification
   }
 
-  public func toDictionary() -> [String: Optional<Any>] {
-    // Pre-compute every derived value here so cross-platform consumers (RN/Flutter) can stay
-    // read-only — they only declare fields, never reproduce branching logic. Keeps the notion
-    // of "what was clicked / where to go" pinned to the native source of truth.
+  /// JSON-serializable representation for the cross-platform bridge.
+  ///
+  /// Pre-compute every derived value here so cross-platform consumers (RN/Flutter) can stay
+  /// read-only — they only declare fields, never reproduce branching logic. Keeps the notion
+  /// of "what was clicked / where to go" pinned to the native source of truth.
+  ///
+  /// Returns `[String: Any]` (never `Optional<Any>`) so `JSONSerialization` accepts the
+  /// dictionary. Optional fields are omitted when nil instead of carrying `Optional.none`
+  /// values, which `isValidJSONObject` rejects and which would crash `data(withJSONObject:)`
+  /// via NSException.
+  public func toDictionary() -> [String: Any] {
     let clicked = clickedButton
-    let dict: [String: Optional<Any>] = [
+    var dict: [String: Any] = [
       "id": id,
-      "title": title,
-      "body": body,
-      "url": url,
-      "imageUrl": imageUrl,
-      "data": data,
-      "buttons": buttonsList(),
-      "clickedButtonIndex": clickedButtonIndex,
-      "clickedButton": clicked.map { btn -> [String: Any] in
-        var item: [String: Any] = ["label": btn.label]
-        if let link = btn.link { item["link"] = link }
-        return item
-      },
-      "clickedUrl": clickedUrl
+      "body": body
     ]
-
+    if let title = title { dict["title"] = title }
+    if let url = url { dict["url"] = url }
+    if let imageUrl = imageUrl { dict["imageUrl"] = imageUrl }
+    if let data = data { dict["data"] = data }
+    if let buttons = buttonsList() { dict["buttons"] = buttons }
+    if let clickedButtonIndex = clickedButtonIndex { dict["clickedButtonIndex"] = clickedButtonIndex }
+    if let clicked = clicked {
+      var item: [String: Any] = ["label": clicked.label]
+      if let link = clicked.link { item["link"] = link }
+      dict["clickedButton"] = item
+    }
+    if let clickedUrl = clickedUrl { dict["clickedUrl"] = clickedUrl }
     return dict
   }
 

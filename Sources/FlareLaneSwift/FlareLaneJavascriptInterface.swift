@@ -46,10 +46,22 @@ import WebKit
     }
   
     private func syncDeviceData() {
-      let data = ["platform":Globals.sdkPlatform, "deviceId":Globals.deviceIdInUserDefaults, "userId":Globals.userIdInUserDefaults, "projectId":Globals.projectIdInUserDefaults]
-      // Even though the dict is composed of SDK-controlled strings, guard against
-      // NSException from `data(withJSONObject:)` should one of the Globals ever be
-      // an unexpected type — `try?` cannot recover from that exception.
+      // Compose with nullable values, then drop nils so downstream serialization
+      // proceeds even when an identifier (userId / deviceId / projectId) hasn't
+      // populated yet. The web SDK reads each key lazily and an absent identifier
+      // is expected to surface as `undefined` on the JS side rather than block the
+      // entire bridge call. Without this normalization, `[String: Optional<String>]`
+      // fails `isValidJSONObject` and the bridge stays silent.
+      let raw: [String: Any?] = [
+        "platform": Globals.sdkPlatform,
+        "deviceId": Globals.deviceIdInUserDefaults,
+        "userId": Globals.userIdInUserDefaults,
+        "projectId": Globals.projectIdInUserDefaults
+      ]
+      let data = raw.compactMapValues { $0 }
+      // Guard against NSException from `data(withJSONObject:)` should one of the
+      // Globals ever be an unexpected non-JSON type — `try?` cannot recover from
+      // that exception.
       guard JSONSerialization.isValidJSONObject(data) else {
         Logger.error("Invalid JSON object in syncDeviceData: \(data)")
         return
@@ -96,6 +108,13 @@ import WebKit
 
     private func setUserAttributes(body: [String: Any]) {
         if let attributes = body["attributes"] as? [String: Any] {
+            // Mirror the syncDeviceData guard: reject NaN / Infinity / non-JSON types
+            // here so a malformed payload can't crash via the downstream NSException
+            // raised by `data(withJSONObject:)`.
+            guard JSONSerialization.isValidJSONObject(attributes) else {
+                Logger.error("Invalid JSON object in setUserAttributes: \(attributes)")
+                return
+            }
             FlareLane.setUserAttributes(attributes: attributes)
         } else {
             Logger.error("setUserAttributes() attributes not found")
