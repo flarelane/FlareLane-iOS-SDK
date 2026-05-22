@@ -32,18 +32,12 @@ import Foundation
 /// `MAX_SIZE = 1000`, persistent write on every accept).
 @objc public class NotificationEventDedup: NSObject {
 
-  /// Hash set for O(1) `contains` lookup of dedup keys. Kept in sync with [order]
-  /// — both structures are rebuilt from UserDefaults on every `shouldProcess`
-  /// call (see `reloadCache`) so cross-process writes (main app ↔ NSE) are
-  /// always visible.
-  private static var processedKeys: Set<String> = []
-
-  /// Insertion-ordered list of the same dedup keys. Lets eviction drop the
-  /// *oldest* single entry when the cap is reached, instead of wiping the whole
-  /// set (which would leave a "thundering herd" window where every previously
-  /// seen notification could fire again). Matches the Android FIFO trim policy
-  /// in `NotificationEventProcessor.trimToMax`.
-  private static var order: [String] = []
+  /// Insertion-ordered list of dedup keys. Rebuilt from UserDefaults on every
+  /// `shouldProcess` call (see `reloadCache`) so cross-process writes
+  /// (main app ↔ NSE) are always visible. `contains` lookup is O(n) but
+  /// `maxSize` caps the array at 1000 — negligible compared to the UserDefaults
+  /// I/O that already runs each call.
+  private static var keys: [String] = []
 
   private static let maxSize = 1000
   private static let lock = NSLock()
@@ -60,51 +54,40 @@ import Foundation
     lock.lock()
     defer { lock.unlock() }
 
-    // Refresh from shared storage on every call so a write made by the
-    // NotificationServiceExtension (separate process) is observed by the main
-    // app (and vice versa). Without this, a once-loaded cache would let the
-    // same notification be processed independently in each process.
     reloadCache()
 
     let key = "\(notificationId)#\(eventType)"
-    if processedKeys.contains(key) {
+    if keys.contains(key) {
       return false
     }
 
-    // Coarse cap matching the Android bound. The cap is across all event types
-    // combined, which is fine because each (id, eventType) pair is a distinct key.
-    // Evict BEFORE inserting (and only the oldest, not all) so the new key isn't
-    // immediately wiped and so the cache doesn't lose its entire dedup window
-    // every time the limit is reached.
-    while processedKeys.count >= maxSize, let oldest = order.first {
-      order.removeFirst()
-      processedKeys.remove(oldest)
+    // Evict the oldest single entry before inserting so the new key survives and
+    // the cache doesn't lose its entire dedup window when the cap is reached.
+    while keys.count >= maxSize {
+      keys.removeFirst()
     }
-    processedKeys.insert(key)
-    order.append(key)
+    keys.append(key)
     persist()
     return true
   }
 
-  /// Re-hydrate in-memory state from `Globals.processedEventKeysInUserDefaults`.
-  /// Filters empty tokens defensively in case the stored value was corrupted
-  /// (leading / trailing / repeated commas). Called under [lock] on every access.
+  /// Refresh in-memory state from shared UserDefaults on every access so writes
+  /// from the NotificationServiceExtension (separate process) are observed by
+  /// the main app and vice versa. Filters empty tokens defensively in case the
+  /// stored value was corrupted (leading / trailing / repeated commas).
   private static func reloadCache() {
     let stored = Globals.processedEventKeysInUserDefaults ?? ""
     guard !stored.isEmpty else {
-      processedKeys = []
-      order = []
+      keys = []
       return
     }
-    let tokens = stored.split(separator: ",").map(String.init).filter { !$0.isEmpty }
-    processedKeys = Set(tokens)
-    order = tokens
+    keys = stored.split(separator: ",").map(String.init).filter { !$0.isEmpty }
   }
 
   /// Synchronously write the current dedup set back to UserDefaults so a
   /// force-stop right after the call can't lose the state.
   private static func persist() {
-    Globals.processedEventKeysInUserDefaults = order.joined(separator: ",")
+    Globals.processedEventKeysInUserDefaults = keys.joined(separator: ",")
   }
 
   /// Clear the dedup cache. Used by tests and `NotificationClickProcessor`'s
@@ -112,8 +95,7 @@ import Foundation
   @objc public static func clearForTesting() {
     lock.lock()
     defer { lock.unlock() }
-    processedKeys.removeAll()
-    order.removeAll()
+    keys.removeAll()
     Globals.processedEventKeysInUserDefaults = nil
   }
 }

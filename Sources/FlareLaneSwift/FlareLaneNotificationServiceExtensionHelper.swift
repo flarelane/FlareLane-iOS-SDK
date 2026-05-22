@@ -95,12 +95,6 @@ import MobileCoreServices
   /// invocations as long as the same extension bundle is in use.
   private static let registeredCategoriesKey = "com.flarelane.dynamicCategoryIds"
 
-  /// Serializes the read-modify-write on `registeredCategoriesKey` so two concurrent
-  /// NSE invocations (a rare but possible scenario when several pushes land back-to-back
-  /// and the extension is kept warm) can't interleave their evictions and lose tracked
-  /// identifiers. Mirrors the lock pattern used by `NotificationEventDedup`.
-  private static let categoryTrackingLock = NSLock()
-
   /// Build a UNNotificationCategory from the parsed button list and attach its identifier to the
   /// content. Each action's identifier is the button index ("0", "1", ...) so the click handler
   /// can recover `clickedButtonIndex` directly from `response.actionIdentifier`.
@@ -125,23 +119,17 @@ import MobileCoreServices
 
     // Track our own category IDs in insertion order; when we exceed the cap, the head of the
     // list is the eviction candidate. We re-append the current ID so a repeated notification ID
-    // (rare but possible) refreshes its position to the tail. The read-modify-write runs under
-    // a lock so concurrent NSE invocations can't interleave their evictions; the async
-    // `setNotificationCategories` call below intentionally lives outside the lock to avoid
-    // holding it across a system callback.
-    let evicted: [String]
-    Self.categoryTrackingLock.lock()
+    // (rare but possible) refreshes its position to the tail. The OS serializes NSE invocations
+    // for a single extension instance, so no explicit cross-thread locking is needed here.
     let defaults = UserDefaults.standard
     var tracked = defaults.stringArray(forKey: Self.registeredCategoriesKey) ?? []
     tracked.removeAll { $0 == categoryIdentifier }
     tracked.append(categoryIdentifier)
-    var pendingEvicted: [String] = []
+    var evicted: [String] = []
     while tracked.count > Self.maxDynamicCategories {
-      pendingEvicted.append(tracked.removeFirst())
+      evicted.append(tracked.removeFirst())
     }
     defaults.set(tracked, forKey: Self.registeredCategoriesKey)
-    evicted = pendingEvicted
-    Self.categoryTrackingLock.unlock()
 
     // Merge into the existing category set so we don't clobber categories registered by the host
     // app or other libraries, while dropping any of ours we just evicted from the tracked list.
