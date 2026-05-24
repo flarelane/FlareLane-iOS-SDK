@@ -46,19 +46,21 @@ import WebKit
     }
   
     private func syncDeviceData() {
-      // Compose with nullable values, then drop nils so downstream serialization
-      // proceeds even when an identifier (userId / deviceId / projectId) hasn't
-      // populated yet. The web SDK reads each key lazily and an absent identifier
-      // is expected to surface as `undefined` on the JS side rather than block the
-      // entire bridge call. Without this normalization, `[String: Optional<String>]`
-      // fails `isValidJSONObject` and the bridge stays silent.
-      let raw: [String: Any?] = [
+      // Emit unset identifiers as explicit `null`, not by omitting the key. The
+      // web SDK applies `{ ...syncedDeviceData, ...data }` on receipt, so an
+      // omitted key would keep a stale value on the JS side (e.g. after a native
+      // logout `userId` would never clear). Native is the source of truth in
+      // hybrid setups, so each call must convey the full identifier set —
+      // including the absence of a value. NSNull is the JSONSerialization-
+      // friendly null token, which also keeps the dict `isValidJSONObject`
+      // compliant; without this, `[String: Optional<String>]` would fail the
+      // check and the bridge would stay silent.
+      let data: [String: Any] = [
         "platform": Globals.sdkPlatform,
-        "deviceId": Globals.deviceIdInUserDefaults,
-        "userId": Globals.userIdInUserDefaults,
-        "projectId": Globals.projectIdInUserDefaults
+        "deviceId": Globals.deviceIdInUserDefaults ?? NSNull(),
+        "userId": Globals.userIdInUserDefaults ?? NSNull(),
+        "projectId": Globals.projectIdInUserDefaults ?? NSNull()
       ]
-      let data = raw.compactMapValues { $0 }
       // Guard against NSException from `data(withJSONObject:)` should one of the
       // Globals ever be an unexpected non-JSON type — `try?` cannot recover from
       // that exception.
