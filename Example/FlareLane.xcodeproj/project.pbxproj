@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		040A273E2C14BE5E00419F35 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 040A273D2C14BE5E00419F35 /* GoogleService-Info.plist */; };
 		044400212BD7C18B007BA17A /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 044400202BD7C18B007BA17A /* PrivacyInfo.xcprivacy */; };
 		044400222BD7C18B007BA17A /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 044400202BD7C18B007BA17A /* PrivacyInfo.xcprivacy */; };
 		044400232BD7C18B007BA17A /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 044400202BD7C18B007BA17A /* PrivacyInfo.xcprivacy */; };
@@ -61,7 +60,6 @@
 
 /* Begin PBXFileReference section */
 		03FE7084E42E1AFCF6BF7802 /* Pods-FlareLane_Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-FlareLane_Example.debug.xcconfig"; path = "Target Support Files/Pods-FlareLane_Example/Pods-FlareLane_Example.debug.xcconfig"; sourceTree = "<group>"; };
-		040A273D2C14BE5E00419F35 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "../../../GoogleService-Info.plist"; sourceTree = "<group>"; };
 		044400202BD7C18B007BA17A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		04863E182C4C049300C9009D /* WebViewBridgeController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebViewBridgeController.swift; sourceTree = "<group>"; };
 		04938C0D2803D3AD00CED062 /* FlareLaneNotificationServiceExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = FlareLaneNotificationServiceExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -179,7 +177,6 @@
 				607FACD71AFB9204008FA782 /* ViewController.swift */,
 				8F7605482B68F38100FBAABB /* WebViewController.swift */,
 				04863E182C4C049300C9009D /* WebViewBridgeController.swift */,
-				040A273D2C14BE5E00419F35 /* GoogleService-Info.plist */,
 				607FACD91AFB9204008FA782 /* Main.storyboard */,
 				607FACDC1AFB9204008FA782 /* Images.xcassets */,
 				8F76053C2B689EDF00FBAABB /* webview_bridge_test.html */,
@@ -367,7 +364,6 @@
 				607FACDD1AFB9204008FA782 /* Images.xcassets in Resources */,
 				044400212BD7C18B007BA17A /* PrivacyInfo.xcprivacy in Resources */,
 				8F76053D2B689EE000FBAABB /* webview_bridge_test.html in Resources */,
-				040A273E2C14BE5E00419F35 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -389,27 +385,11 @@
 			);
 			inputPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-FlareLane_Example/Pods-FlareLane_Example-frameworks.sh",
-				"${BUILT_PRODUCTS_DIR}/FirebaseCore/FirebaseCore.framework",
-				"${BUILT_PRODUCTS_DIR}/FirebaseCoreInternal/FirebaseCoreInternal.framework",
-				"${BUILT_PRODUCTS_DIR}/FirebaseInstallations/FirebaseInstallations.framework",
-				"${BUILT_PRODUCTS_DIR}/FirebaseMessaging/FirebaseMessaging.framework",
 				"${BUILT_PRODUCTS_DIR}/FlareLane/FlareLane.framework",
-				"${BUILT_PRODUCTS_DIR}/GoogleDataTransport/GoogleDataTransport.framework",
-				"${BUILT_PRODUCTS_DIR}/GoogleUtilities/GoogleUtilities.framework",
-				"${BUILT_PRODUCTS_DIR}/PromisesObjC/FBLPromises.framework",
-				"${BUILT_PRODUCTS_DIR}/nanopb/nanopb.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FirebaseCore.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FirebaseCoreInternal.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FirebaseInstallations.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FirebaseMessaging.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FlareLane.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/GoogleDataTransport.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/GoogleUtilities.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FBLPromises.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/nanopb.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;

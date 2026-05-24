@@ -27,14 +27,14 @@
                                 <subviews>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Xed-2g-mLL">
                                         <rect key="frame" x="0.0" y="0.0" width="361" height="40"/>
-                                        <state key="normal" title="Toggle User ID"/>
+                                        <state key="normal" title="Toggle User ID (set)"/>
                                         <connections>
                                             <action selector="ToggleUserID:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="O0q-sy-chR"/>
                                         </connections>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="wEE-nl-Zn1">
                                         <rect key="frame" x="0.0" y="40" width="361" height="39.666666666666657"/>
-                                        <state key="normal" title="Toggle Tags"/>
+                                        <state key="normal" title="Toggle Tags (set)"/>
                                         <connections>
                                             <action selector="ToggleTags:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="m6F-j3-M58"/>
                                         </connections>
@@ -44,6 +44,13 @@
                                         <state key="normal" title="Track Event (test_event)"/>
                                         <connections>
                                             <action selector="TrackEvent:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="oJz-bS-n1N"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="SUA-bt-001">
+                                        <rect key="frame" x="0.0" y="119.66666666666669" width="361" height="40"/>
+                                        <state key="normal" title="Toggle User Attributes (set)"/>
+                                        <connections>
+                                            <action selector="SetUserAttributes:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="SUA-ac-001"/>
                                         </connections>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="XjB-DH-5sn">
@@ -56,18 +63,9 @@
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="EWS-kE-5ej">
                                         <rect key="frame" x="0.0" y="159.66666666666669" width="361" height="39.666666666666657"/>
-                                        <state key="normal" title="Button"/>
-                                        <buttonConfiguration key="configuration" style="plain" title="subscribe()"/>
+                                        <state key="normal" title="Toggle Subscribe (set)"/>
                                         <connections>
-                                            <action selector="subscribe:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="Rh8-Hg-C0V"/>
-                                        </connections>
-                                    </button>
-                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="iCR-E1-jub">
-                                        <rect key="frame" x="0.0" y="199.33333333333331" width="361" height="40"/>
-                                        <state key="normal" title="Button"/>
-                                        <buttonConfiguration key="configuration" style="plain" title="unsubscribe()"/>
-                                        <connections>
-                                            <action selector="unsubscribe:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="TOn-P5-eqV"/>
+                                            <action selector="ToggleSubscribe:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="Rh8-Hg-C0V"/>
                                         </connections>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="BLR-sN-lM6" userLabel="displayInApp()">

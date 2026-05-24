@@ -56,13 +56,22 @@ final class Request {
           let url = URL(string: "\(baseURL)\(path)") else {
       return nil
     }
-    
+
+    // Pre-validate before `data(withJSONObject:)`: that call raises an NSException
+    // (not a Swift error) on non-JSON-serializable input — NaN / Infinity / arbitrary
+    // class instances — and `try?` cannot catch NSException. Without this guard a
+    // malformed payload silently crashes the host app.
+    guard JSONSerialization.isValidJSONObject(body) else {
+      Logger.error("Invalid JSON object in request body: \(body)")
+      return nil
+    }
+
     var request = URLRequest(url: url)
     request.httpMethod = method.rawValue
     request.httpBody = try? JSONSerialization.data(withJSONObject: body, options: [])
     request.addValue("application/json", forHTTPHeaderField: "Content-Type")
     request.setValue(self.getRequestSDKInfoHeaderValue(), forHTTPHeaderField: "x-flarelane-sdk-info")
-    
+
     return request
   }
   
@@ -70,6 +79,7 @@ final class Request {
   
   func get(path: String, parameters: [String: String], completion: @escaping ([String: Any]?, Error?) -> Void) {
     guard let request = self.getRequest(path: path, parameters: parameters) else {
+      completion(nil, nil)
       return
     }
     
@@ -84,15 +94,26 @@ final class Request {
         return
       }
       
-      let responseObject = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any]
+      // `jsonObject(with:)` raises NSException on grossly malformed data; `try?` can't
+      // catch that, so validate the decoded shape too before downcasting.
+      guard let jsonObject = try? JSONSerialization.jsonObject(with: data),
+            JSONSerialization.isValidJSONObject(jsonObject),
+            let responseObject = jsonObject as? [String: Any] else {
+        Logger.error("Invalid JSON response data: \(String(data: data, encoding: .utf8) ?? "unable to decode")")
+        completion(nil, nil)
+        return
+      }
       completion(responseObject, nil)
     }
-    
+
     task.resume()
   }
-  
+
   func post(path: String, body: [String: Any?], completion: @escaping ([String: Any]?, Error?) -> Void) {
     guard let request = self.getRequestWithBody(method: WithBodyMethod.POST, path: path, body: body) else {
+      // Surface an explicit failure to the caller so a malformed body doesn't
+      // leave dependent tasks (event queue, NSE handlers) waiting forever.
+      completion(nil, nil)
       return
     }
     
@@ -107,19 +128,26 @@ final class Request {
       }
       
       if ((200 ..< 300) ~= response.statusCode) {
-        let responseObject = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any]
+        guard let jsonObject = try? JSONSerialization.jsonObject(with: data),
+              JSONSerialization.isValidJSONObject(jsonObject),
+              let responseObject = jsonObject as? [String: Any] else {
+          Logger.error("Invalid JSON response data: \(String(data: data, encoding: .utf8) ?? "unable to decode")")
+          completion(nil, nil)
+          return
+        }
         completion(responseObject, nil)
       } else {
         Logger.error(String(data: data, encoding: .utf8) ?? "post error")
         completion(nil, HTTPError.serverSideError(response.statusCode))
       }
     }
-    
+
     task.resume()
   }
-  
+
   func patch(path: String, body: [String: Any?], completion: @escaping ([String: Any]?, Error?) -> Void) {
     guard let request = self.getRequestWithBody(method: WithBodyMethod.PATCH, path: path, body: body) else {
+      completion(nil, nil)
       return
     }
     
@@ -134,19 +162,26 @@ final class Request {
       }
       
       if ((200 ..< 300) ~= response.statusCode) {
-        let responseObject = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any]
+        guard let jsonObject = try? JSONSerialization.jsonObject(with: data),
+              JSONSerialization.isValidJSONObject(jsonObject),
+              let responseObject = jsonObject as? [String: Any] else {
+          Logger.error("Invalid JSON response data: \(String(data: data, encoding: .utf8) ?? "unable to decode")")
+          completion(nil, nil)
+          return
+        }
         completion(responseObject, nil)
       } else {
         Logger.error(String(data: data, encoding: .utf8) ?? "patch error")
         completion(nil, HTTPError.serverSideError(response.statusCode))
       }
     }
-    
+
     task.resume()
   }
-  
+
   func delete(path: String, body: [String: Any?], completion: @escaping ([String: Any]?, Error?) -> Void) {
     guard let request = self.getRequestWithBody(method: WithBodyMethod.DELETE, path: path, body: body) else {
+      completion(nil, nil)
       return
     }
     
@@ -161,12 +196,18 @@ final class Request {
       }
       
       if ((200 ..< 300) ~= response.statusCode) {
-        let responseObject = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any]
+        guard let jsonObject = try? JSONSerialization.jsonObject(with: data),
+              JSONSerialization.isValidJSONObject(jsonObject),
+              let responseObject = jsonObject as? [String: Any] else {
+          Logger.error("Invalid JSON response data: \(String(data: data, encoding: .utf8) ?? "unable to decode")")
+          completion(nil, nil)
+          return
+        }
         completion(responseObject, nil)
       } else {
         Logger.error(String(data: data, encoding: .utf8) ?? "delete error")
         completion(nil, HTTPError.serverSideError(response.statusCode))
-        
+
       }
     }
     

@@ -14,7 +14,7 @@ public enum SdkType: String {
 }
 
 final class Globals {
-  static var sdkVersion = "1.9.4"
+  static var sdkVersion = "1.10.0"
   static var sdkType: SdkType = .native
   static var sdkPlatform = "ios"
   
@@ -41,6 +41,11 @@ final class Globals {
     case pushToken = "flarelane_pushTokenKey"
     case isSubscribed = "flarelane_isSubscribedKey"
     case badgeCount = "flarelane_badgeCount"
+    // Comma-separated `<notificationId>#<eventType>` dedup keys consumed by
+    // `NotificationEventDedup`. Stored via the same dual app-group + standard
+    // path as the other identifiers so the NSE-side BACKGROUND_RECEIVED dedup
+    // is visible to the main app's CLICKED dedup (and survives process restart).
+    case processedEventKeys = "flarelane_processedEventKeysKey"
   }
   
   /// Generalized Dual Storage Getter
@@ -100,6 +105,14 @@ final class Globals {
   static var badgeCountUserDefaults: Int? {
     get { getValue(forKey: .badgeCount) }
     set { setValue(newValue, forKey: .badgeCount) }
+  }
+
+  /// Persisted dedup keys for `NotificationEventDedup` (comma-joined).
+  /// Lives in the same dual storage as the other identifiers so the dedup
+  /// decision survives process restart and is shared between main app ↔ NSE.
+  static var processedEventKeysInUserDefaults: String? {
+    get { getValue(forKey: .processedEventKeys) }
+    set { setValue(newValue, forKey: .processedEventKeys) }
   }
   
   static var bundleIdentifier: String? {

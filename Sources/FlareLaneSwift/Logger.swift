@@ -13,27 +13,29 @@ import Foundation
   case verbose = 5
 }
 
-enum LogEvent: String {
-  case error = "[‼️]"
-  case verbose = "[💬]"
-}
-
+/// Single SDK-wide logger. Output prefix is unified across all four FlareLane SDKs to
+/// `[FlareLane][LEVEL] message` so the same log line is recognizable on any platform.
+///
+/// Uses `NSLog` rather than `print` so the line shows up in the device's syslog —
+/// visible via Console.app and `idevicesyslog` for production debugging, with the
+/// timestamp / process / PID metadata that NSLog prepends automatically. Matches the
+/// pattern used by OneSignal / Sentry / Firebase iOS SDKs.
 final class Logger {
-  static func error( _ object: Any, filename: String = #file, line: Int = #line, column: Int = #column, funcName: String = #function) {
-    if Globals.logLevel.rawValue >= LogLevel.error.rawValue {
-      print("\(Date().toString()) [FlareLaneLogger]\(LogEvent.error.rawValue)[\(sourceFileName(filePath: filename))]:\(line) \(column) \(funcName) -> \(object)")
-    }
-  }
-  
-  static func verbose( _ object: Any, filename: String = #file, line: Int = #line, column: Int = #column, funcName: String = #function) {
+  static func verbose(_ object: Any) {
     if Globals.logLevel.rawValue >= LogLevel.verbose.rawValue {
-      print("\(Date().toString()) [FlareLaneLogger]\(LogEvent.verbose.rawValue)[\(sourceFileName(filePath: filename))]:\(line) \(column) \(funcName) -> \(object)")
+      NSLog("%@", "[FlareLane][VERBOSE] \(object)")
     }
   }
-  
-  private static func sourceFileName(filePath: String) -> String {
-    let components = filePath.components(separatedBy: "/")
-    return components.isEmpty ? "" : components.last!
+
+  /// Pass `error` when reporting a caught exception. The Error's description
+  /// (including `NSError`'s domain/code) is appended on its own line so the
+  /// failure context is preserved alongside the action message.
+  static func error(_ object: Any, error: Error? = nil) {
+    if Globals.logLevel.rawValue >= LogLevel.error.rawValue {
+      NSLog("%@", "[FlareLane][ERROR] \(object)")
+      if let error = error {
+        NSLog("%@", "[FlareLane][ERROR] cause=\(error)")
+      }
+    }
   }
 }
-

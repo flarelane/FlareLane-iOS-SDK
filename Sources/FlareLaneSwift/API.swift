@@ -53,7 +53,7 @@ final class API {
   ///   - type: Notification event type
   ///   - notificationId: NotificationId
   ///   - completion: Completion callback
-  func sendEvent(deviceId: String, type: String, notificationId: String, completion: @escaping (Error?) -> Void) {
+  func sendEvent(deviceId: String, type: String, notificationId: String, data: [String: Any]? = nil, completion: @escaping (Error?) -> Void) {
     var body: [String: Any] = [
       "notificationId":notificationId,
       "deviceId": deviceId,
@@ -61,12 +61,15 @@ final class API {
       "createdAt": Date().toString(),
       "platform" : Globals.sdkPlatform
     ]
-    
+
     let userId = Globals.userIdInUserDefaults
     if (userId != nil) {
       body["userId"] = userId
     }
 
+    if let data = data, data.isEmpty == false {
+      body["data"] = data
+    }
 
     request.post(path: "/events", body: body) { (response, error) in
       completion(error)
@@ -107,6 +110,21 @@ final class API {
     }
   }
     
+  /// API to set user attributes
+  /// - Parameters:
+  ///   - deviceId: FlareLane deviceId
+  ///   - userId: FlareLane userId (required by backend)
+  ///   - attributes: User attribute key-value pairs (name/email/phoneNumber/dob/timeZone/country/language)
+  func setUserAttributes(deviceId: String, userId: String, attributes: [String: Any], completion: @escaping (Error?) -> Void) {
+    var body: [String: Any?] = attributes
+    body["deviceId"] = deviceId
+    body["userId"] = userId
+
+    request.patch(path: "/user-attributes", body: body) { (_, error) in
+      completion(error)
+    }
+  }
+
   func getInAppMessages(deviceId: String, group: String, data: [String: Any]?, completionHandler: @escaping (Result<[String: Any], Error>) -> Void) {
     request.post(
       path: "/devices/\(deviceId)/in-app-messages",

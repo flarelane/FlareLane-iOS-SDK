@@ -12,28 +12,19 @@ import Foundation
 
   @objc public static let shared = NotificationClickProcessor()
 
-  // Track processed notification IDs to prevent duplicate clicks across different execution paths
-  // This prevents issues in React Native where didReceive may be called before process()
-  private static var processedNotificationIds: Set<String> = []
-
   /// Process notification click with duplicate prevention, deep link handling, and click handler execution
   /// - Parameter notification: Received notification
   @objc public func processNotificationClick(notification: FlareLaneNotification) {
-    // Check for duplicate prevention
-    if NotificationClickProcessor.processedNotificationIds.contains(notification.id) {
-      Logger.verbose("Duplicate notification processing prevented: \(notification.id)")
+    // Gate on the shared dedup cache so a re-fire of the same CLICKED event
+    // (rapid re-tap, OS replay, etc.) skips backend POST + handler invoke
+    // together. RECEIVED events for the same notification id remain independent
+    // because the dedup key is `<id>#<eventType>`.
+    if !NotificationEventDedup.shouldProcess(notificationId: notification.id, eventType: "CLICKED") {
+      Logger.verbose("Duplicate notification CLICKED processing prevented: \(notification.id)")
       return
     }
 
     Logger.verbose("Clicked user notification: \(notification.id)")
-
-    // Mark as processed
-    NotificationClickProcessor.processedNotificationIds.insert(notification.id)
-
-    // Clean up old entries to prevent memory leaks (keep only last 1000 entries)
-    if NotificationClickProcessor.processedNotificationIds.count > 1000 {
-      NotificationClickProcessor.processedNotificationIds.removeAll()
-    }
 
     // Send clicked event
     EventService.createClicked(notification: notification)
@@ -67,10 +58,11 @@ import Foundation
   }
 
   private func handleDeepLink(notification: FlareLaneNotification) {
-    if let urlString = notification.url, let url = URL(string: urlString) {
-      Logger.verbose("Processing deep link for notification: \(notification.id)")
-      FlareLaneNotificationCenter.shared.handleReceivedURL(url: url)
-    }
+    // `clickedUrl` already picks the right source — button.link for button clicks, body url
+    // for body clicks, nil when neither is set. No extra fallback needed here.
+    guard let urlString = notification.clickedUrl, let url = URL(string: urlString) else { return }
+    Logger.verbose("Processing deep link for notification: \(notification.id)")
+    FlareLaneNotificationCenter.shared.handleReceivedURL(url: url)
   }
 
   private func executeClickHandler(notification: FlareLaneNotification) {
@@ -85,9 +77,10 @@ import Foundation
     clickedHandler(notification)
   }
 
-  /// Clear processed notification tracking cache (useful for testing)
+  /// Clear processed notification tracking cache (useful for testing). Kept as a
+  /// public API for backward compatibility; dedup state lives in [NotificationEventDedup].
   @objc public static func clearProcessedNotificationIds() {
-    processedNotificationIds.removeAll()
-    Logger.verbose("Cleared processed notification IDs cache")
+    NotificationEventDedup.clearForTesting()
+    Logger.verbose("Cleared processed notification keys cache")
   }
 }
