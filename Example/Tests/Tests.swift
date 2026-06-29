@@ -123,4 +123,102 @@ class Tests: XCTestCase {
         // Sanity: the body still has its own url; we're just not surfacing it via clickedUrl.
         XCTAssertEqual(notification.url, "https://example.com/body")
     }
+
+    // MARK: - API.getInAppMessages crash regression
+    //
+    // These specs prove the SDK no longer trips `fatalError("Unreachable")` when `Request.post`
+    // legitimately callbacks `(result: nil, error: nil)`. If a future change re-introduces a
+    // fatalError on this path the XCTest runner itself crashes — so these tests double as a
+    // hard guarantee that the in-app message fetcher cannot tear down the host app.
+
+    func testGetInAppMessages_failsGracefullyOnMalformedBody() {
+        // Request.swift:113-117 — `JSONSerialization.isValidJSONObject(body)` returns false for
+        // NaN/Infinity, so `getRequestWithBody` is nil and `Request.post` calls `completion(nil, nil)`
+        // synchronously. Previously crashed via fatalError; now resolves to .failure.
+        Globals.projectIdInUserDefaults = "test-project-id"
+        defer { Globals.projectIdInUserDefaults = nil }
+
+        let exp = expectation(description: "completion invoked")
+        var captured: Result<[String: Any], Error>?
+
+        API.shared.getInAppMessages(
+            deviceId: "device-1",
+            group: "default",
+            data: ["bad": Double.nan]
+        ) { result in
+            captured = result
+            exp.fulfill()
+        }
+
+        wait(for: [exp], timeout: 2.0)
+        guard case let .failure(error) = captured else {
+            XCTFail("expected failure, got \(String(describing: captured))")
+            return
+        }
+        guard case Request.HTTPError.unexpectedNilResponse = error else {
+            XCTFail("expected HTTPError.unexpectedNilResponse, got \(error)")
+            return
+        }
+    }
+
+    func testGetInAppMessages_failsGracefullyOnNonJSON200Body() {
+        // Request.swift:131-137 — a 200 response whose body isn't JSON makes `Request.post`
+        // call `completion(nil, nil)`. Previously crashed via fatalError; now resolves to .failure.
+        Globals.projectIdInUserDefaults = "test-project-id"
+        defer { Globals.projectIdInUserDefaults = nil }
+
+        URLProtocol.registerClass(NonJSON200ResponseStub.self)
+        defer { URLProtocol.unregisterClass(NonJSON200ResponseStub.self) }
+
+        let exp = expectation(description: "completion invoked")
+        var captured: Result<[String: Any], Error>?
+
+        API.shared.getInAppMessages(
+            deviceId: "device-1",
+            group: "default",
+            data: nil
+        ) { result in
+            captured = result
+            exp.fulfill()
+        }
+
+        wait(for: [exp], timeout: 5.0)
+        guard case let .failure(error) = captured else {
+            XCTFail("expected failure, got \(String(describing: captured))")
+            return
+        }
+        guard case Request.HTTPError.unexpectedNilResponse = error else {
+            XCTFail("expected HTTPError.unexpectedNilResponse, got \(error)")
+            return
+        }
+    }
+}
+
+// URLSession.shared honors URLProtocol subclasses registered via `URLProtocol.registerClass`,
+// which lets us intercept the FlareLane service host and return a non-JSON 200 body without
+// touching `Request`'s internals.
+private final class NonJSON200ResponseStub: URLProtocol {
+    override class func canInit(with request: URLRequest) -> Bool {
+        request.url?.host == "service-api.flarelane.com"
+    }
+
+    override class func canonicalRequest(for request: URLRequest) -> URLRequest { request }
+
+    override func startLoading() {
+        guard let url = request.url,
+              let response = HTTPURLResponse(
+                url: url,
+                statusCode: 200,
+                httpVersion: "HTTP/1.1",
+                headerFields: ["Content-Type": "text/html"]
+              ) else {
+            client?.urlProtocolDidFinishLoading(self)
+            return
+        }
+        client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
+        client?.urlProtocol(self, didLoad: Data("<html>not-json</html>".utf8))
+        client?.urlProtocolDidFinishLoading(self)
+    }
+
+    override func stopLoading() {}
 }

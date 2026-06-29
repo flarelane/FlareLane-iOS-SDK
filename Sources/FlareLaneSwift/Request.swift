@@ -18,6 +18,10 @@ final class Request {
   enum HTTPError: Error {
     case transportError(Error)
     case serverSideError(Int)
+    /// URLSession callback delivered no data and no error, or the 200 body wasn't JSON.
+    /// Observed on iOS under background + low-memory pressure where the system
+    /// terminates an in-flight dataTask without surfacing an NSURLError.
+    case unexpectedNilResponse
   }
   
   func getBaseURL () -> String? {
