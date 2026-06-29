@@ -136,9 +136,15 @@ final class API {
       }
       if let result {
         completionHandler(.success(result))
-      } else {
-        fatalError("Unreachable")
+        return
       }
+      // (result, error) == (nil, nil) is reachable: request build failure,
+      // a 200 response whose body isn't JSON, or a URLSession completion that
+      // delivers data=nil/error=nil under background + low-memory pressure
+      // (observed on iOS 26 / iPhone 13 Pro Max). Fail gracefully instead of
+      // crashing the host app.
+      Logger.error("getInAppMessages: nil response with no error")
+      completionHandler(.failure(Request.HTTPError.unexpectedNilResponse))
     }
   }
 }
