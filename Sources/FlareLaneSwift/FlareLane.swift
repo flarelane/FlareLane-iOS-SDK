@@ -253,8 +253,11 @@ import UIKit
   @objc public static func displayInApp(group: String, data: [String: Any]? = nil) {
     inAppMessageThrottler.throttle {
       taskManager.addTaskAfterInit(taskName: "displayInApp") { completionTask in
-        InAppMessageService.shared.showInAppMessageIfNeeded(group: group, data: data)
-        completionTask()
+        // Wait for the fetch/display flow to finish before releasing the queue slot;
+        // otherwise a follow-up displayInApp() can race the in-flight HTTP response.
+        InAppMessageService.shared.showInAppMessageIfNeeded(group: group, data: data) {
+          completionTask()
+        }
       }
     }
   }

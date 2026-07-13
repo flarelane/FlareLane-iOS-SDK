@@ -19,24 +19,31 @@ final class InAppMessageService {
 
   private init() {}
 
-  func showInAppMessageIfNeeded(group: String, data: [String: Any]?) {
+  /// Fetches and displays an in-app message for the given group.
+  /// - Parameter completion: Invoked exactly once when the fetch/display flow finishes,
+  ///   regardless of success, failure, or guard early-return. Callers rely on this to
+  ///   release the FlareLaneTaskManager slot without waiting for its timeout.
+  func showInAppMessageIfNeeded(group: String, data: [String: Any]?, completion: @escaping () -> Void) {
     guard let deviceId = Globals.deviceIdInUserDefaults else {
       Logger.error("deviceId does not set.")
+      completion()
       return
     }
 
     if isDisplaying {
       Logger.verbose("InAppMessage is already displaying")
+      completion()
       return
     }
 
-    API.shared.getInAppMessages(deviceId: deviceId, group: group, data: data) { result in
+    API.shared.getInAppMessages(deviceId: deviceId, group: group, data: data) { [weak self] result in
       switch result {
       case let .success(data):
-        self.processInAppMessages(data: data)
+        self?.processInAppMessages(data: data)
       case let .failure(error):
         Logger.error("Failed to get in app messages.", error: error)
       }
+      completion()
     }
   }
 
