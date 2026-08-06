@@ -222,3 +222,104 @@ private final class NonJSON200ResponseStub: URLProtocol {
 
     override func stopLoading() {}
 }
+
+// MARK: - InAppMessageService completion contract
+//
+// showInAppMessageIfNeeded MUST invoke its completion exactly once on every exit path so the
+// FlareLaneTaskManager slot is released without waiting for its TIMEOUT_MS (10s). These specs
+// pin that contract; a regression here re-introduces the "next displayInApp takes 10s" bug
+// reported in production.
+
+extension Tests {
+
+    func testShowInAppMessageIfNeeded_callsCompletionWhenDeviceIdMissing() {
+        Globals.deviceIdInUserDefaults = nil
+
+        let exp = expectation(description: "completion invoked (device-id guard)")
+        var callCount = 0
+        InAppMessageService.shared.showInAppMessageIfNeeded(group: "TabHome", data: nil) {
+            callCount += 1
+            exp.fulfill()
+        }
+
+        wait(for: [exp], timeout: 2.0)
+        XCTAssertEqual(callCount, 1)
+    }
+
+    func testShowInAppMessageIfNeeded_callsCompletionOnAPIFailure() {
+        // Emulate the bug reproducer: the API responds with a 200 body that isn't JSON, which
+        // Request.post surfaces as `.failure(unexpectedNilResponse)`. Our fix routes the failure
+        // through `completion()` instead of dropping the callback silently.
+        Globals.projectIdInUserDefaults = "test-project-id"
+        Globals.deviceIdInUserDefaults = "device-1"
+        defer {
+            Globals.projectIdInUserDefaults = nil
+            Globals.deviceIdInUserDefaults = nil
+        }
+
+        URLProtocol.registerClass(NonJSON200ResponseStub.self)
+        defer { URLProtocol.unregisterClass(NonJSON200ResponseStub.self) }
+
+        let exp = expectation(description: "completion invoked (API failure)")
+        var callCount = 0
+        InAppMessageService.shared.showInAppMessageIfNeeded(group: "TabHome", data: nil) {
+            callCount += 1
+            exp.fulfill()
+        }
+
+        wait(for: [exp], timeout: 5.0)
+        XCTAssertEqual(callCount, 1)
+    }
+
+    func testShowInAppMessageIfNeeded_callsCompletionOnEmptyDataArray() {
+        // Success response with `data: []` — the "no displayable IAM" branch. Must still
+        // release the task slot; otherwise the next displayInApp waits for TIMEOUT_MS.
+        Globals.projectIdInUserDefaults = "test-project-id"
+        Globals.deviceIdInUserDefaults = "device-1"
+        defer {
+            Globals.projectIdInUserDefaults = nil
+            Globals.deviceIdInUserDefaults = nil
+        }
+
+        URLProtocol.registerClass(EmptyDataArrayResponseStub.self)
+        defer { URLProtocol.unregisterClass(EmptyDataArrayResponseStub.self) }
+
+        let exp = expectation(description: "completion invoked (empty data)")
+        var callCount = 0
+        InAppMessageService.shared.showInAppMessageIfNeeded(group: "TabHome", data: nil) {
+            callCount += 1
+            exp.fulfill()
+        }
+
+        wait(for: [exp], timeout: 5.0)
+        XCTAssertEqual(callCount, 1)
+    }
+}
+
+// Returns a well-formed but empty IAM response body so the caller reaches the "nothing to
+// show" branch without touching UIKit.
+private final class EmptyDataArrayResponseStub: URLProtocol {
+    override class func canInit(with request: URLRequest) -> Bool {
+        request.url?.host == "service-api.flarelane.com"
+    }
+
+    override class func canonicalRequest(for request: URLRequest) -> URLRequest { request }
+
+    override func startLoading() {
+        guard let url = request.url,
+              let response = HTTPURLResponse(
+                url: url,
+                statusCode: 200,
+                httpVersion: "HTTP/1.1",
+                headerFields: ["Content-Type": "application/json"]
+              ) else {
+            client?.urlProtocolDidFinishLoading(self)
+            return
+        }
+        client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
+        client?.urlProtocol(self, didLoad: Data("{\"data\":[]}".utf8))
+        client?.urlProtocolDidFinishLoading(self)
+    }
+
+    override func stopLoading() {}
+}
