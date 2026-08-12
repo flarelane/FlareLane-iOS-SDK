@@ -180,7 +180,10 @@ extension UNUserNotificationCenter: NotificationCategoryStore {}
       return false
     }
 
-    var merged = Set(existing.filter { !evicted.contains($0.identifier) })
+    // Besides evicted IDs, drop any stale category sharing this identifier: Set.insert is a
+    // no-op when an equal member already exists, and a repeated notification ID must replace
+    // its previous category so updated actions win.
+    var merged = Set(existing.filter { !evicted.contains($0.identifier) && $0.identifier != category.identifier })
     merged.insert(category)
     store.setNotificationCategories(merged)
 

@@ -340,6 +340,29 @@ extension Tests {
         XCTAssertEqual(ids, ["host_category", "flarelane_dynamic_new"])
     }
 
+    func testRegisterCategory_repeatedNotificationIdReplacesStaleCategory() {
+        let store = FakeCategoryStore()
+        store.existing = [Self.makeCategory("host_category"), Self.makeCategory("flarelane_dynamic_a")]
+
+        // Same notification ID delivered again with different buttons: the stale same-identifier
+        // category must be replaced, not left to coexist (Set.insert is a no-op on equal members
+        // and iOS picks arbitrarily between duplicate identifiers).
+        let updatedAction = UNNotificationAction(identifier: "0", title: "Updated", options: [.foreground])
+        let updated = UNNotificationCategory(
+            identifier: "flarelane_dynamic_a", actions: [updatedAction], intentIdentifiers: [], options: []
+        )
+
+        let registered = FlareLaneNotificationServiceExtensionHelper.registerCategorySynchronously(
+            updated, evicted: [], store: store, timeout: 1.0
+        )
+
+        XCTAssertTrue(registered)
+        let ours = store.lastSetCategories?.filter { $0.identifier == "flarelane_dynamic_a" } ?? []
+        XCTAssertEqual(ours.count, 1)
+        XCTAssertEqual(ours.first?.actions.map(\.title), ["Updated"])
+        XCTAssertTrue(store.lastSetCategories?.contains { $0.identifier == "host_category" } ?? false)
+    }
+
     func testRegisterCategory_firstGetTimeoutSkipsSetAndReturnsFalse() {
         let store = FakeCategoryStore()
         store.swallowGetCalls = [0]
@@ -370,22 +393,27 @@ extension Tests {
     }
 }
 
-// Call-recording NotificationCategoryStore double. Completions run synchronously on the calling
-// thread; `swallowGetCalls` lists get-call indices whose completion is never invoked, simulating
-// an unresponsive notification center so the semaphore timeout paths can be exercised.
+// Call-recording NotificationCategoryStore double. Completions are delivered asynchronously on a
+// private queue, mirroring UNUserNotificationCenter's own internal queue, so the semaphore in
+// fetchCategories genuinely blocks until the callback arrives; `swallowGetCalls` lists get-call
+// indices whose completion is never invoked, simulating an unresponsive notification center so
+// the timeout paths can be exercised.
 private final class FakeCategoryStore: NotificationCategoryStore {
     var existing: Set<UNNotificationCategory> = []
     var swallowGetCalls: Set<Int> = []
     private(set) var calls: [String] = []
     private(set) var lastSetCategories: Set<UNNotificationCategory>?
     private var getCallIndex = 0
+    private let callbackQueue = DispatchQueue(label: "com.flarelane.tests.fake-category-store")
 
     func getNotificationCategories(completionHandler: @escaping (Set<UNNotificationCategory>) -> Void) {
         let index = getCallIndex
         getCallIndex += 1
         calls.append("get")
         if swallowGetCalls.contains(index) { return }
-        completionHandler(existing)
+        // Snapshot on the calling thread; the caller's semaphore sequences all other state access.
+        let snapshot = existing
+        callbackQueue.async { completionHandler(snapshot) }
     }
 
     func setNotificationCategories(_ categories: Set<UNNotificationCategory>) {
