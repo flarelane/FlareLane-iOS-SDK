@@ -8,6 +8,15 @@
 import UserNotifications
 import MobileCoreServices
 
+/// The two UNUserNotificationCenter calls the action-button path depends on, extracted so the
+/// registration sequencing can be unit tested with a fake center.
+protocol NotificationCategoryStore {
+  func getNotificationCategories(completionHandler: @escaping (Set<UNNotificationCategory>) -> Void)
+  func setNotificationCategories(_ categories: Set<UNNotificationCategory>)
+}
+
+extension UNUserNotificationCenter: NotificationCategoryStore {}
+
 @objc public class FlareLaneNotificationServiceExtensionHelper: NSObject {
   @objc public static let shared = FlareLaneNotificationServiceExtensionHelper()
   
@@ -36,9 +45,10 @@ import MobileCoreServices
     EventService.createBackgroundReceived(notificationId: flarelaneNotification.id)
 
     // Register a per-notification UNNotificationCategory carrying this push's action buttons.
-    // The OS resolves `categoryIdentifier` lazily at presentation time, so it's safe to register
-    // alongside the (potentially slower) image download below — by the time the OS reads it,
-    // setNotificationCategories has run.
+    // This BLOCKS until the OS has the category (bounded by 2x categoryFetchTimeout, well within
+    // the NSE's ~30s budget): once contentHandler runs the NSE can be suspended at any moment,
+    // and a category that is still pending registration is never applied — the notification then
+    // shows without buttons (reported on iOS 16, image-less pushes being the tightest window).
     registerActionButtonsIfNeeded(notification: flarelaneNotification, content: bestAttemptContent)
 
     guard let imageUrl = flarelaneNotification.imageUrl,
@@ -95,6 +105,11 @@ import MobileCoreServices
   /// invocations as long as the same extension bundle is in use.
   private static let registeredCategoriesKey = "com.flarelane.dynamicCategoryIds"
 
+  /// Max seconds to wait for each UNUserNotificationCenter round-trip during category
+  /// registration. Two waits worst case keeps the NSE far inside its ~30s budget, and on
+  /// timeout the notification is still delivered — just without buttons.
+  static let categoryFetchTimeout: TimeInterval = 5
+
   /// Build a UNNotificationCategory from the parsed button list and attach its identifier to the
   /// content. Each action's identifier is the button index ("0", "1", ...) so the click handler
   /// can recover `clickedButtonIndex` directly from `response.actionIdentifier`.
@@ -115,8 +130,6 @@ import MobileCoreServices
       options: []
     )
 
-    content.categoryIdentifier = categoryIdentifier
-
     // Track our own category IDs in insertion order; when we exceed the cap, the head of the
     // list is the eviction candidate. We re-append the current ID so a repeated notification ID
     // (rare but possible) refreshes its position to the tail. The OS serializes NSE invocations
@@ -129,16 +142,66 @@ import MobileCoreServices
     while tracked.count > Self.maxDynamicCategories {
       evicted.append(tracked.removeFirst())
     }
-    defaults.set(tracked, forKey: Self.registeredCategoriesKey)
 
-    // Merge into the existing category set so we don't clobber categories registered by the host
-    // app or other libraries, while dropping any of ours we just evicted from the tracked list.
-    let center = UNUserNotificationCenter.current()
-    center.getNotificationCategories { existing in
-      let filtered = existing.filter { !evicted.contains($0.identifier) }
-      var merged = filtered
-      merged.insert(category)
-      center.setNotificationCategories(merged)
+    // Attach the identifier only once registration has completed — the content is handed to the
+    // OS the moment contentHandler runs, and an identifier pointing at a not-yet-registered
+    // category renders without buttons.
+    let registered = Self.registerCategorySynchronously(
+      category,
+      evicted: evicted,
+      store: UNUserNotificationCenter.current(),
+      timeout: Self.categoryFetchTimeout
+    )
+    if registered {
+      // Persist the tracked list only after the OS actually has the merged set; on failure the
+      // previous state stays intact so the next push retries the same eviction consistently.
+      defaults.set(tracked, forKey: Self.registeredCategoriesKey)
+      content.categoryIdentifier = categoryIdentifier
     }
+  }
+
+  /// Register `category` with the notification center, merging into the existing set (so host-app
+  /// categories survive) and dropping `evicted` ones, then wait until the OS has committed it.
+  /// The whole sequence blocks the caller: read existing -> merge & set -> read back. The final
+  /// read acts as a flush barrier — setNotificationCategories has no completion handler, and
+  /// without the read-back iOS can present the notification before the category is committed,
+  /// so the buttons never appear (same fix OneSignal ships since their iOS 12 report).
+  /// Returns true when the caller may attach the category's identifier to the content.
+  static func registerCategorySynchronously(
+    _ category: UNNotificationCategory,
+    evicted: [String],
+    store: NotificationCategoryStore,
+    timeout: TimeInterval
+  ) -> Bool {
+    // If this read times out we must not call set at all: setting with an empty merge base
+    // would wipe categories registered by the host app or other libraries.
+    guard let existing = fetchCategories(from: store, timeout: timeout) else {
+      Logger.error("Timed out reading notification categories; delivering push without action buttons")
+      return false
+    }
+
+    var merged = Set(existing.filter { !evicted.contains($0.identifier) })
+    merged.insert(category)
+    store.setNotificationCategories(merged)
+
+    if fetchCategories(from: store, timeout: timeout) == nil {
+      // Registration was already submitted; deliver with the identifier attached, best effort.
+      Logger.error("Timed out flushing notification categories; action buttons may not display")
+    }
+    return true
+  }
+
+  /// Blocking wrapper around getNotificationCategories. Safe to block here: the NSE's didReceive
+  /// runs on a system background queue, and UNUserNotificationCenter delivers this completion on
+  /// its own internal queue, so waiting on the caller's thread cannot deadlock.
+  private static func fetchCategories(from store: NotificationCategoryStore, timeout: TimeInterval) -> Set<UNNotificationCategory>? {
+    let semaphore = DispatchSemaphore(value: 0)
+    var result: Set<UNNotificationCategory>?
+    store.getNotificationCategories { categories in
+      result = categories
+      semaphore.signal()
+    }
+    guard semaphore.wait(timeout: .now() + timeout) == .success else { return nil }
+    return result
   }
 }

@@ -1,4 +1,5 @@
 import XCTest
+import UserNotifications
 @testable import FlareLane
 
 class Tests: XCTestCase {
@@ -293,6 +294,104 @@ extension Tests {
 
         wait(for: [exp], timeout: 5.0)
         XCTAssertEqual(callCount, 1)
+    }
+}
+
+// MARK: - NSE category registration sequencing (iOS 16 buttons regression)
+//
+// registerCategorySynchronously must finish its get -> set -> get(flush) round-trips BEFORE
+// returning, and the caller attaches categoryIdentifier only when it returns true. The previous
+// fire-and-forget registration raced contentHandler: the NSE could be suspended before
+// setNotificationCategories ran, so the notification rendered without buttons (reported on
+// iOS 16 with image-less pushes).
+
+extension Tests {
+
+    private static func makeCategory(_ id: String) -> UNNotificationCategory {
+        UNNotificationCategory(identifier: id, actions: [], intentIdentifiers: [], options: [])
+    }
+
+    func testRegisterCategory_completesGetSetGetBeforeReturning() {
+        let store = FakeCategoryStore()
+
+        let registered = FlareLaneNotificationServiceExtensionHelper.registerCategorySynchronously(
+            Self.makeCategory("flarelane_dynamic_a"), evicted: [], store: store, timeout: 1.0
+        )
+
+        XCTAssertTrue(registered)
+        // The flush read-back must have happened before the function returned — this ordering is
+        // the whole fix; without it the content ships while registration is still pending.
+        XCTAssertEqual(store.calls, ["get", "set", "get"])
+    }
+
+    func testRegisterCategory_mergePreservesHostCategoriesAndDropsEvicted() {
+        let store = FakeCategoryStore()
+        store.existing = [Self.makeCategory("host_category"), Self.makeCategory("flarelane_dynamic_old")]
+
+        let registered = FlareLaneNotificationServiceExtensionHelper.registerCategorySynchronously(
+            Self.makeCategory("flarelane_dynamic_new"),
+            evicted: ["flarelane_dynamic_old"],
+            store: store,
+            timeout: 1.0
+        )
+
+        XCTAssertTrue(registered)
+        let ids = Set(store.lastSetCategories?.map { $0.identifier } ?? [])
+        XCTAssertEqual(ids, ["host_category", "flarelane_dynamic_new"])
+    }
+
+    func testRegisterCategory_firstGetTimeoutSkipsSetAndReturnsFalse() {
+        let store = FakeCategoryStore()
+        store.swallowGetCalls = [0]
+
+        let registered = FlareLaneNotificationServiceExtensionHelper.registerCategorySynchronously(
+            Self.makeCategory("flarelane_dynamic_a"), evicted: [], store: store, timeout: 0.1
+        )
+
+        // With no merge base, calling set would wipe host-app categories — it must be skipped
+        // entirely, and the caller must not attach the identifier.
+        XCTAssertFalse(registered)
+        XCTAssertEqual(store.calls, ["get"])
+        XCTAssertNil(store.lastSetCategories)
+    }
+
+    func testRegisterCategory_flushTimeoutStillRegistersAndReturnsTrue() {
+        let store = FakeCategoryStore()
+        store.swallowGetCalls = [1]
+
+        let registered = FlareLaneNotificationServiceExtensionHelper.registerCategorySynchronously(
+            Self.makeCategory("flarelane_dynamic_a"), evicted: [], store: store, timeout: 0.1
+        )
+
+        // set was already submitted, so this is best effort: identifier still attaches.
+        XCTAssertTrue(registered)
+        XCTAssertEqual(store.calls, ["get", "set", "get"])
+        XCTAssertEqual(store.lastSetCategories?.map { $0.identifier }, ["flarelane_dynamic_a"])
+    }
+}
+
+// Call-recording NotificationCategoryStore double. Completions run synchronously on the calling
+// thread; `swallowGetCalls` lists get-call indices whose completion is never invoked, simulating
+// an unresponsive notification center so the semaphore timeout paths can be exercised.
+private final class FakeCategoryStore: NotificationCategoryStore {
+    var existing: Set<UNNotificationCategory> = []
+    var swallowGetCalls: Set<Int> = []
+    private(set) var calls: [String] = []
+    private(set) var lastSetCategories: Set<UNNotificationCategory>?
+    private var getCallIndex = 0
+
+    func getNotificationCategories(completionHandler: @escaping (Set<UNNotificationCategory>) -> Void) {
+        let index = getCallIndex
+        getCallIndex += 1
+        calls.append("get")
+        if swallowGetCalls.contains(index) { return }
+        completionHandler(existing)
+    }
+
+    func setNotificationCategories(_ categories: Set<UNNotificationCategory>) {
+        calls.append("set")
+        lastSetCategories = categories
+        existing = categories
     }
 }
 
