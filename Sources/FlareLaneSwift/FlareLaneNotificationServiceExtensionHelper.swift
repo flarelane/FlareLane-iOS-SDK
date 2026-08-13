@@ -9,9 +9,10 @@ import UserNotifications
 import MobileCoreServices
 
 /// The two UNUserNotificationCenter calls the action-button path depends on, extracted so the
-/// registration sequencing can be unit tested with a fake center.
+/// registration sequencing can be unit tested with a fake center. The completion must be
+/// @Sendable to match UNUserNotificationCenter's own signature (an error in Swift 6 otherwise).
 protocol NotificationCategoryStore {
-  func getNotificationCategories(completionHandler: @escaping (Set<UNNotificationCategory>) -> Void)
+  func getNotificationCategories(completionHandler: @escaping @Sendable (Set<UNNotificationCategory>) -> Void)
   func setNotificationCategories(_ categories: Set<UNNotificationCategory>)
 }
 
@@ -199,12 +200,18 @@ extension UNUserNotificationCenter: NotificationCategoryStore {}
   /// its own internal queue, so waiting on the caller's thread cannot deadlock.
   private static func fetchCategories(from store: NotificationCategoryStore, timeout: TimeInterval) -> Set<UNNotificationCategory>? {
     let semaphore = DispatchSemaphore(value: 0)
-    var result: Set<UNNotificationCategory>?
+    let box = CategoriesBox()
     store.getNotificationCategories { categories in
-      result = categories
+      box.value = categories
       semaphore.signal()
     }
     guard semaphore.wait(timeout: .now() + timeout) == .success else { return nil }
-    return result
+    return box.value
+  }
+
+  /// Mutable holder a @Sendable completion can write into (a captured `var` cannot be mutated
+  /// there). The semaphore orders the write before the read, so no locking is needed.
+  private final class CategoriesBox: @unchecked Sendable {
+    var value: Set<UNNotificationCategory>?
   }
 }

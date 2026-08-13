@@ -406,7 +406,7 @@ private final class FakeCategoryStore: NotificationCategoryStore {
     private var getCallIndex = 0
     private let callbackQueue = DispatchQueue(label: "com.flarelane.tests.fake-category-store")
 
-    func getNotificationCategories(completionHandler: @escaping (Set<UNNotificationCategory>) -> Void) {
+    func getNotificationCategories(completionHandler: @escaping @Sendable (Set<UNNotificationCategory>) -> Void) {
         let index = getCallIndex
         getCallIndex += 1
         calls.append("get")
