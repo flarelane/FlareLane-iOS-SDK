@@ -54,8 +54,35 @@ final class URLSessionMediaDownloader: NotificationMediaDownloader {
     task.resume()
   }
 
+  /// Hard cap on the avatar payload — anything larger falls back to a normal notification
+  /// (guides recommend a square image under 1MB; 5MB is the safety ceiling).
+  static let maxAvatarBytes = 5 * 1024 * 1024
+
   func downloadData(from url: URL, completion: @escaping @Sendable (Data?) -> Void) {
     let task = session.dataTask(with: url) { data, response, error in
+      guard error == nil,
+            let httpResponse = response as? HTTPURLResponse,
+            (200...299).contains(httpResponse.statusCode),
+            let data = data,
+            data.isEmpty == false,
+            data.count <= URLSessionMediaDownloader.maxAvatarBytes else {
+        completion(nil)
+        return
+      }
+
+      // Reject clearly-wrong payloads (HTML error pages, JSON) while tolerating CDNs that omit
+      // the header or serve images as generic octet-streams. Header lookup API requires iOS 13;
+      // the caller only fetches avatars on iOS 15+, so the else-branch is unreachable in practice.
+      if #available(iOS 13.0, *) {
+        if let contentType = httpResponse.value(forHTTPHeaderField: "Content-Type")?.lowercased(),
+           contentType.isEmpty == false,
+           contentType.hasPrefix("image/") == false,
+           contentType.contains("octet-stream") == false {
+          completion(nil)
+          return
+        }
+      }
+
       completion(data)
     }
     task.resume()
@@ -152,7 +179,10 @@ final class URLSessionMediaDownloader: NotificationMediaDownloader {
       }
     }
 
-    if let avatarUrl = flarelaneNotification.communication?.senderImageUrl, let url = URL(string: avatarUrl) {
+    // The avatar is only consumed by the iOS 15+ communication restyle below — skip the
+    // download entirely on older versions instead of fetching data that would be discarded.
+    if #available(iOS 15.0, *),
+       let avatarUrl = flarelaneNotification.communication?.senderImageUrl, let url = URL(string: avatarUrl) {
       downloadGroup.enter()
       mediaDownloader.downloadData(from: url) { data in
         results.avatarData = data
