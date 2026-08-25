@@ -6,6 +6,7 @@
 //
 
 import Intents
+import UIKit
 import UserNotifications
 
 /// Applies the chat-style (communication notification) rendering to notification content by
@@ -32,7 +33,10 @@ enum FlareLaneCommunicationIntentBuilder {
     avatarData: Data?,
     to content: UNMutableNotificationContent
   ) -> UNNotificationContent {
-    guard let avatarData = avatarData, avatarData.isEmpty == false else {
+    // The decode check closes the last monogram path: bytes that passed the download's
+    // Content-Type filter but aren't a renderable image would otherwise style the chat
+    // bubble with a gray placeholder.
+    guard let avatarData = avatarData, UIImage(data: avatarData) != nil else {
       Logger.verbose("No sender avatar available; delivering as a normal notification.")
       return content
     }

@@ -59,13 +59,14 @@ final class URLSessionMediaDownloader: NotificationMediaDownloader {
   static let maxAvatarBytes = 5 * 1024 * 1024
 
   func downloadData(from url: URL, completion: @escaping @Sendable (Data?) -> Void) {
-    let task = session.dataTask(with: url) { data, response, error in
+    // downloadTask streams the body to disk (same as the attachment path above), so an
+    // oversized payload never sits in RAM — the NSE gets jetsammed around ~24MB, and a
+    // dataTask would buffer the whole response in memory before we could check its size.
+    let task = session.downloadTask(with: url) { downloadedUrl, response, error in
       guard error == nil,
             let httpResponse = response as? HTTPURLResponse,
             (200...299).contains(httpResponse.statusCode),
-            let data = data,
-            data.isEmpty == false,
-            data.count <= URLSessionMediaDownloader.maxAvatarBytes else {
+            let downloadedUrl = downloadedUrl else {
         completion(nil)
         return
       }
@@ -81,6 +82,15 @@ final class URLSessionMediaDownloader: NotificationMediaDownloader {
           completion(nil)
           return
         }
+      }
+
+      // Size gate BEFORE loading into memory; the temp file is only valid inside this callback.
+      guard let fileSize = (try? FileManager.default.attributesOfItem(atPath: downloadedUrl.path)[.size] as? NSNumber)?.intValue,
+            fileSize > 0,
+            fileSize <= URLSessionMediaDownloader.maxAvatarBytes,
+            let data = try? Data(contentsOf: downloadedUrl) else {
+        completion(nil)
+        return
       }
 
       completion(data)

@@ -1,3 +1,4 @@
+import UIKit
 import XCTest
 import UserNotifications
 @testable import FlareLane
@@ -509,9 +510,15 @@ extension Tests {
     }
 
     private static func makeAvatarData() -> Data? {
-        // INImage(imageData:) accepts arbitrary Data — content validity only matters at render
-        // time on a real device, so a PNG magic header is enough for unit tests.
-        Data([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A])
+        // The builder decode-checks avatar bytes (UIImage(data:)) before styling, so the
+        // fixture must be a real decodable image, not just a PNG magic header.
+        let renderer = UIGraphicsImageRenderer(size: CGSize(width: 1, height: 1))
+        let image = renderer.image { context in
+            UIColor.black.setFill()
+            context.fill(CGRect(x: 0, y: 0, width: 1, height: 1))
+        }
+        // The Tests target still builds with the pre-4.2 Swift setting, hence the old API name.
+        return UIImagePNGRepresentation(image)
     }
 
     @available(iOS 15.0, *)
