@@ -100,23 +100,19 @@ class ViewController: UIViewController {
     }
   }
 
-  @IBAction func ToggleSubscribe(_ sender: Any) {
-    if (isSubscribed == false) {
-      FlareLane.subscribe() { subscribed in
-        print("FlareLane.subscribe() - \(subscribed)")
-        DispatchQueue.main.async {
-          self.isSubscribed = subscribed
-          self.updateToggleTitle(sender, prefix: "Toggle Subscribe", state: self.isSubscribed)
-        }
-      }
-    } else {
-      FlareLane.unsubscribe() { subscribed in
-        print("FlareLane.unsubscribe() - \(subscribed)")
-        DispatchQueue.main.async {
-          self.isSubscribed = subscribed
-          self.updateToggleTitle(sender, prefix: "Toggle Subscribe", state: self.isSubscribed)
-        }
-      }
+  // Separate buttons (not a toggle) so tests can force a known state without
+  // tracking what the previous state was.
+  @IBAction func subscribe(_ sender: Any) {
+    FlareLane.subscribe() { subscribed in
+      print("FlareLane.subscribe() - \(subscribed)")
+      DispatchQueue.main.async { self.isSubscribed = subscribed }
+    }
+  }
+
+  @IBAction func unsubscribe(_ sender: Any) {
+    FlareLane.unsubscribe() { subscribed in
+      print("FlareLane.unsubscribe() - \(subscribed)")
+      DispatchQueue.main.async { self.isSubscribed = subscribed }
     }
   }
   
