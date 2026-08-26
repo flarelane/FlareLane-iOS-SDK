@@ -1,3 +1,4 @@
+import UIKit
 import XCTest
 import UserNotifications
 @testable import FlareLane
@@ -420,6 +421,227 @@ private final class FakeCategoryStore: NotificationCategoryStore {
         calls.append("set")
         lastSetCategories = categories
         existing = categories
+    }
+}
+
+// MARK: - threadId & communication payload parsing (1.11.0)
+
+extension Tests {
+
+    private static func makeFlareLaneUserInfo(extra: [String: Any] = [:]) -> [AnyHashable: Any] {
+        var userInfo: [AnyHashable: Any] = [
+            "isFlareLane": true,
+            "notificationId": "notif_1",
+            "aps": ["alert": ["title": "t", "body": "b"]]
+        ]
+        for (key, value) in extra { userInfo[key] = value }
+        return userInfo
+    }
+
+    func testNotification_parsesThreadIdAndKeepsItThroughCopyAndBridge() {
+        let notification = FlareLaneNotification.getFlareLaneNotificationFromUserInfo(
+            userInfo: Self.makeFlareLaneUserInfo(extra: ["threadId": "promo"])
+        )
+
+        XCTAssertEqual(notification?.threadId, "promo")
+        XCTAssertEqual(notification?.withClickedButtonIndex(0).threadId, "promo")
+        XCTAssertEqual(notification?.toDictionary()["threadId"] as? String, "promo")
+    }
+
+    func testNotification_threadIdAbsentOrEmptyIsNil() {
+        let absent = FlareLaneNotification.getFlareLaneNotificationFromUserInfo(userInfo: Self.makeFlareLaneUserInfo())
+        let empty = FlareLaneNotification.getFlareLaneNotificationFromUserInfo(userInfo: Self.makeFlareLaneUserInfo(extra: ["threadId": ""]))
+
+        XCTAssertNil(absent?.threadId)
+        XCTAssertNil(empty?.threadId)
+        XCTAssertNil(absent?.toDictionary()["threadId"])
+    }
+
+    func testCommunication_parsesDictionaryAndJsonString() {
+        let fromDict = FlareLaneNotificationCommunication.parse(
+            from: ["senderName": "Kim", "senderImageUrl": "https://cdn.example.com/a.png"]
+        )
+        XCTAssertEqual(fromDict?.senderName, "Kim")
+        XCTAssertEqual(fromDict?.senderImageUrl, "https://cdn.example.com/a.png")
+
+        // FCM data values arrive as JSON strings; both forms must parse identically.
+        let fromString = FlareLaneNotificationCommunication.parse(
+            from: "{\"senderName\":\"Kim\",\"senderImageUrl\":\"https://cdn.example.com/a.png\"}"
+        )
+        XCTAssertEqual(fromString?.senderName, "Kim")
+        XCTAssertEqual(fromString?.senderImageUrl, "https://cdn.example.com/a.png")
+    }
+
+    func testCommunication_requiresBothFieldsAndNeverThrows() {
+        XCTAssertNil(FlareLaneNotificationCommunication.parse(from: ["senderName": "Kim"]))
+        XCTAssertNil(FlareLaneNotificationCommunication.parse(from: ["senderImageUrl": "https://x/a.png"]))
+        XCTAssertNil(FlareLaneNotificationCommunication.parse(from: ["senderName": "", "senderImageUrl": "https://x/a.png"]))
+        XCTAssertNil(FlareLaneNotificationCommunication.parse(from: "not json"))
+        XCTAssertNil(FlareLaneNotificationCommunication.parse(from: 42))
+        XCTAssertNil(FlareLaneNotificationCommunication.parse(from: nil))
+    }
+
+    func testNotification_communicationRoundTripsThroughBridgeDictionary() {
+        let notification = FlareLaneNotification.getFlareLaneNotificationFromUserInfo(
+            userInfo: Self.makeFlareLaneUserInfo(
+                extra: ["communication": ["senderName": "Kim", "senderImageUrl": "https://x/a.png"]]
+            )
+        )
+
+        let bridged = notification?.toDictionary()["communication"] as? [String: Any]
+        XCTAssertEqual(bridged?["senderName"] as? String, "Kim")
+        XCTAssertEqual(bridged?["senderImageUrl"] as? String, "https://x/a.png")
+        XCTAssertTrue(JSONSerialization.isValidJSONObject(notification?.toDictionary() ?? [:]))
+    }
+}
+
+// MARK: - Communication intent builder + NSE media sequencing (1.11.0)
+
+extension Tests {
+
+    private static func makeStyledContent() -> UNMutableNotificationContent {
+        let content = UNMutableNotificationContent()
+        content.title = "t"
+        content.body = "b"
+        content.userInfo = ["notificationId": "notif_1"]
+        content.categoryIdentifier = "flarelane_dynamic_notif_1"
+        content.threadIdentifier = "promo"
+        return content
+    }
+
+    private static func makeAvatarData() -> Data? {
+        // The builder decode-checks avatar bytes (UIImage(data:)) before styling, so the
+        // fixture must be a real decodable image, not just a PNG magic header.
+        let renderer = UIGraphicsImageRenderer(size: CGSize(width: 1, height: 1))
+        let image = renderer.image { context in
+            UIColor.black.setFill()
+            context.fill(CGRect(x: 0, y: 0, width: 1, height: 1))
+        }
+        // The Tests target still builds with the pre-4.2 Swift setting, hence the old API name.
+        return UIImagePNGRepresentation(image)
+    }
+
+    @available(iOS 15.0, *)
+    func testCommunicationBuilder_withoutAvatarFallsBackToOriginalContent() {
+        let content = Self.makeStyledContent()
+
+        let result = FlareLaneCommunicationIntentBuilder.apply(
+            communication: FlareLaneNotificationCommunication(senderName: "Kim", senderImageUrl: "https://x/a.png"),
+            notificationId: "notif_1",
+            threadId: nil,
+            avatarData: nil,
+            to: content
+        )
+
+        // Product decision: no avatar -> plain app-icon notification, not a gray monogram bubble.
+        XCTAssertTrue(result === content)
+    }
+
+    @available(iOS 15.0, *)
+    func testCommunicationBuilder_appliedContentPreservesExistingFields() throws {
+        let content = Self.makeStyledContent()
+        let avatar = try XCTUnwrap(Self.makeAvatarData())
+
+        let result = FlareLaneCommunicationIntentBuilder.apply(
+            communication: FlareLaneNotificationCommunication(senderName: "Kim", senderImageUrl: "https://x/a.png"),
+            notificationId: "notif_1",
+            threadId: "promo",
+            avatarData: avatar,
+            to: content
+        )
+
+        // updating(from:) returns a restyled copy carrying everything set beforehand.
+        XCTAssertFalse(result === content)
+        XCTAssertEqual(result.categoryIdentifier, "flarelane_dynamic_notif_1")
+        XCTAssertEqual(result.threadIdentifier, "promo")
+        XCTAssertEqual(result.userInfo["notificationId"] as? String, "notif_1")
+        XCTAssertEqual(result.body, "b")
+    }
+
+    func testDidReceive_threadsEarlyAndAppliesCommunicationExactlyOnce() throws {
+        let helper = FlareLaneNotificationServiceExtensionHelper.shared
+        let fake = FakeMediaDownloader()
+        fake.avatarData = try XCTUnwrap(Self.makeAvatarData())
+        helper.mediaDownloader = fake
+        defer { helper.mediaDownloader = URLSessionMediaDownloader() }
+
+        let content = UNMutableNotificationContent()
+        content.body = "b"
+        content.userInfo = Self.makeFlareLaneUserInfo(
+            extra: [
+                "threadId": "promo",
+                "communication": ["senderName": "Kim", "senderImageUrl": "https://x/a.png"]
+            ]
+        ) as! [String: Any]
+        let request = UNNotificationRequest(identifier: "notif_1", content: content, trigger: nil)
+
+        var delivered: UNNotificationContent?
+        var callCount = 0
+        let expectation = expectation(description: "contentHandler")
+        helper.didReceive(request) { finalContent in
+            delivered = finalContent
+            callCount += 1
+            expectation.fulfill()
+        }
+        waitForExpectations(timeout: 5)
+
+        XCTAssertEqual(callCount, 1)
+        XCTAssertTrue(fake.requestedAvatar)
+        XCTAssertFalse(fake.requestedAttachment) // payload has no imageUrl
+        XCTAssertEqual(delivered?.threadIdentifier, "promo")
+        if #available(iOS 15.0, *) {
+            // Avatar succeeded -> communication restyle applied -> delivered is the immutable copy.
+            XCTAssertFalse(delivered === helper.bestAttemptContent)
+        }
+    }
+
+    func testDidReceive_avatarFailureDeliversNormalNotification() {
+        let helper = FlareLaneNotificationServiceExtensionHelper.shared
+        let fake = FakeMediaDownloader()
+        fake.avatarData = nil // download failure
+        helper.mediaDownloader = fake
+        defer { helper.mediaDownloader = URLSessionMediaDownloader() }
+
+        let content = UNMutableNotificationContent()
+        content.body = "b"
+        content.userInfo = Self.makeFlareLaneUserInfo(
+            extra: ["communication": ["senderName": "Kim", "senderImageUrl": "https://x/a.png"]]
+        ) as! [String: Any]
+        let request = UNNotificationRequest(identifier: "notif_1", content: content, trigger: nil)
+
+        var delivered: UNNotificationContent?
+        let expectation = expectation(description: "contentHandler")
+        helper.didReceive(request) { finalContent in
+            delivered = finalContent
+            expectation.fulfill()
+        }
+        waitForExpectations(timeout: 5)
+
+        XCTAssertTrue(fake.requestedAvatar)
+        // Fallback is the untouched bestAttemptContent — a plain app-icon notification.
+        XCTAssertTrue(delivered === helper.bestAttemptContent)
+    }
+}
+
+// Media downloader double: completions run synchronously on a private queue like the real
+// URLSession-backed one; records which fetches were requested.
+private final class FakeMediaDownloader: NotificationMediaDownloader {
+    var avatarData: Data?
+    var attachment: UNNotificationAttachment?
+    private(set) var requestedAvatar = false
+    private(set) var requestedAttachment = false
+    private let callbackQueue = DispatchQueue(label: "com.flarelane.tests.fake-media-downloader")
+
+    func downloadAttachment(from url: URL, completion: @escaping @Sendable (UNNotificationAttachment?) -> Void) {
+        requestedAttachment = true
+        let result = attachment
+        callbackQueue.async { completion(result) }
+    }
+
+    func downloadData(from url: URL, completion: @escaping @Sendable (Data?) -> Void) {
+        requestedAvatar = true
+        let result = avatarData
+        callbackQueue.async { completion(result) }
     }
 }
 

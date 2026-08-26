@@ -18,16 +18,131 @@ protocol NotificationCategoryStore {
 
 extension UNUserNotificationCenter: NotificationCategoryStore {}
 
+/// The two media fetches the NSE performs, extracted so didReceive's download sequencing can be
+/// unit tested with a fake downloader (same seam pattern as NotificationCategoryStore).
+protocol NotificationMediaDownloader {
+  /// Download the big-picture image and wrap it as a notification attachment.
+  func downloadAttachment(from url: URL, completion: @escaping @Sendable (UNNotificationAttachment?) -> Void)
+  /// Download raw data (sender avatar).
+  func downloadData(from url: URL, completion: @escaping @Sendable (Data?) -> Void)
+}
+
+final class URLSessionMediaDownloader: NotificationMediaDownloader {
+  /// Bounds every fetch so a slow CDN can never eat the NSE's ~30s budget; on timeout the
+  /// notification is still delivered — just without the image or chat styling.
+  static let resourceTimeout: TimeInterval = 10
+
+  private let session: URLSession = {
+    let configuration = URLSessionConfiguration.ephemeral
+    configuration.timeoutIntervalForResource = URLSessionMediaDownloader.resourceTimeout
+    return URLSession(configuration: configuration)
+  }()
+
+  func downloadAttachment(from url: URL, completion: @escaping @Sendable (UNNotificationAttachment?) -> Void) {
+    let task = session.downloadTask(with: url) { downloadedUrl, response, error in
+      // The temp file is only valid inside this callback, so the attachment (which takes
+      // ownership of the file) must be created here.
+      guard let downloadedUrl = downloadedUrl,
+            let attachment = try? UNNotificationAttachment(identifier: "flarelane_notification_attachment",
+                                                           url: downloadedUrl,
+                                                           options: [UNNotificationAttachmentOptionsTypeHintKey: kUTTypePNG]) else {
+        completion(nil)
+        return
+      }
+      completion(attachment)
+    }
+    task.resume()
+  }
+
+  /// Hard cap on the avatar payload — anything larger falls back to a normal notification
+  /// (guides recommend a square image under 1MB; 5MB is the safety ceiling).
+  static let maxAvatarBytes = 5 * 1024 * 1024
+
+  func downloadData(from url: URL, completion: @escaping @Sendable (Data?) -> Void) {
+    // downloadTask streams the body to disk (same as the attachment path above), so an
+    // oversized payload never sits in RAM — the NSE gets jetsammed around ~24MB, and a
+    // dataTask would buffer the whole response in memory before we could check its size.
+    let task = session.downloadTask(with: url) { downloadedUrl, response, error in
+      guard error == nil,
+            let httpResponse = response as? HTTPURLResponse,
+            (200...299).contains(httpResponse.statusCode),
+            let downloadedUrl = downloadedUrl else {
+        completion(nil)
+        return
+      }
+
+      // Reject clearly-wrong payloads (HTML error pages, JSON) while tolerating CDNs that omit
+      // the header or serve images as generic octet-streams. Header lookup API requires iOS 13;
+      // the caller only fetches avatars on iOS 15+, so the else-branch is unreachable in practice.
+      if #available(iOS 13.0, *) {
+        if let contentType = httpResponse.value(forHTTPHeaderField: "Content-Type")?.lowercased(),
+           contentType.isEmpty == false,
+           contentType.hasPrefix("image/") == false,
+           contentType.contains("octet-stream") == false {
+          completion(nil)
+          return
+        }
+      }
+
+      // Size gate BEFORE loading into memory; the temp file is only valid inside this callback.
+      guard let fileSize = (try? FileManager.default.attributesOfItem(atPath: downloadedUrl.path)[.size] as? NSNumber)?.intValue,
+            fileSize > 0,
+            fileSize <= URLSessionMediaDownloader.maxAvatarBytes,
+            let data = try? Data(contentsOf: downloadedUrl) else {
+        completion(nil)
+        return
+      }
+
+      completion(data)
+    }
+    task.resume()
+  }
+}
+
 @objc public class FlareLaneNotificationServiceExtensionHelper: NSObject {
   @objc public static let shared = FlareLaneNotificationServiceExtensionHelper()
-  
+
   var contentHandler: ((UNNotificationContent) -> Void)?
   var bestAttemptContent: UNMutableNotificationContent?
+
+  /// Injectable for tests; production always uses the URLSession-backed downloader.
+  var mediaDownloader: NotificationMediaDownloader = URLSessionMediaDownloader()
+
+  /// Holder the @Sendable download completions write into; the DispatchGroup orders both
+  /// writes before the notify-block read, so no locking is needed.
+  private final class MediaResults: @unchecked Sendable {
+    var attachment: UNNotificationAttachment?
+    var avatarData: Data?
+  }
+
+  /// One-shot latch so the download-completion path and serviceExtensionTimeWillExpire can never
+  /// both hand content to the OS for the same delivery (the second call would be dropped by iOS
+  /// with a warning, but racing it is sloppy). Lock-guarded because expire and the download
+  /// group's notify run on different queues.
+  private final class DeliveryGuard: @unchecked Sendable {
+    private let lock = NSLock()
+    private var delivered = false
+    func claim() -> Bool {
+      lock.lock()
+      defer { lock.unlock() }
+      if delivered { return false }
+      delivered = true
+      return true
+    }
+  }
   
   @objc public func didReceive(_ request: UNNotificationRequest, withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void) {
     Logger.verbose("INVOKED")
-    
-    self.contentHandler = contentHandler
+
+    // Every delivery path (guard exits, download completion, expiration fallback) goes through
+    // this wrapper so contentHandler runs exactly once per delivery.
+    let guardState = DeliveryGuard()
+    let deliver: (UNNotificationContent) -> Void = { content in
+      guard guardState.claim() else { return }
+      contentHandler(content)
+    }
+
+    self.contentHandler = deliver
     bestAttemptContent = (request.content.mutableCopy() as? UNMutableNotificationContent)
     
     if let badgeCount = bestAttemptContent?.badge as? Int {
@@ -38,10 +153,18 @@ extension UNUserNotificationCenter: NotificationCategoryStore {}
     
     guard let bestAttemptContent = bestAttemptContent,
           let flarelaneNotification = FlareLaneNotification.getFlareLaneNotificationFromUNNotificationContent(request.content) else {
-      contentHandler(self.bestAttemptContent ?? request.content)
+      deliver(self.bestAttemptContent ?? request.content)
       return
     }
     
+    // Thread the notification as early as possible so even the serviceExtensionTimeWillExpire
+    // fallback delivers grouped content. The server also sets aps.thread-id (the primary
+    // mechanism, which works without an NSE); this mirror only fills the gap when a payload
+    // carries threadId without it, and never overrides a server-set value.
+    if bestAttemptContent.threadIdentifier.isEmpty, let threadId = flarelaneNotification.threadId {
+      bestAttemptContent.threadIdentifier = threadId
+    }
+
     // Only Background. Cannot split background~foreground in extension.
     EventService.createBackgroundReceived(notificationId: flarelaneNotification.id)
 
@@ -52,24 +175,53 @@ extension UNUserNotificationCenter: NotificationCategoryStore {}
     // shows without buttons (reported on iOS 16, image-less pushes being the tightest window).
     registerActionButtonsIfNeeded(notification: flarelaneNotification, content: bestAttemptContent)
 
-    guard let imageUrl = flarelaneNotification.imageUrl,
-          let attachmentUrl = URL(string: imageUrl) else {
-      contentHandler(bestAttemptContent)
-      return
-    }
-    
-    let task = URLSession.shared.downloadTask(with: attachmentUrl) { downloadedUrl, response, error in
-      defer { contentHandler(bestAttemptContent) }
-      
-      if let downloadedUrl = downloadedUrl,
-         let attachment = try? UNNotificationAttachment(identifier: "flarelane_notification_attachment",
-                                                        url: downloadedUrl,
-                                                        options: [UNNotificationAttachmentOptionsTypeHintKey: kUTTypePNG]) {
-        bestAttemptContent.attachments = [attachment]
+    // Download the big-picture image and the sender avatar concurrently; with neither present
+    // the group is empty and notify fires immediately. Worst case adds one bounded resource
+    // timeout (10s) on top of the category waits — still inside the NSE budget.
+    let downloadGroup = DispatchGroup()
+    let results = MediaResults()
+
+    if let imageUrl = flarelaneNotification.imageUrl, let attachmentUrl = URL(string: imageUrl) {
+      downloadGroup.enter()
+      mediaDownloader.downloadAttachment(from: attachmentUrl) { attachment in
+        results.attachment = attachment
+        downloadGroup.leave()
       }
     }
-    
-    task.resume()
+
+    // The avatar is only consumed by the iOS 15+ communication restyle below — skip the
+    // download entirely on older versions instead of fetching data that would be discarded.
+    if #available(iOS 15.0, *),
+       let avatarUrl = flarelaneNotification.communication?.senderImageUrl, let url = URL(string: avatarUrl) {
+      downloadGroup.enter()
+      mediaDownloader.downloadData(from: url) { data in
+        results.avatarData = data
+        downloadGroup.leave()
+      }
+    }
+
+    downloadGroup.notify(queue: .global()) {
+      if let attachment = results.attachment {
+        bestAttemptContent.attachments = [attachment]
+      }
+
+      // The communication restyle must come LAST: updating(from:) returns an immutable copy,
+      // so everything set before (category, attachments, threadIdentifier, userInfo) is carried
+      // into it, and nothing set after would be. Avatar failure skips the restyle entirely —
+      // a normal app-icon notification beats a chat bubble with a broken gray monogram.
+      var finalContent: UNNotificationContent = bestAttemptContent
+      if #available(iOS 15.0, *), let communication = flarelaneNotification.communication {
+        finalContent = FlareLaneCommunicationIntentBuilder.apply(
+          communication: communication,
+          notificationId: flarelaneNotification.id,
+          threadId: flarelaneNotification.threadId,
+          avatarData: results.avatarData,
+          to: bestAttemptContent
+        )
+      }
+
+      deliver(finalContent)
+    }
   }
   
   

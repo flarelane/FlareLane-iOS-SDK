@@ -17,9 +17,11 @@ import UIKit
   public var imageUrl: String?
   public var data: Dictionary<String, Any>?
   public var buttons: [FlareLaneNotificationButton]?
+  public var threadId: String?
+  public var communication: FlareLaneNotificationCommunication?
   public var clickedButtonIndex: Int?
 
-  public init(id: String, body: String, title: String?, url: String?, imageUrl: String?, data: Dictionary<String, Any>?, buttons: [FlareLaneNotificationButton]? = nil, clickedButtonIndex: Int? = nil) {
+  public init(id: String, body: String, title: String?, url: String?, imageUrl: String?, data: Dictionary<String, Any>?, buttons: [FlareLaneNotificationButton]? = nil, threadId: String? = nil, communication: FlareLaneNotificationCommunication? = nil, clickedButtonIndex: Int? = nil) {
     self.id = id
     self.body = body
     self.data = data
@@ -28,11 +30,13 @@ import UIKit
     self.url = url == "" ? nil : url
     self.imageUrl = imageUrl == "" ? nil : imageUrl
     self.buttons = buttons
+    self.threadId = threadId == "" ? nil : threadId
+    self.communication = communication
     self.clickedButtonIndex = clickedButtonIndex
   }
 
   open override var description: String {
-    return "id:\(id)\nbody:\(body)\ntitle:\(String(describing: title))\nurl:\(String(describing: url))\nimageUrl:\(String(describing: imageUrl))\ndata:\(String(describing: data))\nbuttons:\(String(describing: buttons))\nclickedButtonIndex:\(String(describing: clickedButtonIndex))"
+    return "id:\(id)\nbody:\(body)\ntitle:\(String(describing: title))\nurl:\(String(describing: url))\nimageUrl:\(String(describing: imageUrl))\ndata:\(String(describing: data))\nbuttons:\(String(describing: buttons))\nthreadId:\(String(describing: threadId))\ncommunication:\(String(describing: communication))\nclickedButtonIndex:\(String(describing: clickedButtonIndex))"
   }
 
   /// The button the user actually tapped, or `nil` for a body click / out-of-range index.
@@ -71,6 +75,8 @@ import UIKit
       imageUrl: imageUrl,
       data: data,
       buttons: buttons,
+      threadId: threadId,
+      communication: communication,
       clickedButtonIndex: idx
     )
   }
@@ -92,6 +98,7 @@ import UIKit
           }
 
     let buttons = FlareLaneNotificationButton.parseButtons(from: userInfo["buttons"])
+    let communication = FlareLaneNotificationCommunication.parse(from: userInfo["communication"])
 
     let notification = FlareLaneNotification(id: notificationId,
                                              body:body,
@@ -99,7 +106,9 @@ import UIKit
                                              url: userInfo["url"] as? String,
                                              imageUrl: userInfo["imageUrl"] as? String,
                                              data: userInfo["data"] as? Dictionary<String, Any>,
-                                             buttons: buttons
+                                             buttons: buttons,
+                                             threadId: userInfo["threadId"] as? String,
+                                             communication: communication
     )
 
     return notification
@@ -143,6 +152,8 @@ import UIKit
     if let imageUrl = imageUrl { dict["imageUrl"] = imageUrl }
     if let data = data { dict["data"] = data }
     if let buttons = buttonsList() { dict["buttons"] = buttons }
+    if let threadId = threadId { dict["threadId"] = threadId }
+    if let communication = communication { dict["communication"] = communication.toDictionary() }
     if let clickedButtonIndex = clickedButtonIndex { dict["clickedButtonIndex"] = clickedButtonIndex }
     if let clicked = clicked {
       var item: [String: Any] = ["label": clicked.label]

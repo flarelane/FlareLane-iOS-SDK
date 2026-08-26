@@ -8,7 +8,6 @@ import FlareLane
 
 class ViewController: UIViewController {
   var isSetUserId = false
-  var isSubscribed = false
   var isSetTags = false
   var isSetUserAttributes = false
   let userId = "myuser@flarelane.com"
@@ -27,19 +26,6 @@ class ViewController: UIViewController {
     if let button = sender as? UIButton {
       button.setTitle(title, for: .normal)
       button.configuration?.title = title
-    }
-  }
-
-  override func viewDidLoad() {
-    super.viewDidLoad()
-    // Seed `isSubscribed` from the persisted SDK state so the first tap branches
-    // correctly (subscribe vs unsubscribe). Storyboard titles are static; the
-    // runtime label only updates after the user taps, which is intentional —
-    // syncing the title here would require an IBOutlet per toggle button.
-    FlareLane.isSubscribed { [weak self] subscribed in
-      DispatchQueue.main.async {
-        self?.isSubscribed = subscribed
-      }
     }
   }
 
@@ -100,23 +86,17 @@ class ViewController: UIViewController {
     }
   }
 
-  @IBAction func ToggleSubscribe(_ sender: Any) {
-    if (isSubscribed == false) {
-      FlareLane.subscribe() { subscribed in
-        print("FlareLane.subscribe() - \(subscribed)")
-        DispatchQueue.main.async {
-          self.isSubscribed = subscribed
-          self.updateToggleTitle(sender, prefix: "Toggle Subscribe", state: self.isSubscribed)
-        }
-      }
-    } else {
-      FlareLane.unsubscribe() { subscribed in
-        print("FlareLane.unsubscribe() - \(subscribed)")
-        DispatchQueue.main.async {
-          self.isSubscribed = subscribed
-          self.updateToggleTitle(sender, prefix: "Toggle Subscribe", state: self.isSubscribed)
-        }
-      }
+  // Separate buttons (not a toggle) so tests can force a known state without
+  // tracking what the previous state was.
+  @IBAction func subscribe(_ sender: Any) {
+    FlareLane.subscribe() { subscribed in
+      print("FlareLane.subscribe() - \(subscribed)")
+    }
+  }
+
+  @IBAction func unsubscribe(_ sender: Any) {
+    FlareLane.unsubscribe() { subscribed in
+      print("FlareLane.unsubscribe() - \(subscribed)")
     }
   }
   
