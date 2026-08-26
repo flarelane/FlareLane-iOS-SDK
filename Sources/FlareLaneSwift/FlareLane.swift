@@ -43,6 +43,11 @@ import UIKit
   ///   - launchOptions: AppDelegate didFinishLaunchingWithOptions
   ///   - requestPermissionOnLaunch: Request permission for notifications on launch
   @objc public static func initWithLaunchOptions(_ launchOptions: [UIApplication.LaunchOptionsKey: Any]?, projectId: String, requestPermissionOnLaunch: Bool = true) {
+    // Re-publish this launch's level so a level set by an earlier launch cannot outlive the
+    // process that set it. Without this, an app that once called setLogLevel(.none) and later
+    // dropped the call would keep a permanently silent extension. Order-safe either way: called
+    // before setLogLevel it republishes the default, called after it republishes that level.
+    Globals.logLevelInUserDefaults = Globals.logLevel.rawValue
     Logger.verbose("Initialize FlareLane")
 
     if (Globals.projectIdInUserDefaults != projectId) {

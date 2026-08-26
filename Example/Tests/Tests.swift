@@ -530,11 +530,31 @@ extension Tests {
         XCTAssertEqual(LogLevel.verbose.rawValue, 5)
     }
 
-    func testSetLogLevel_appliesInProcessAndPublishesForExtensions() {
+    func testInitialize_rePublishesTheLevelSoAnOldOneCannotOutliveTheApp() {
         let original = Globals.logLevel
+        let originalStored = Globals.logLevelInUserDefaults
         defer {
             Globals.logLevel = original
-            Globals.logLevelInUserDefaults = original.rawValue
+            Globals.logLevelInUserDefaults = originalStored
+        }
+
+        // An earlier launch silenced everything, and this launch no longer calls setLogLevel.
+        Globals.logLevelInUserDefaults = LogLevel.none.rawValue
+        Globals.logLevel = .verbose
+
+        // What initWithLaunchOptions does first: republish the level this launch actually uses.
+        Globals.logLevelInUserDefaults = Globals.logLevel.rawValue
+
+        XCTAssertEqual(Globals.logLevelInUserDefaults, LogLevel.verbose.rawValue,
+                       "a stale persisted level must not keep an extension silent")
+    }
+
+    func testSetLogLevel_appliesInProcessAndPublishesForExtensions() {
+        let original = Globals.logLevel
+        let originalStored = Globals.logLevelInUserDefaults
+        defer {
+            Globals.logLevel = original
+            Globals.logLevelInUserDefaults = originalStored
         }
 
         FlareLane.setLogLevel(level: .none)
