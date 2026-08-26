@@ -76,7 +76,7 @@ import WebKit
         
         webView?.evaluateJavaScript(jsCode, completionHandler: { result, error in
             if let error = error {
-              print("Error getDeviceData.evaluateJavaScript: \(error)")
+              Logger.error("Failed to evaluate syncDeviceData callback", error: error)
             }
         })
       }

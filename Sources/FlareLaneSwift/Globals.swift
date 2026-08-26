@@ -14,7 +14,7 @@ public enum SdkType: String {
 }
 
 final class Globals {
-  static var sdkVersion = "1.11.0"
+  static var sdkVersion = "1.11.1"
   static var sdkType: SdkType = .native
   static var sdkPlatform = "ios"
   
@@ -46,6 +46,8 @@ final class Globals {
     // path as the other identifiers so the NSE-side BACKGROUND_RECEIVED dedup
     // is visible to the main app's CLICKED dedup (and survives process restart).
     case processedEventKeys = "flarelane_processedEventKeysKey"
+    // Lets an app extension (a separate process) adopt the level the app set.
+    case logLevel = "flarelane_logLevelKey"
   }
   
   /// Generalized Dual Storage Getter
@@ -113,6 +115,13 @@ final class Globals {
   static var processedEventKeysInUserDefaults: String? {
     get { getValue(forKey: .processedEventKeys) }
     set { setValue(newValue, forKey: .processedEventKeys) }
+  }
+
+  /// logLevel published by `FlareLane.setLogLevel` so an app extension — a separate process that
+  /// never sees that call — can adopt the same level. Nothing in the host app reads it.
+  static var logLevelInUserDefaults: Int? {
+    get { getValue(forKey: .logLevel) }
+    set { setValue(newValue, forKey: .logLevel) }
   }
   
   static var bundleIdentifier: String? {

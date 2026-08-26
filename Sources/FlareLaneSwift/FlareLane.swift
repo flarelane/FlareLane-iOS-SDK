@@ -18,8 +18,12 @@ import UIKit
   /// Set level to logging
   /// - Parameter level: LogLevel, Default is verbose
   @objc public static func setLogLevel(level: LogLevel) {
-    Logger.verbose("Change log level to \(level)")
+    // Assign first so switching to `.none` leaves nothing behind, while switching up to a
+    // talkative level still confirms the change.
     Globals.logLevel = level
+    // Publish it for app extensions, which run in their own process and never see this call.
+    Globals.logLevelInUserDefaults = level.rawValue
+    Logger.verbose("Change log level to \(level)")
   }
 
   /// Set sdk info

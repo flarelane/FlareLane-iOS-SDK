@@ -12,9 +12,31 @@ class ViewController: UIViewController {
   var isSetUserAttributes = false
   let userId = "myuser@flarelane.com"
   
-  override func viewDidAppear(_ animated: Bool) {
-    super.viewDidAppear(animated)
-    FlareLane.displayInApp(group: "home", data: ["data1": "d1", "data2": 2, "data3": nil])
+  /// Cycles verbose -> error -> none so the level gate can be checked on a device: at `.none`
+  /// the SDK (including the Notification Service Extension) should print nothing at all.
+  /// Added programmatically to keep the storyboard untouched.
+  private let logLevels: [(LogLevel, String)] = [(.verbose, "verbose"), (.error, "error"), (.none, "none")]
+  private var logLevelIndex = 0
+  private lazy var logLevelButton = UIButton(type: .system)
+
+  override func viewDidLoad() {
+    super.viewDidLoad()
+
+    logLevelButton.setTitle("Log level (verbose)", for: .normal)
+    logLevelButton.addTarget(self, action: #selector(cycleLogLevel), for: .touchUpInside)
+    logLevelButton.translatesAutoresizingMaskIntoConstraints = false
+    view.addSubview(logLevelButton)
+    NSLayoutConstraint.activate([
+      logLevelButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+      logLevelButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -12)
+    ])
+  }
+
+  @objc private func cycleLogLevel() {
+    logLevelIndex = (logLevelIndex + 1) % logLevels.count
+    let (level, label) = logLevels[logLevelIndex]
+    FlareLane.setLogLevel(level: level)
+    logLevelButton.setTitle("Log level (\(label))", for: .normal)
   }
 
   /// Update both `setTitle` and `configuration?.title` so the new label sticks

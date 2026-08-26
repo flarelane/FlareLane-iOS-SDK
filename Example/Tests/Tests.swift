@@ -521,6 +521,33 @@ extension Tests {
         return UIImagePNGRepresentation(image)
     }
 
+    // MARK: - Log level
+
+    func testLogLevel_rawValuesAreTheSharedWireFormat() {
+        // The four SDKs send one value per level, so these must not drift.
+        XCTAssertEqual(LogLevel.none.rawValue, 0)
+        XCTAssertEqual(LogLevel.error.rawValue, 1)
+        XCTAssertEqual(LogLevel.verbose.rawValue, 5)
+    }
+
+    func testSetLogLevel_appliesInProcessAndPublishesForExtensions() {
+        let original = Globals.logLevel
+        defer {
+            Globals.logLevel = original
+            Globals.logLevelInUserDefaults = original.rawValue
+        }
+
+        FlareLane.setLogLevel(level: .none)
+        XCTAssertEqual(Globals.logLevel, .none)
+        // The extension is a separate process; the published value is the only way it can adopt
+        // the app's level.
+        XCTAssertEqual(Globals.logLevelInUserDefaults, LogLevel.none.rawValue)
+
+        FlareLane.setLogLevel(level: .error)
+        XCTAssertEqual(Globals.logLevel, .error)
+        XCTAssertEqual(Globals.logLevelInUserDefaults, LogLevel.error.rawValue)
+    }
+
     @available(iOS 15.0, *)
     func testCommunicationBuilder_withoutAvatarFallsBackToOriginalContent() {
         let content = Self.makeStyledContent()
