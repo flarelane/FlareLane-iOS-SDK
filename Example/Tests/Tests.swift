@@ -521,6 +521,53 @@ extension Tests {
         return UIImagePNGRepresentation(image)
     }
 
+    // MARK: - Log level
+
+    func testLogLevel_rawValuesAreTheSharedWireFormat() {
+        // The four SDKs send one value per level, so these must not drift.
+        XCTAssertEqual(LogLevel.none.rawValue, 0)
+        XCTAssertEqual(LogLevel.error.rawValue, 1)
+        XCTAssertEqual(LogLevel.verbose.rawValue, 5)
+    }
+
+    func testInitialize_rePublishesTheLevelSoAnOldOneCannotOutliveTheApp() {
+        let original = Globals.logLevel
+        let originalStored = Globals.logLevelInUserDefaults
+        defer {
+            Globals.logLevel = original
+            Globals.logLevelInUserDefaults = originalStored
+        }
+
+        // An earlier launch silenced everything, and this launch no longer calls setLogLevel.
+        Globals.logLevelInUserDefaults = LogLevel.none.rawValue
+        Globals.logLevel = .verbose
+
+        // What initWithLaunchOptions does first: republish the level this launch actually uses.
+        Globals.logLevelInUserDefaults = Globals.logLevel.rawValue
+
+        XCTAssertEqual(Globals.logLevelInUserDefaults, LogLevel.verbose.rawValue,
+                       "a stale persisted level must not keep an extension silent")
+    }
+
+    func testSetLogLevel_appliesInProcessAndPublishesForExtensions() {
+        let original = Globals.logLevel
+        let originalStored = Globals.logLevelInUserDefaults
+        defer {
+            Globals.logLevel = original
+            Globals.logLevelInUserDefaults = originalStored
+        }
+
+        FlareLane.setLogLevel(level: .none)
+        XCTAssertEqual(Globals.logLevel, .none)
+        // The extension is a separate process; the published value is the only way it can adopt
+        // the app's level.
+        XCTAssertEqual(Globals.logLevelInUserDefaults, LogLevel.none.rawValue)
+
+        FlareLane.setLogLevel(level: .error)
+        XCTAssertEqual(Globals.logLevel, .error)
+        XCTAssertEqual(Globals.logLevelInUserDefaults, LogLevel.error.rawValue)
+    }
+
     @available(iOS 15.0, *)
     func testCommunicationBuilder_withoutAvatarFallsBackToOriginalContent() {
         let content = Self.makeStyledContent()

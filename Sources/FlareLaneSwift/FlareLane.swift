@@ -18,8 +18,12 @@ import UIKit
   /// Set level to logging
   /// - Parameter level: LogLevel, Default is verbose
   @objc public static func setLogLevel(level: LogLevel) {
-    Logger.verbose("Change log level to \(level)")
+    // Assign first so switching to `.none` leaves nothing behind, while switching up to a
+    // talkative level still confirms the change.
     Globals.logLevel = level
+    // Publish it for app extensions, which run in their own process and never see this call.
+    Globals.logLevelInUserDefaults = level.rawValue
+    Logger.verbose("Change log level to \(level)")
   }
 
   /// Set sdk info
@@ -39,6 +43,11 @@ import UIKit
   ///   - launchOptions: AppDelegate didFinishLaunchingWithOptions
   ///   - requestPermissionOnLaunch: Request permission for notifications on launch
   @objc public static func initWithLaunchOptions(_ launchOptions: [UIApplication.LaunchOptionsKey: Any]?, projectId: String, requestPermissionOnLaunch: Bool = true) {
+    // Re-publish this launch's level so a level set by an earlier launch cannot outlive the
+    // process that set it. Without this, an app that once called setLogLevel(.none) and later
+    // dropped the call would keep a permanently silent extension. Order-safe either way: called
+    // before setLogLevel it republishes the default, called after it republishes that level.
+    Globals.logLevelInUserDefaults = Globals.logLevel.rawValue
     Logger.verbose("Initialize FlareLane")
 
     if (Globals.projectIdInUserDefaults != projectId) {

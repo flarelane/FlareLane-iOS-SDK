@@ -132,6 +132,9 @@ final class URLSessionMediaDownloader: NotificationMediaDownloader {
   }
   
   @objc public func didReceive(_ request: UNNotificationRequest, withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void) {
+    // The extension is its own process and is reused across deliveries, so adopt the level the
+    // app last set. Falls back to the default when the app never set one.
+    Globals.logLevel = Globals.logLevelInUserDefaults.flatMap { LogLevel(rawValue: $0) } ?? .verbose
     Logger.verbose("INVOKED")
 
     // Every delivery path (guard exits, download completion, expiration fallback) goes through
