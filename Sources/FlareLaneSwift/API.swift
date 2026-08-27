@@ -88,7 +88,10 @@ final class API {
     let subjectType = userId != nil ? "user": "device"
     let subjectId = userId ?? deviceId
     
+    // Idempotency key. A retried request carries the same body, so the backend can recognise a
+    // redelivery of an event it already stored and count it once.
     var event: [String: Any] = [
+      "id": UUID().uuidString,
       "subjectType": subjectType,
       "subjectId": subjectId,
       "type": type,

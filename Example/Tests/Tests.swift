@@ -719,3 +719,436 @@ private final class EmptyDataArrayResponseStub: URLProtocol {
 
     override func stopLoading() {}
 }
+
+// MARK: - Retry policy
+//
+// Pins which failures are worth sending again. The distinction is the whole point of the retry
+// layer: retrying a rejection the server will simply repeat wastes battery and, for events, risks
+// duplicating data, while giving up on a dropped connection loses information for no reason.
+// The same cases are asserted in the Android SDK's RetryPolicyTest.
+
+extension Tests {
+
+    func testRetryPolicy_retriesWhenNoResponseArrived() {
+        XCTAssertTrue(RetryPolicy.shouldRetry(statusCode: RetryPolicy.noResponse, attempt: 1))
+    }
+
+    func testRetryPolicy_retriesServerErrors() {
+        for status in [500, 502, 503, 504] {
+            XCTAssertTrue(RetryPolicy.shouldRetry(statusCode: status, attempt: 1), "\(status) should be retried")
+        }
+    }
+
+    func testRetryPolicy_retriesTimeoutAndRateLimit() {
+        XCTAssertTrue(RetryPolicy.shouldRetry(statusCode: 408, attempt: 1))
+        XCTAssertTrue(RetryPolicy.shouldRetry(statusCode: 429, attempt: 1))
+    }
+
+    func testRetryPolicy_doesNotRetryClientErrors() {
+        for status in [400, 401, 403, 404, 409, 422] {
+            XCTAssertFalse(RetryPolicy.shouldRetry(statusCode: status, attempt: 1), "\(status) should not be retried")
+        }
+    }
+
+    /// 410 means the project or device is gone for the rest of this app run. Retrying would delay
+    /// the stop signal the SDK acts on by the length of the whole backoff chain.
+    func testRetryPolicy_doesNotRetryGone() {
+        XCTAssertFalse(RetryPolicy.shouldRetry(statusCode: 410, attempt: 1))
+    }
+
+    func testRetryPolicy_doesNotRetrySuccess() {
+        for status in [200, 201, 204, 302] {
+            XCTAssertFalse(RetryPolicy.shouldRetry(statusCode: status, attempt: 1), "\(status) should not be retried")
+        }
+    }
+
+    func testRetryPolicy_stopsAtTheLastAttempt() {
+        XCTAssertTrue(RetryPolicy.shouldRetry(statusCode: 500, attempt: RetryPolicy.maxAttempts - 1))
+        XCTAssertFalse(RetryPolicy.shouldRetry(statusCode: 500, attempt: RetryPolicy.maxAttempts))
+        XCTAssertFalse(RetryPolicy.shouldRetry(statusCode: RetryPolicy.noResponse, attempt: RetryPolicy.maxAttempts))
+    }
+
+    func testRetryPolicy_backoffStaysWithinTheAdvertisedBounds() {
+        for _ in 0 ..< 200 {
+            let first = RetryPolicy.delay(attempt: 1)
+            let second = RetryPolicy.delay(attempt: 2)
+
+            XCTAssertTrue((0.5 ... 1.0).contains(first), "first delay out of range: \(first)")
+            XCTAssertTrue((1.5 ... 3.0).contains(second), "second delay out of range: \(second)")
+        }
+    }
+
+    /// Out-of-range attempt numbers clamp to the nearest entry instead of trapping.
+    func testRetryPolicy_backoffToleratesAttemptNumbersOutsideTheTable() {
+        let lowest: (ClosedRange<TimeInterval>) -> TimeInterval = { $0.lowerBound }
+
+        XCTAssertEqual(RetryPolicy.delay(attempt: 0, randomness: lowest),
+                       RetryPolicy.delay(attempt: 1, randomness: lowest))
+        XCTAssertEqual(RetryPolicy.delay(attempt: 99, randomness: lowest),
+                       RetryPolicy.delay(attempt: 2, randomness: lowest))
+    }
+
+    /// The random share is what keeps devices that reconnect together from retrying as one burst.
+    func testRetryPolicy_backoffIsJittered() {
+        let samples = Set((0 ..< 50).map { _ in RetryPolicy.delay(attempt: 1) })
+
+        XCTAssertGreaterThan(samples.count, 1, "expected varied delays, got \(samples)")
+    }
+
+    func testRetryPolicy_transportErrorCollapsesToNoResponse() {
+        let response = HTTPURLResponse(url: URL(string: "https://example.com")!,
+                                       statusCode: 503, httpVersion: nil, headerFields: nil)
+
+        // An error means nothing ever came back, whatever else the callback carried.
+        XCTAssertEqual(RetryPolicy.statusCode(for: response, error: URLError(.networkConnectionLost)),
+                       RetryPolicy.noResponse)
+        XCTAssertEqual(RetryPolicy.statusCode(for: nil, error: nil), RetryPolicy.noResponse)
+        XCTAssertEqual(RetryPolicy.statusCode(for: response, error: nil), 503)
+    }
+}
+
+// MARK: - Retry budget
+//
+// The budget is the SDK's guard against retries snowballing during a long outage, and it is reached
+// from several threads at once, so both the limit and its accounting are pinned here.
+// The same cases are asserted in the Android SDK's RetryBudgetTest.
+
+extension Tests {
+
+    func testRetryBudget_handsOutSlotsUpToTheLimit() {
+        let budget = RetryBudget(limit: 3)
+
+        for _ in 0 ..< 3 {
+            XCTAssertTrue(budget.tryAcquire())
+        }
+
+        XCTAssertFalse(budget.tryAcquire(), "the fourth request must be refused")
+        XCTAssertEqual(budget.waitingCount, 3)
+    }
+
+    func testRetryBudget_releasedSlotCanBeTakenAgain() {
+        let budget = RetryBudget(limit: 1)
+
+        XCTAssertTrue(budget.tryAcquire())
+        XCTAssertFalse(budget.tryAcquire())
+
+        budget.release()
+
+        XCTAssertEqual(budget.waitingCount, 0)
+        XCTAssertTrue(budget.tryAcquire())
+    }
+
+    /// A refused acquire must not consume a slot, or the budget would leak down to zero.
+    func testRetryBudget_refusedAcquireLeavesTheCountUntouched() {
+        let budget = RetryBudget(limit: 1)
+        _ = budget.tryAcquire()
+
+        for _ in 0 ..< 10 {
+            _ = budget.tryAcquire()
+        }
+
+        XCTAssertEqual(budget.waitingCount, 1)
+    }
+
+    func testRetryBudget_concurrentCallersNeverExceedTheLimit() {
+        let limit = 8
+        let budget = RetryBudget(limit: limit)
+        let granted = NSCounter()
+        let group = DispatchGroup()
+
+        for _ in 0 ..< 64 {
+            DispatchQueue.global().async(group: group) {
+                if budget.tryAcquire() { granted.increment() }
+            }
+        }
+
+        XCTAssertEqual(group.wait(timeout: .now() + 10), .success)
+        XCTAssertEqual(granted.value, limit)
+        XCTAssertEqual(budget.waitingCount, limit)
+    }
+}
+
+// MARK: - Retry over the request path
+//
+// Covers what a caller ends up seeing once a request can be sent more than once: the outcome, how
+// many times the request actually went out, and that exactly one completion still fires.
+
+extension Tests {
+
+    func testRequest_retriesAndSucceedsOnTheSecondAttempt() {
+        Globals.projectIdInUserDefaults = "test-project-id"
+        ScriptedResponseStub.script = [(503, "{}"), (200, #"{"data":{"id":"device-1"}}"#)]
+        URLProtocol.registerClass(ScriptedResponseStub.self)
+        defer {
+            URLProtocol.unregisterClass(ScriptedResponseStub.self)
+            ScriptedResponseStub.reset()
+            Globals.projectIdInUserDefaults = nil
+        }
+
+        let exp = expectation(description: "completion invoked")
+        var completions = 0
+        var received: [String: Any]?
+
+        Request().post(path: "/events-v2", body: ["events": []]) { response, _ in
+            completions += 1
+            received = response
+            exp.fulfill()
+        }
+
+        wait(for: [exp], timeout: 15.0)
+        watch(settleOnly)
+
+        XCTAssertEqual(completions, 1, "exactly one completion")
+        XCTAssertNotNil(received, "caller should see the successful retry")
+        XCTAssertEqual(ScriptedResponseStub.requestCount, 2, "request should have gone out twice")
+    }
+
+    func testRequest_reportsTheRealStatusAfterExhaustingRetries() {
+        Globals.projectIdInUserDefaults = "test-project-id"
+        ScriptedResponseStub.script = [(503, #"{"message":"unavailable"}"#)]
+        URLProtocol.registerClass(ScriptedResponseStub.self)
+        defer {
+            URLProtocol.unregisterClass(ScriptedResponseStub.self)
+            ScriptedResponseStub.reset()
+            Globals.projectIdInUserDefaults = nil
+        }
+
+        let exp = expectation(description: "completion invoked")
+        var completions = 0
+        var captured: Error?
+
+        Request().post(path: "/events-v2", body: ["events": []]) { _, error in
+            completions += 1
+            captured = error
+            exp.fulfill()
+        }
+
+        wait(for: [exp], timeout: 15.0)
+        watch(pastLastBackoff)
+
+        XCTAssertEqual(completions, 1, "exactly one completion")
+        XCTAssertEqual(ScriptedResponseStub.requestCount, RetryPolicy.maxAttempts,
+                       "there must be no fourth attempt")
+        guard case Request.HTTPError.serverSideError(let status)? = captured else {
+            XCTFail("expected serverSideError, got \(String(describing: captured))")
+            return
+        }
+        XCTAssertEqual(status, 503, "the caller must see the server's status, not a placeholder")
+    }
+
+    func testRequest_doesNotRetryARejectionTheServerWouldRepeat() {
+        Globals.projectIdInUserDefaults = "test-project-id"
+        ScriptedResponseStub.script = [(404, #"{"message":"Project not found"}"#)]
+        URLProtocol.registerClass(ScriptedResponseStub.self)
+        defer {
+            URLProtocol.unregisterClass(ScriptedResponseStub.self)
+            ScriptedResponseStub.reset()
+            Globals.projectIdInUserDefaults = nil
+        }
+
+        let exp = expectation(description: "completion invoked")
+        Request().post(path: "/devices", body: [:]) { _, _ in exp.fulfill() }
+
+        wait(for: [exp], timeout: 5.0)
+        watch(pastFirstBackoff)
+
+        XCTAssertEqual(ScriptedResponseStub.requestCount, 1, "404 must not be retried")
+    }
+
+    /// 410 stops the SDK for the rest of the run; the backoff chain must not delay that.
+    func testRequest_deliversGoneWithoutRetrying() {
+        Globals.projectIdInUserDefaults = "test-project-id"
+        ScriptedResponseStub.script = [(410, #"{"message":"Gone"}"#)]
+        URLProtocol.registerClass(ScriptedResponseStub.self)
+        defer {
+            URLProtocol.unregisterClass(ScriptedResponseStub.self)
+            ScriptedResponseStub.reset()
+            Globals.projectIdInUserDefaults = nil
+        }
+
+        let exp = expectation(description: "completion invoked")
+        var captured: Error?
+
+        Request().patch(path: "/devices/device-1", body: [:]) { _, error in
+            captured = error
+            exp.fulfill()
+        }
+
+        wait(for: [exp], timeout: 5.0)
+        watch(pastFirstBackoff)
+
+        XCTAssertEqual(ScriptedResponseStub.requestCount, 1, "410 must not be retried")
+        guard case Request.HTTPError.serverSideError(let status)? = captured else {
+            XCTFail("expected serverSideError, got \(String(describing: captured))")
+            return
+        }
+        XCTAssertEqual(status, 410)
+    }
+
+    /// 204 and 205 are defined to carry no body, so an empty one is the expected shape, not a fault.
+    func testRequest_bodylessSuccessStatusIsReportedAsSuccess() {
+        Globals.projectIdInUserDefaults = "test-project-id"
+        ScriptedResponseStub.script = [(204, "")]
+        URLProtocol.registerClass(ScriptedResponseStub.self)
+        defer {
+            URLProtocol.unregisterClass(ScriptedResponseStub.self)
+            ScriptedResponseStub.reset()
+            Globals.projectIdInUserDefaults = nil
+        }
+
+        let exp = expectation(description: "completion invoked")
+        var completions = 0
+        var received: [String: Any]?
+        var captured: Error?
+
+        Request().delete(path: "/devices/device-1", body: [:]) { response, error in
+            completions += 1
+            received = response
+            captured = error
+            exp.fulfill()
+        }
+
+        wait(for: [exp], timeout: 5.0)
+        watch(pastFirstBackoff)
+
+        XCTAssertEqual(completions, 1, "exactly one completion")
+        XCTAssertNil(captured, "204 is a success, not an error")
+        XCTAssertNotNil(received, "a bodyless success should still resolve to a response")
+        XCTAssertEqual(ScriptedResponseStub.requestCount, 1, "a success must not be retried")
+    }
+
+    func testRequest_retrySendsTheExactSameBody() {
+        Globals.projectIdInUserDefaults = "test-project-id"
+        ScriptedResponseStub.script = [(500, "{}"), (200, "{}")]
+        URLProtocol.registerClass(ScriptedResponseStub.self)
+        defer {
+            URLProtocol.unregisterClass(ScriptedResponseStub.self)
+            ScriptedResponseStub.reset()
+            Globals.projectIdInUserDefaults = nil
+        }
+
+        let exp = expectation(description: "completion invoked")
+        Request().post(path: "/events-v2", body: ["events": [["id": "fixed-uuid"]]]) { _, _ in exp.fulfill() }
+
+        wait(for: [exp], timeout: 15.0)
+        watch(settleOnly)
+
+        XCTAssertEqual(ScriptedResponseStub.bodies.count, 2)
+        XCTAssertEqual(ScriptedResponseStub.bodies.first, ScriptedResponseStub.bodies.last,
+                       "the retried body must be byte-identical, or the backend cannot deduplicate it")
+    }
+
+    /// Keeps watching after the completion fired.
+    ///
+    /// A spec asserting that no retry happened has to outlast the backoff that retry would have
+    /// used, or a scheduled-but-not-yet-fired attempt slips past the assertion unseen.
+    /// `pastFirstBackoff` outlasts the 0.5-1.0s first delay, `pastLastBackoff` the 1.5-3.0s second
+    /// one — both pinned by the RetryPolicy specs above.
+    private func watch(_ seconds: TimeInterval) {
+        let idle = expectation(description: "watch")
+        DispatchQueue.main.asyncAfter(deadline: .now() + seconds) { idle.fulfill() }
+        wait(for: [idle], timeout: seconds + 2.0)
+    }
+
+    /// Short window, enough to catch a duplicate completion but not a retry.
+    private var settleOnly: TimeInterval { 0.3 }
+    private var pastFirstBackoff: TimeInterval { 1.2 }
+    private var pastLastBackoff: TimeInterval { 3.5 }
+}
+
+// Replays a scripted sequence of responses, one per request, and records the bodies that were sent.
+// Past the end of the script the last entry repeats, so a test only spells out what it cares about.
+private final class ScriptedResponseStub: URLProtocol {
+    static var script: [(status: Int, body: String)] = []
+    private static let lock = NSLock()
+    private static var sentBodies: [Data] = []
+
+    static var requestCount: Int { lock.withLock { sentBodies.count } }
+    static var bodies: [Data] { lock.withLock { sentBodies } }
+
+    static func reset() {
+        script = []
+        lock.withLock { sentBodies = [] }
+    }
+
+    override class func canInit(with request: URLRequest) -> Bool {
+        request.url?.host == "service-api.flarelane.com"
+    }
+
+    // URLProtocol strips httpBody from the request it hands over, so the bytes are read from
+    // httpBodyStream when that is where they ended up.
+    override class func canonicalRequest(for request: URLRequest) -> URLRequest { request }
+
+    override func startLoading() {
+        let index = Self.lock.withLock { () -> Int in
+            let index = Self.sentBodies.count
+            Self.sentBodies.append(Self.body(of: request))
+            return index
+        }
+
+        guard let url = request.url,
+              let entry = Self.script.isEmpty ? nil : (Self.script.count > index ? Self.script[index] : Self.script.last),
+              let response = HTTPURLResponse(
+                url: url,
+                statusCode: entry.status,
+                httpVersion: "HTTP/1.1",
+                headerFields: ["Content-Type": "application/json"]
+              ) else {
+            client?.urlProtocolDidFinishLoading(self)
+            return
+        }
+
+        client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
+        client?.urlProtocol(self, didLoad: Data(entry.body.utf8))
+        client?.urlProtocolDidFinishLoading(self)
+    }
+
+    override func stopLoading() {}
+
+    private static func body(of request: URLRequest) -> Data {
+        if let body = request.httpBody {
+            return body
+        }
+        guard let stream = request.httpBodyStream else {
+            return Data()
+        }
+
+        stream.open()
+        defer { stream.close() }
+
+        var data = Data()
+        var buffer = [UInt8](repeating: 0, count: 4096)
+        while stream.hasBytesAvailable {
+            let read = stream.read(&buffer, maxLength: buffer.count)
+            if read <= 0 { break }
+            data.append(buffer, count: read)
+        }
+        return data
+    }
+}
+
+private extension NSLock {
+    func withLock<T>(_ block: () -> T) -> T {
+        lock()
+        defer { unlock() }
+        return block()
+    }
+}
+
+/// Thread-safe counter for the concurrency spec above.
+private final class NSCounter {
+    private let lock = NSLock()
+    private var count = 0
+
+    func increment() {
+        lock.lock()
+        count += 1
+        lock.unlock()
+    }
+
+    var value: Int {
+        lock.lock()
+        defer { lock.unlock() }
+        return count
+    }
+}
