@@ -12,6 +12,17 @@ final class API {
 
   private let request = Request()
 
+  /// 410 from a device endpoint means this project or device is gone for the
+  /// rest of this app run, so the SDK stops queueing and sending. Only these
+  /// two endpoints carry that meaning — a 410 from any other endpoint must
+  /// never be able to shut the SDK down.
+  static func stopSdkIfGone(_ error: Error?) {
+    guard case Request.HTTPError.serverSideError(410)? = error else { return }
+
+    Logger.error("Device endpoint returned 410, stopping the SDK until the next app launch.")
+    FlareLaneTaskManager.shared.stop()
+  }
+
   /// API to create device
   /// - Parameters:
   ///   - body: Body params
@@ -20,6 +31,7 @@ final class API {
 
     request.post(path: "/devices", body: body) { (response, error) in
       if (error != nil) {
+        API.stopSdkIfGone(error)
         completion(nil, error)
         return
       }
@@ -38,6 +50,7 @@ final class API {
 
     request.patch(path: "/devices/\(deviceId)", body: body) { (response, error) in
       if (error != nil) {
+        API.stopSdkIfGone(error)
         completion(nil, error)
         return
       }
@@ -88,7 +101,10 @@ final class API {
     let subjectType = userId != nil ? "user": "device"
     let subjectId = userId ?? deviceId
     
+    // The id is the dedup key: a retried request carries the same body, so
+    // the backend can recognise a resend whose response was lost.
     var event: [String: Any] = [
+      "id": UUID().uuidString,
       "subjectType": subjectType,
       "subjectId": subjectId,
       "type": type,
@@ -105,7 +121,8 @@ final class API {
       event["userId"] = userId
     }
 
-    request.post(path: "/events-v2", body: ["events": [event]]) { (response, error) in
+    // Safe to retry thanks to the id above.
+    request.post(path: "/events-v2", body: ["events": [event]], idempotent: true) { (response, error) in
       completion(error)
     }
   }
@@ -126,9 +143,12 @@ final class API {
   }
 
   func getInAppMessages(deviceId: String, group: String, data: [String: Any]?, completionHandler: @escaping (Result<[String: Any], Error>) -> Void) {
+    // A read in POST clothing — fetching the message list twice is harmless,
+    // so it is marked idempotent and may retry.
     request.post(
       path: "/devices/\(deviceId)/in-app-messages",
-      body: ["group": group, "data": data]
+      body: ["group": group, "data": data],
+      idempotent: true
     ) { result, error in
       if let error {
         completionHandler(.failure(error))

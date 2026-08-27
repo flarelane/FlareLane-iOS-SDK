@@ -8,7 +8,71 @@
 import Foundation
 
 final class Request {
-  
+
+  // MARK: - Retry policy (mirrors the Android SDK: same constants, same wording)
+
+  // Transient failures are retried before the caller hears about them, so a
+  // few seconds without network no longer loses the request outright.
+  static let maxAttempts = 3
+
+  // Total budget for one call, retries included. Kept under the
+  // FlareLaneTaskManager timeout (10s) so a retrying request cannot outlive
+  // the task slot that is waiting on it.
+  static let retryDeadline: TimeInterval = 8.0
+
+  /// A transient failure is worth another attempt; a rejection the server
+  /// would simply repeat is not. -1 means no HTTP response ever arrived.
+  /// Every other 4xx fails immediately, 410 (gone) included — it is the
+  /// stop signal and must not be delayed by a backoff.
+  static func shouldRetry(responseCode: Int, attempt: Int) -> Bool {
+    if attempt >= maxAttempts { return false }
+    if responseCode == -1 || responseCode >= 500 { return true }
+    return responseCode == 408 || responseCode == 429
+  }
+
+  /// Half the base delay (1s, then 3s) plus a random share of the other half,
+  /// so devices that lost connectivity together do not retry as one burst.
+  static func delayMillis(attempt: Int) -> Int {
+    let half = (attempt <= 1 ? 1000 : 3000) / 2
+    return half + Int.random(in: 0...half)
+  }
+
+  /// Runs the request, retrying transient failures while the call stays inside
+  /// its deadline, then hands the final (data, response, error) to the caller's
+  /// existing completion logic unchanged. The URLRequest is reused verbatim, so
+  /// every attempt puts the same bytes on the wire — the event id inside stays
+  /// stable, which is what lets the backend deduplicate a resend.
+  private func perform(_ request: URLRequest, label: String, idempotent: Bool,
+                       deadline: Date? = nil, attempt: Int = 1,
+                       handler: @escaping (Data?, URLResponse?, Error?) -> Void) {
+    let deadline = deadline ?? Date().addingTimeInterval(Self.retryDeadline)
+
+    // Clamped to what is left of the call's deadline (floored so a nearly spent
+    // budget does not degenerate into instant spurious failures), so a single
+    // blocked attempt cannot spend more than the whole call was given.
+    var request = request
+    request.timeoutInterval = max(1.0, min(10.0, deadline.timeIntervalSinceNow))
+
+    URLSession.shared.dataTask(with: request) { data, response, error in
+      let responseCode = error == nil ? ((response as? HTTPURLResponse)?.statusCode ?? -1) : -1
+      let delayMs = Self.delayMillis(attempt: attempt)
+
+      if idempotent, Self.shouldRetry(responseCode: responseCode, attempt: attempt),
+         Date().addingTimeInterval(TimeInterval(delayMs) / 1000) < deadline {
+        Logger.verbose("Retrying \(label) in \(delayMs)ms"
+                       + " (attempt \(attempt + 1)/\(Self.maxAttempts), status \(responseCode))")
+        // asyncAfter rather than a sleep: the wait costs a timer, not a thread.
+        DispatchQueue.global(qos: .utility).asyncAfter(deadline: .now() + TimeInterval(delayMs) / 1000) {
+          self.perform(request, label: label, idempotent: idempotent,
+                       deadline: deadline, attempt: attempt + 1, handler: handler)
+        }
+        return
+      }
+
+      handler(data, response, error)
+    }.resume()
+  }
+
   enum WithBodyMethod: String {
     case POST
     case PATCH
@@ -89,7 +153,7 @@ final class Request {
     
     Logger.verbose("GET Request - path:\(path) parameters:\(parameters.description))")
     
-    let task = URLSession.shared.dataTask(with: request) { (data, response, error) in
+    perform(request, label: "GET \(path)", idempotent: true) { (data, response, error) in
       guard let data = data,
             let response = response as? HTTPURLResponse,
             (200 ..< 300) ~= response.statusCode,
@@ -110,10 +174,15 @@ final class Request {
       completion(responseObject, nil)
     }
 
-    task.resume()
   }
 
-  func post(path: String, body: [String: Any?], completion: @escaping ([String: Any]?, Error?) -> Void) {
+  /// POSTs are only retried when the caller marks them idempotent — a POST
+  /// that reached the server but lost its response would otherwise be applied
+  /// twice. Opt in only when the request is a read in POST clothing, or when
+  /// its body carries an id the backend can deduplicate on. GET/PATCH/DELETE
+  /// are idempotent by contract here: PATCH bodies are absolute values
+  /// (last-writer-wins), never increments.
+  func post(path: String, body: [String: Any?], idempotent: Bool = false, completion: @escaping ([String: Any]?, Error?) -> Void) {
     guard let request = self.getRequestWithBody(method: WithBodyMethod.POST, path: path, body: body) else {
       // Surface an explicit failure to the caller so a malformed body doesn't
       // leave dependent tasks (event queue, NSE handlers) waiting forever.
@@ -123,7 +192,7 @@ final class Request {
     
     Logger.verbose("POST Request - path:\(path) body:\(body.description))")
     
-    let task = URLSession.shared.dataTask(with: request) { (data, response, error) in
+    perform(request, label: "POST \(path)", idempotent: idempotent) { (data, response, error) in
       guard let data = data,
             let response = response as? HTTPURLResponse,
             error == nil else {
@@ -146,7 +215,6 @@ final class Request {
       }
     }
 
-    task.resume()
   }
 
   func patch(path: String, body: [String: Any?], completion: @escaping ([String: Any]?, Error?) -> Void) {
@@ -157,7 +225,7 @@ final class Request {
     
     Logger.verbose("PATCH Request - path:\(path) body:\(body.description))")
     
-    let task = URLSession.shared.dataTask(with: request) { (data, response, error) in
+    perform(request, label: "PATCH \(path)", idempotent: true) { (data, response, error) in
       guard let data = data,
             let response = response as? HTTPURLResponse,
             error == nil else {
@@ -180,7 +248,6 @@ final class Request {
       }
     }
 
-    task.resume()
   }
 
   func delete(path: String, body: [String: Any?], completion: @escaping ([String: Any]?, Error?) -> Void) {
@@ -191,7 +258,7 @@ final class Request {
     
     Logger.verbose("DELETE Request - path:\(path) body:\(body.description))")
     
-    let task = URLSession.shared.dataTask(with: request) { (data, response, error) in
+    perform(request, label: "DELETE \(path)", idempotent: true) { (data, response, error) in
       guard let data = data,
             let response = response as? HTTPURLResponse,
             error == nil else {
@@ -215,7 +282,6 @@ final class Request {
       }
     }
     
-    task.resume()
   }
   
 }
