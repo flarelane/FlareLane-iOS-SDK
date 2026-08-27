@@ -177,27 +177,32 @@ final class Request {
       return
     }
 
-    guard statusCode != RetryPolicy.noResponse, let data = data else {
-      // Either nothing came back at all — observed on iOS under background + low-memory pressure,
-      // where the system terminates an in-flight dataTask without surfacing an NSURLError — or a
-      // response arrived with no body to make sense of. Reported as an error so callers do not
-      // mistake it for success and log a delivery that never happened.
-      Logger.error("\(label) finished without a usable response (status \(statusCode)).")
+    guard statusCode != RetryPolicy.noResponse else {
+      // Nothing came back at all. Observed on iOS under background + low-memory pressure, where
+      // the system terminates an in-flight dataTask without surfacing an NSURLError. Reported as
+      // an error so callers do not mistake it for success and log a delivery that never happened.
+      Logger.error("\(label) finished without a response.")
       completion(nil, HTTPError.unexpectedNilResponse)
       return
     }
 
+    // Status-only decisions come before the body unwrap: an error status must keep its code even
+    // when the reply carried no body, and 204/205 are defined to carry none at all.
     guard (200 ..< 300) ~= statusCode else {
       Logger.error("\(label) failed with status \(statusCode): "
-                   + (String(data: data, encoding: .utf8) ?? "unreadable body"))
+                   + (data.flatMap { String(data: $0, encoding: .utf8) } ?? "no body"))
       completion(nil, HTTPError.serverSideError(statusCode))
       return
     }
 
-    // 204/205 are defined to carry no body, so there is nothing to parse. Falling through would
-    // hand empty data to the JSON parser and turn a success into a failure.
     if statusCode == 204 || statusCode == 205 {
       completion([:], nil)
+      return
+    }
+
+    guard let data = data else {
+      Logger.error("\(label) returned \(statusCode) with no body.")
+      completion(nil, HTTPError.unexpectedNilResponse)
       return
     }
 
