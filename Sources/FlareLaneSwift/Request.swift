@@ -50,6 +50,9 @@ final class Request {
     // Clamped to what is left of the call's deadline (floored so a nearly spent
     // budget does not degenerate into instant spurious failures), so a single
     // blocked attempt cannot spend more than the whole call was given.
+    // The 1s floor can overshoot the deadline by at most a second on the very
+    // last attempt — a floor of 0 would mean "wait forever" on this API, and
+    // 8s + 1s still fits inside the task manager's 10s slot.
     var request = request
     request.timeoutInterval = max(1.0, min(10.0, deadline.timeIntervalSinceNow))
 
