@@ -104,7 +104,7 @@ class ViewController: UIViewController {
 
   @IBAction func isSubscribed(_ sender: Any) {
     FlareLane.isSubscribed() { isSubscribed in
-      print("FlareLane.isSubscribed() - \(isSubscribed), isMainThread: \(Thread.isMainThread)")
+      exampleLog("FlareLane.isSubscribed() - \(isSubscribed), isMainThread: \(Thread.isMainThread)")
     }
   }
 
@@ -112,13 +112,13 @@ class ViewController: UIViewController {
   // tracking what the previous state was.
   @IBAction func subscribe(_ sender: Any) {
     FlareLane.subscribe() { subscribed in
-      print("FlareLane.subscribe() - \(subscribed)")
+      exampleLog("FlareLane.subscribe() - \(subscribed)")
     }
   }
 
   @IBAction func unsubscribe(_ sender: Any) {
     FlareLane.unsubscribe() { subscribed in
-      print("FlareLane.unsubscribe() - \(subscribed)")
+      exampleLog("FlareLane.unsubscribe() - \(subscribed)")
     }
   }
   
