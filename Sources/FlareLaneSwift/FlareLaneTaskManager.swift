@@ -12,8 +12,21 @@ class FlareLaneTaskManager {
 
   private var taskQueue = OperationQueue()
   private var isInitialized = false
+
+  /// Guards `stopped` together with the queue mutation it decides on. `stop()` runs on a URLSession
+  /// callback thread while tasks are added from the caller's thread, so checking the flag and
+  /// enqueueing have to be one step — otherwise a task can slip in after `stop()` already cancelled
+  /// everything and resumed the queue, and it would run.
+  private let stateLock = NSLock()
   /// Set when the server tells the SDK to stop (HTTP 410). Nothing is queued or run afterwards.
-  private(set) var isStopped = false
+  private var stopped = false
+
+  /// Whether the server told the SDK to stop. Read from `FlareLane.subscribe`/`unsubscribe`.
+  var isStopped: Bool {
+    stateLock.lock()
+    defer { stateLock.unlock() }
+    return stopped
+  }
 
   init() {
     taskQueue.maxConcurrentOperationCount = 1 // Ensure tasks are processed sequentially
@@ -21,13 +34,6 @@ class FlareLaneTaskManager {
   }
 
   func addTaskAfterInit(taskName: String, timeout: TimeInterval = 10.0, _ task: @escaping (_ completion: @escaping () -> Void) -> Void) {
-    if isStopped {
-      Logger.verbose("SDK is stopped, ignoring task: '\(taskName)'")
-      return
-    }
-
-    Logger.verbose("Task added to queue: '\(taskName)'. Queue size after adding: \(taskQueue.operationCount + 1)")
-
     let operation = BlockOperation {
       let semaphore = DispatchSemaphore(value: 0)
       var taskCompleted = false
@@ -59,6 +65,15 @@ class FlareLaneTaskManager {
       }
     }
 
+    stateLock.lock()
+    defer { stateLock.unlock() }
+
+    if stopped {
+      Logger.verbose("SDK is stopped, ignoring task: '\(taskName)'")
+      return
+    }
+
+    Logger.verbose("Task added to queue: '\(taskName)'. Queue size after adding: \(taskQueue.operationCount + 1)")
     taskQueue.addOperation(operation)
   }
 
@@ -72,11 +87,13 @@ class FlareLaneTaskManager {
   /// operations (and whatever they captured) even after `cancelAllOperations`, so the queue is
   /// resumed to let the cancelled ones drain and release. Cancelled operations never run.
   func stop() {
-    isStopped = true
-
+    stateLock.lock()
+    stopped = true
     let discarded = taskQueue.operationCount
     taskQueue.cancelAllOperations()
     taskQueue.isSuspended = false
+    stateLock.unlock()
+
     Logger.verbose("SDK stopped, task queue cleared. Pending tasks discarded: \(discarded)")
   }
 
@@ -87,19 +104,28 @@ class FlareLaneTaskManager {
     // Registration reports completion even when it failed, so this runs after a 410 stop too.
     // Returning keeps the log stream honest: "Task queue initialized" right after "SDK stopped"
     // reads as if the SDK resumed, and Android never emits it in that situation.
-    if isStopped { return }
+    stateLock.lock()
+    if stopped {
+      stateLock.unlock()
+      return
+    }
 
     isInitialized = true
-    Logger.verbose("Task queue initialized. Processing queued tasks.")
     taskQueue.isSuspended = false // Resume task execution after initialization is complete
+    stateLock.unlock()
+
+    Logger.verbose("Task queue initialized. Processing queued tasks.")
   }
   func reset() {
     Logger.verbose("Resetting task queue state")
     // Prevent new operations from starting, then cancel pending ones.
+    stateLock.lock()
     taskQueue.isSuspended = true
     taskQueue.cancelAllOperations()
     isInitialized = false
-    isStopped = false
+    stopped = false
+    stateLock.unlock()
+
     Logger.verbose("Task queue reset completed")
   }
 }

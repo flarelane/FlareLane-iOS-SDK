@@ -612,6 +612,38 @@ extension Tests {
         XCTAssertFalse(ran, "a stopped SDK must not run new tasks")
     }
 
+    /// `stop()` runs on a URLSession callback thread while tasks are added from the caller's
+    /// thread. If the stopped check and the enqueue were not one step, a task could slip in after
+    /// stop() already cancelled everything and resumed the queue — and it would run.
+    func testStop_isAtomicAgainstConcurrentTaskAdds() {
+        let manager = FlareLaneTaskManager()
+        defer { manager.reset() }
+        manager.initializeComplete()
+
+        let adds = DispatchQueue(label: "adds", attributes: .concurrent)
+        let group = DispatchGroup()
+
+        for i in 0..<200 {
+            group.enter()
+            adds.async {
+                manager.addTaskAfterInit(taskName: "task-\(i)") { completion in completion() }
+                group.leave()
+            }
+            if i == 20 {
+                DispatchQueue.global().async { manager.stop() }
+            }
+        }
+
+        group.wait()
+
+        let settled = expectation(description: "queue settles")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { settled.fulfill() }
+        wait(for: [settled], timeout: 5)
+
+        XCTAssertTrue(manager.isStopped)
+        XCTAssertEqual(manager.queuedTaskCount, 0, "no task may survive stop()")
+    }
+
     func testReset_liftsTheStoppedStateSoTheNextLaunchWorks() {
         let manager = FlareLaneTaskManager()
         defer { manager.reset() }
