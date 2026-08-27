@@ -31,6 +31,9 @@ class FlareLaneTaskManager {
   }
 
   func addTaskAfterInit(taskName: String, timeout: TimeInterval = 10.0, _ task: @escaping (_ completion: @escaping () -> Void) -> Void) {
+    // A flood guard, not an exact quota: a burst of concurrent adds may briefly
+    // overshoot by the number of racing threads, which is fine — the point is
+    // that the queue can never grow without limit.
     if taskQueue.operationCount >= Self.maxPendingTasks {
       Logger.error("Task queue is full (\(Self.maxPendingTasks) pending), ignoring task: '\(taskName)'")
       return
@@ -107,11 +110,19 @@ class FlareLaneTaskManager {
   }
   func reset() {
     Logger.verbose("Resetting task queue state")
-    // Prevent new operations from starting, then cancel pending ones.
-    taskQueue.isSuspended = true
+    // Cancelled operations only leave operationCount once they run to their
+    // finished state, and a suspended queue never starts them — they would sit
+    // there forever, counting against maxPendingTasks. Resume briefly so they
+    // drain (cancelled operations never execute), then suspend for the next init.
     taskQueue.cancelAllOperations()
+    taskQueue.isSuspended = false
+    taskQueue.waitUntilAllOperationsAreFinished()
+    taskQueue.isSuspended = true
     isInitialized = false
     stateLock.lock()
+    // Deliberately lifted here: reset() is the explicit re-initialization entry
+    // point, which must be allowed to try again. If the project is still gone,
+    // the very next registration's 410 re-stops.
     isStopped = false
     stateLock.unlock()
     Logger.verbose("Task queue reset completed")
