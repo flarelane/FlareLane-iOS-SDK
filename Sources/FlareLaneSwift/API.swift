@@ -101,10 +101,11 @@ final class API {
     let subjectType = userId != nil ? "user": "device"
     let subjectId = userId ?? deviceId
     
-    // The id is the dedup key: a retried request carries the same body, so
-    // the backend can recognise a resend whose response was lost.
+    // Dedup key, separate from the server-owned record id: a retried request
+    // carries the same body, so the backend can recognise a resend whose
+    // response was lost.
     var event: [String: Any] = [
-      "id": UUID().uuidString,
+      "clientEventId": UUID().uuidString,
       "subjectType": subjectType,
       "subjectId": subjectId,
       "type": type,
@@ -121,7 +122,7 @@ final class API {
       event["userId"] = userId
     }
 
-    // Safe to retry thanks to the id above.
+    // Safe to retry thanks to the dedup key above.
     request.post(path: "/events-v2", body: ["events": [event]], idempotent: true) { (response, error) in
       completion(error)
     }

@@ -859,6 +859,36 @@ extension Tests {
                        "a non-idempotent request must fail on the first attempt")
     }
 
+    /// The airplane-mode shape end to end: the connection dies without any HTTP
+    /// response (status -1), the retry fires, and the next attempt delivers.
+    func testRetry_aDroppedConnectionIsRetriedAndSucceeds() {
+        Globals.projectIdInUserDefaults = "test-project-id"
+        ScriptedResponseStub.script = [(0, ""), (200, #"{"data":{}}"#)]
+        URLProtocol.registerClass(ScriptedResponseStub.self)
+        defer {
+            URLProtocol.unregisterClass(ScriptedResponseStub.self)
+            ScriptedResponseStub.reset()
+            Globals.projectIdInUserDefaults = nil
+        }
+
+        let exp = expectation(description: "completion invoked")
+        var completions = 0
+        var received: [String: Any]?
+
+        Request().post(path: "/events-v2", body: ["events": []], idempotent: true) { response, _ in
+            completions += 1
+            received = response
+            exp.fulfill()
+        }
+
+        wait(for: [exp], timeout: 15.0)
+        watchForStrayCallbacks(0.3)
+
+        XCTAssertEqual(completions, 1, "exactly one completion")
+        XCTAssertNotNil(received, "caller should see the successful retry")
+        XCTAssertEqual(ScriptedResponseStub.requestCount, 2, "request should have gone out twice")
+    }
+
     func testRetry_aRetrySendsTheExactSameBody() {
         Globals.projectIdInUserDefaults = "test-project-id"
         ScriptedResponseStub.script = [(500, "{}"), (200, "{}")]
@@ -957,6 +987,29 @@ extension Tests {
         wait(for: [exp], timeout: 5.0)
     }
 
+    /// Pins the reset() drain: cancelled operations must leave operationCount, or
+    /// they would keep counting against maxPendingTasks forever on a suspended queue.
+    func testStop_resetDrainsCancelledTasksSoTheCapIsNotConsumed() {
+        let manager = FlareLaneTaskManager.shared
+        manager.reset()
+        defer { manager.reset() }
+
+        // Fill the suspended queue to its cap, then reset. Without the drain,
+        // these would linger in operationCount and refuse everything below.
+        for _ in 0 ..< FlareLaneTaskManager.maxPendingTasks {
+            manager.addTaskAfterInit(taskName: "stale") { done in done() }
+        }
+        manager.reset()
+
+        let exp = expectation(description: "a fresh task runs after reset")
+        manager.addTaskAfterInit(taskName: "fresh") { done in
+            done()
+            exp.fulfill()
+        }
+        manager.initializeComplete()
+        wait(for: [exp], timeout: 5.0)
+    }
+
     func testStop_thePendingQueueNeverGrowsPastItsCap() {
         let manager = FlareLaneTaskManager.shared
         manager.reset()
@@ -1017,8 +1070,17 @@ private final class ScriptedResponseStub: URLProtocol {
             return index
         }
 
+        let entry = Self.script.isEmpty ? nil : (Self.script.count > index ? Self.script[index] : Self.script.last)
+
+        // status 0 slams the connection without an HTTP response — the airplane-mode
+        // shape: the client sees a transport error and no status code at all.
+        if entry?.status == 0 {
+            client?.urlProtocol(self, didFailWithError: URLError(.networkConnectionLost))
+            return
+        }
+
         guard let url = request.url,
-              let entry = Self.script.isEmpty ? nil : (Self.script.count > index ? Self.script[index] : Self.script.last),
+              let entry = entry,
               let response = HTTPURLResponse(
                 url: url,
                 statusCode: entry.status,
