@@ -101,11 +101,12 @@ final class API {
     let subjectType = userId != nil ? "user": "device"
     let subjectId = userId ?? deviceId
     
-    // Dedup key, separate from the server-owned record id: a retried request
+    // Insert id — the client-generated dedup key (the industry-standard name
+    // for it), separate from the server-owned record id: a retried request
     // carries the same body, so the backend can recognise a resend whose
     // response was lost.
     var event: [String: Any] = [
-      "clientEventId": UUID().uuidString,
+      "insertId": UUID().uuidString,
       "subjectType": subjectType,
       "subjectId": subjectId,
       "type": type,
