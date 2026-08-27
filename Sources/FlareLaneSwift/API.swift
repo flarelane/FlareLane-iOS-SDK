@@ -108,7 +108,9 @@ final class API {
       event["userId"] = userId
     }
 
-    request.post(path: "/events-v2", body: ["events": [event]]) { (response, error) in
+    // Safe to retry: the event carries its own id, so a resend of a stored-but-unacknowledged
+    // event is recognised and counted once.
+    request.post(path: "/events-v2", body: ["events": [event]], idempotent: true) { (response, error) in
       completion(error)
     }
   }
@@ -129,9 +131,11 @@ final class API {
   }
 
   func getInAppMessages(deviceId: String, group: String, data: [String: Any]?, completionHandler: @escaping (Result<[String: Any], Error>) -> Void) {
+    // A read in POST clothing: fetching the message list twice is harmless, so it may retry.
     request.post(
       path: "/devices/\(deviceId)/in-app-messages",
-      body: ["group": group, "data": data]
+      body: ["group": group, "data": data],
+      idempotent: true
     ) { result, error in
       if let error {
         completionHandler(.failure(error))

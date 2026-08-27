@@ -889,7 +889,7 @@ extension Tests {
         var completions = 0
         var received: [String: Any]?
 
-        Request().post(path: "/events-v2", body: ["events": []]) { response, _ in
+        Request().post(path: "/events-v2", body: ["events": []], idempotent: true) { response, _ in
             completions += 1
             received = response
             exp.fulfill()
@@ -917,7 +917,7 @@ extension Tests {
         var completions = 0
         var captured: Error?
 
-        Request().post(path: "/events-v2", body: ["events": []]) { _, error in
+        Request().post(path: "/events-v2", body: ["events": []], idempotent: true) { _, error in
             completions += 1
             captured = error
             exp.fulfill()
@@ -1017,6 +1017,37 @@ extension Tests {
         XCTAssertEqual(ScriptedResponseStub.requestCount, 1, "a success must not be retried")
     }
 
+    /// A POST that reached the server but lost its response would be applied twice if resent, so
+    /// only callers that declared the request idempotent enter the retry loop at all.
+    func testRequest_doesNotRetryANonIdempotentRequest() {
+        Globals.projectIdInUserDefaults = "test-project-id"
+        ScriptedResponseStub.script = [(503, "{}")]
+        URLProtocol.registerClass(ScriptedResponseStub.self)
+        defer {
+            URLProtocol.unregisterClass(ScriptedResponseStub.self)
+            ScriptedResponseStub.reset()
+            Globals.projectIdInUserDefaults = nil
+        }
+
+        let exp = expectation(description: "completion invoked")
+        var captured: Error?
+
+        Request().post(path: "/devices", body: [:]) { _, error in
+            captured = error
+            exp.fulfill()
+        }
+
+        wait(for: [exp], timeout: 5.0)
+        watch(pastFirstBackoff)
+
+        XCTAssertEqual(ScriptedResponseStub.requestCount, 1,
+                       "a non-idempotent request must fail on the first attempt")
+        guard case Request.HTTPError.serverSideError(503)? = captured else {
+            XCTFail("expected serverSideError(503), got \(String(describing: captured))")
+            return
+        }
+    }
+
     func testRequest_retrySendsTheExactSameBody() {
         Globals.projectIdInUserDefaults = "test-project-id"
         ScriptedResponseStub.script = [(500, "{}"), (200, "{}")]
@@ -1028,7 +1059,7 @@ extension Tests {
         }
 
         let exp = expectation(description: "completion invoked")
-        Request().post(path: "/events-v2", body: ["events": [["id": "fixed-uuid"]]]) { _, _ in exp.fulfill() }
+        Request().post(path: "/events-v2", body: ["events": [["id": "fixed-uuid"]]], idempotent: true) { _, _ in exp.fulfill() }
 
         wait(for: [exp], timeout: 15.0)
         watch(settleOnly)

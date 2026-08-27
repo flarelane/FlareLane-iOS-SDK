@@ -100,23 +100,28 @@ final class Request {
     }
 
     Logger.verbose("GET Request - path:\(path) parameters:\(parameters.description))")
-    perform(request, label: "GET \(path)", completion: completion)
+    perform(request, label: "GET \(path)", idempotent: true, completion: completion)
   }
 
-  func post(path: String, body: [String: Any?], completion: @escaping Completion) {
-    send(.POST, path: path, body: body, completion: completion)
+  /// POSTs are only retried when the caller marks them `idempotent` — a POST that reached the
+  /// server but lost its response would otherwise be applied twice. Callers may opt in when the
+  /// request is a read in POST clothing, or when its body carries a deduplication id the backend
+  /// can recognise. GET/PATCH/DELETE are idempotent by contract here: PATCH bodies are absolute
+  /// values (last-writer-wins), never increments.
+  func post(path: String, body: [String: Any?], idempotent: Bool = false, completion: @escaping Completion) {
+    send(.POST, path: path, body: body, idempotent: idempotent, completion: completion)
   }
 
   func patch(path: String, body: [String: Any?], completion: @escaping Completion) {
-    send(.PATCH, path: path, body: body, completion: completion)
+    send(.PATCH, path: path, body: body, idempotent: true, completion: completion)
   }
 
   func delete(path: String, body: [String: Any?], completion: @escaping Completion) {
-    send(.DELETE, path: path, body: body, completion: completion)
+    send(.DELETE, path: path, body: body, idempotent: true, completion: completion)
   }
 
   private func send(_ method: WithBodyMethod, path: String, body: [String: Any?],
-                    completion: @escaping Completion) {
+                    idempotent: Bool, completion: @escaping Completion) {
     guard let request = self.getRequestWithBody(method: method, path: path, body: body) else {
       // Surface an explicit failure to the caller so a malformed body doesn't
       // leave dependent tasks (event queue, NSE handlers) waiting forever.
@@ -125,7 +130,7 @@ final class Request {
     }
 
     Logger.verbose("\(method.rawValue) Request - path:\(path) body:\(body.description))")
-    perform(request, label: "\(method.rawValue) \(path)", completion: completion)
+    perform(request, label: "\(method.rawValue) \(path)", idempotent: idempotent, completion: completion)
   }
 
   // MARK: - Attempt loop
@@ -134,12 +139,12 @@ final class Request {
   ///
   /// The `URLRequest` is passed along unchanged, so every attempt puts the exact same bytes on the
   /// wire — which is what lets the backend recognise a redelivered event and count it once.
-  private func perform(_ request: URLRequest, label: String, attempt: Int = 1,
+  private func perform(_ request: URLRequest, label: String, idempotent: Bool, attempt: Int = 1,
                        completion: @escaping Completion) {
     let task = URLSession.shared.dataTask(with: request) { data, response, error in
       let statusCode = RetryPolicy.statusCode(for: response, error: error)
 
-      guard RetryPolicy.shouldRetry(statusCode: statusCode, attempt: attempt) else {
+      guard idempotent, RetryPolicy.shouldRetry(statusCode: statusCode, attempt: attempt) else {
         self.finish(data: data, statusCode: statusCode, error: error, label: label, completion: completion)
         return
       }
@@ -157,7 +162,7 @@ final class Request {
       // asyncAfter rather than a sleep: the wait costs a timer, not a thread.
       DispatchQueue.global(qos: .utility).asyncAfter(deadline: .now() + delay) {
         Self.retryBudget.release()
-        self.perform(request, label: label, attempt: attempt + 1, completion: completion)
+        self.perform(request, label: label, idempotent: idempotent, attempt: attempt + 1, completion: completion)
       }
     }
 
@@ -175,9 +180,10 @@ final class Request {
     guard statusCode != RetryPolicy.noResponse, let data = data else {
       // Either nothing came back at all — observed on iOS under background + low-memory pressure,
       // where the system terminates an in-flight dataTask without surfacing an NSURLError — or a
-      // response arrived with no body to make sense of.
+      // response arrived with no body to make sense of. Reported as an error so callers do not
+      // mistake it for success and log a delivery that never happened.
       Logger.error("\(label) finished without a usable response (status \(statusCode)).")
-      completion(nil, nil)
+      completion(nil, HTTPError.unexpectedNilResponse)
       return
     }
 
@@ -201,7 +207,7 @@ final class Request {
           JSONSerialization.isValidJSONObject(jsonObject),
           let responseObject = jsonObject as? [String: Any] else {
       Logger.error("Invalid JSON response data: \(String(data: data, encoding: .utf8) ?? "unable to decode")")
-      completion(nil, nil)
+      completion(nil, HTTPError.unexpectedNilResponse)
       return
     }
 
