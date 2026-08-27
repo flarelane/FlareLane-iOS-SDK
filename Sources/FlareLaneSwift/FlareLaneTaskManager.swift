@@ -21,19 +21,16 @@ class FlareLaneTaskManager {
   /// Set when the server tells the SDK to stop (HTTP 410). Nothing is queued or run afterwards.
   private var stopped = false
 
-  /// Whether the server told the SDK to stop. Read from `FlareLane.subscribe`/`unsubscribe`.
-  var isStopped: Bool {
-    stateLock.lock()
-    defer { stateLock.unlock() }
-    return stopped
-  }
-
   init() {
     taskQueue.maxConcurrentOperationCount = 1 // Ensure tasks are processed sequentially
     taskQueue.isSuspended = true // Suspend task execution until initialization is complete
   }
 
-  func addTaskAfterInit(taskName: String, timeout: TimeInterval = 10.0, _ task: @escaping (_ completion: @escaping () -> Void) -> Void) {
+  /// Returns false when the SDK is stopped and the task was refused. Callers that owe the host app
+  /// a result must answer it themselves in that case — deciding here keeps the check and the
+  /// enqueue atomic, so a task can never be refused after a caller already saw "not stopped".
+  @discardableResult
+  func addTaskAfterInit(taskName: String, timeout: TimeInterval = 10.0, _ task: @escaping (_ completion: @escaping () -> Void) -> Void) -> Bool {
     let operation = BlockOperation {
       let semaphore = DispatchSemaphore(value: 0)
       var taskCompleted = false
@@ -70,11 +67,12 @@ class FlareLaneTaskManager {
 
     if stopped {
       Logger.verbose("SDK is stopped, ignoring task: '\(taskName)'")
-      return
+      return false
     }
 
     Logger.verbose("Task added to queue: '\(taskName)'. Queue size after adding: \(taskQueue.operationCount + 1)")
     taskQueue.addOperation(operation)
+    return true
   }
 
   /// Drop everything pending and ignore new tasks, for the rest of this process.

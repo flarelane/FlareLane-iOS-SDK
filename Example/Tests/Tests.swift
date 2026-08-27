@@ -640,8 +640,9 @@ extension Tests {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { settled.fulfill() }
         wait(for: [settled], timeout: 5)
 
-        XCTAssertTrue(manager.isStopped)
         XCTAssertEqual(manager.queuedTaskCount, 0, "no task may survive stop()")
+        XCTAssertFalse(manager.addTaskAfterInit(taskName: "after") { $0() },
+                       "a stopped manager must keep refusing")
     }
 
     func testReset_liftsTheStoppedStateSoTheNextLaunchWorks() {
@@ -811,4 +812,330 @@ private final class EmptyDataArrayResponseStub: URLProtocol {
     }
 
     override func stopLoading() {}
+}
+
+// MARK: - Request-level test harness
+
+/// Intercepts `URLSession.shared` so tests can drive the real request path — `API` → `Request` →
+/// `URLSession` → response handling → `FlareLaneTaskManager` — with no network and no live project.
+///
+/// Unit tests cover the queue in isolation. This covers the wiring between an actual HTTP status and
+/// the queue reacting to it, plus the two properties that matter for data integrity: **how many**
+/// requests go out and **in what order**. A scripted response per call also lets a retry policy be
+/// tested here later (`.script` accepts a sequence; the last entry repeats).
+final class StubURLProtocol: URLProtocol {
+  struct Response {
+    let status: Int
+    let body: String
+
+    static func ok(_ body: String = "{\"data\":{}}") -> Response { .init(status: 200, body: body) }
+    static func gone(_ message: String = "Project not found") -> Response {
+      .init(status: 410, body: "{\"statusCode\":410,\"message\":\"\(message)\",\"error\":\"Gone\"}")
+    }
+    static func status(_ code: Int) -> Response {
+      .init(status: code, body: "{\"statusCode\":\(code),\"message\":\"e2e\",\"error\":\"e2e\"}")
+    }
+  }
+
+  struct Recorded {
+    let method: String
+    let path: String
+    let body: String
+  }
+
+  private static let lock = NSLock()
+  /// Responses to hand out per path suffix, consumed in order. The last entry repeats.
+  private static var script: [String: [Response]] = [:]
+  private static var log: [Recorded] = []
+
+  static func install(_ script: [String: [Response]] = [:]) {
+    lock.lock()
+    self.script = script
+    log = []
+    lock.unlock()
+    URLProtocol.registerClass(StubURLProtocol.self)
+  }
+
+  static func uninstall() {
+    URLProtocol.unregisterClass(StubURLProtocol.self)
+    lock.lock()
+    script = [:]
+    log = []
+    lock.unlock()
+  }
+
+  /// Every request seen so far, in order.
+  static var requests: [Recorded] {
+    lock.lock()
+    defer { lock.unlock() }
+    return log
+  }
+
+  static func count(pathSuffix: String) -> Int {
+    requests.filter { $0.path.hasSuffix(pathSuffix) }.count
+  }
+
+  override class func canInit(with request: URLRequest) -> Bool {
+    request.url?.host?.contains("flarelane.com") == true
+  }
+
+  override class func canonicalRequest(for request: URLRequest) -> URLRequest { request }
+
+  override func startLoading() {
+    let path = request.url?.path ?? ""
+    // URLSession streams an upload body, so httpBody is usually nil — read the stream instead.
+    var body = ""
+    if let data = request.httpBody {
+      body = String(data: data, encoding: .utf8) ?? ""
+    } else if let stream = request.httpBodyStream {
+      stream.open()
+      var buffer = [UInt8](repeating: 0, count: 8192)
+      var collected = Data()
+      while stream.hasBytesAvailable {
+        let read = stream.read(&buffer, maxLength: buffer.count)
+        if read <= 0 { break }
+        collected.append(buffer, count: read)
+      }
+      stream.close()
+      body = String(data: collected, encoding: .utf8) ?? ""
+    }
+
+    StubURLProtocol.lock.lock()
+    StubURLProtocol.log.append(
+      Recorded(method: request.httpMethod ?? "", path: path, body: body))
+    let key = StubURLProtocol.script.keys.first { path.hasSuffix($0) }
+    var response = Response.ok()
+    if let key = key, var queued = StubURLProtocol.script[key], !queued.isEmpty {
+      response = queued.removeFirst()
+      // Keep the last scripted response in place so repeated calls stay deterministic.
+      StubURLProtocol.script[key] = queued.isEmpty ? [response] : queued
+    }
+    StubURLProtocol.lock.unlock()
+
+    let http = HTTPURLResponse(
+      url: request.url!, statusCode: response.status, httpVersion: "HTTP/1.1",
+      headerFields: ["Content-Type": "application/json"])!
+    client?.urlProtocol(self, didReceive: http, cacheStoragePolicy: .notAllowed)
+    client?.urlProtocol(self, didLoad: Data(response.body.utf8))
+    client?.urlProtocolDidFinishLoading(self)
+  }
+
+  override func stopLoading() {}
+}
+
+// MARK: - Stop contract, end to end
+
+extension Tests {
+  private static let e2eProject = "00000000-0000-4000-8000-00000000e2e0"
+  private static let e2eDevice = "00000000-0000-4000-8000-00000000e2e1"
+  private var devicePath: String { "/devices/\(Tests.e2eDevice)" }
+
+  private func startE2E(_ script: [String: [StubURLProtocol.Response]] = [:]) {
+    StubURLProtocol.install(script)
+    Globals.projectIdInUserDefaults = Tests.e2eProject
+    Globals.deviceIdInUserDefaults = Tests.e2eDevice
+    FlareLaneTaskManager.shared.reset()
+  }
+
+  private func endE2E() {
+    StubURLProtocol.uninstall()
+    FlareLaneTaskManager.shared.reset()
+    Globals.projectIdInUserDefaults = nil
+    Globals.deviceIdInUserDefaults = nil
+  }
+
+  private func settle(_ seconds: TimeInterval = 0.6) {
+    let done = expectation(description: "settle")
+    DispatchQueue.main.asyncAfter(deadline: .now() + seconds) { done.fulfill() }
+    wait(for: [done], timeout: seconds + 5)
+  }
+
+  private func updateDeviceAndWait() {
+    let done = expectation(description: "device update returns")
+    API.shared.updateDevice(deviceId: Tests.e2eDevice, body: ["lastActiveAt": "e2e"]) { _, _ in
+      done.fulfill()
+    }
+    wait(for: [done], timeout: 5)
+    settle()
+  }
+
+  /// The whole contract in order: work queues up, a 410 on device update stops the SDK, the queue
+  /// empties, nothing else goes out, and a caller waiting on a result still gets one.
+  func testE2E_410OnDeviceUpdate_stopsTheSdkAndAnswersCallers() {
+    startE2E([devicePath: [.gone()]])
+    defer { endE2E() }
+
+    // Queue work before initialization, the way a host app does at launch.
+    for i in 0..<5 {
+      FlareLaneTaskManager.shared.addTaskAfterInit(taskName: "queued-\(i)") { $0() }
+    }
+    XCTAssertGreaterThan(FlareLaneTaskManager.shared.queuedTaskCount, 0)
+
+    updateDeviceAndWait()
+
+    XCTAssertEqual(FlareLaneTaskManager.shared.queuedTaskCount, 0, "stop() must empty the queue")
+
+    let before = StubURLProtocol.requests.count
+    let answered = expectation(description: "subscribe answers even though the SDK stopped")
+    FlareLane.subscribe { _ in answered.fulfill() }
+    wait(for: [answered], timeout: 5)
+    settle()
+
+    XCTAssertEqual(StubURLProtocol.requests.count, before,
+                   "a stopped SDK must not send anything else")
+  }
+
+  /// 404 is an ordinary failure. Only 410 means stop.
+  func testE2E_404OnDeviceUpdate_doesNotStopTheSdk() {
+    startE2E([devicePath: [.status(404)]])
+    defer { endE2E() }
+
+    updateDeviceAndWait()
+
+    XCTAssertTrue(FlareLaneTaskManager.shared.addTaskAfterInit(taskName: "after-404") { $0() },
+                  "404 must leave the SDK running")
+  }
+
+  /// Same for the statuses a retry policy will treat as transient.
+  func testE2E_transientFailures_doNotStopTheSdk() {
+    for status in [408, 429, 500, 502, 503] {
+      startE2E([devicePath: [.status(status)]])
+      updateDeviceAndWait()
+      XCTAssertTrue(
+        FlareLaneTaskManager.shared.addTaskAfterInit(taskName: "after-\(status)") { $0() },
+        "status \(status) must not stop the SDK")
+      endE2E()
+    }
+  }
+
+  /// A 410 from anything other than device create/update must not shut the SDK down.
+  func testE2E_410FromOtherEndpoint_doesNotStopTheSdk() {
+    startE2E(["/in-app-messages": [.gone()]])
+    defer { endE2E() }
+
+    let served = expectation(description: "in-app request returns")
+    API.shared.getInAppMessages(deviceId: Tests.e2eDevice, group: "home", data: nil) { _ in
+      served.fulfill()
+    }
+    wait(for: [served], timeout: 5)
+    settle()
+
+    XCTAssertTrue(FlareLaneTaskManager.shared.addTaskAfterInit(taskName: "after-iam-410") { $0() },
+                  "only the device endpoints may stop the SDK")
+  }
+
+  /// Device create is the other endpoint that carries the stop signal.
+  func testE2E_410OnDeviceCreate_stopsTheSdk() {
+    startE2E(["/devices": [.gone()]])
+    defer { endE2E() }
+
+    let created = expectation(description: "device create returns")
+    API.shared.createDevice(body: ["platform": "ios"]) { deviceId, error in
+      XCTAssertNil(deviceId)
+      XCTAssertTrue(API.isGone(error))
+      created.fulfill()
+    }
+    wait(for: [created], timeout: 5)
+    settle()
+
+    XCTAssertFalse(FlareLaneTaskManager.shared.addTaskAfterInit(taskName: "after") { $0() },
+                   "a stopped SDK must refuse new work")
+  }
+
+  /// The public API must answer even when the queue refused the work. The Flutter and React Native
+  /// bridges resolve only from inside these completions, so a missing answer hangs the host app.
+  func testE2E_stoppedSdkStillAnswersSubscribeAndUnsubscribe() {
+    startE2E(["/devices": [.gone()]])
+    defer { endE2E() }
+
+    let created = expectation(description: "device create returns")
+    API.shared.createDevice(body: ["platform": "ios"]) { _, _ in created.fulfill() }
+    wait(for: [created], timeout: 5)
+    settle()
+
+    XCTAssertFalse(FlareLaneTaskManager.shared.addTaskAfterInit(taskName: "probe") { $0() },
+                   "precondition: the SDK must be stopped")
+
+    let subscribed = expectation(description: "subscribe answers")
+    FlareLane.subscribe { _ in subscribed.fulfill() }
+
+    let unsubscribed = expectation(description: "unsubscribe answers")
+    FlareLane.unsubscribe { _ in unsubscribed.fulfill() }
+
+    wait(for: [subscribed, unsubscribed], timeout: 5)
+  }
+
+  /// resetDevice() has to bring the SDK back, otherwise a stop would be permanent.
+  func testE2E_resetRecoversAfterStop() {
+    startE2E([devicePath: [.gone()]])
+    defer { endE2E() }
+
+    updateDeviceAndWait()
+    XCTAssertFalse(FlareLaneTaskManager.shared.addTaskAfterInit(taskName: "stopped") { $0() })
+
+    FlareLaneTaskManager.shared.reset()
+
+    XCTAssertTrue(FlareLaneTaskManager.shared.addTaskAfterInit(taskName: "after-reset") { $0() },
+                  "reset must lift the stopped state")
+  }
+
+  // MARK: - Data guarantees
+
+  /// One call must produce exactly one request. Guards against a retry or a re-entrant path
+  /// silently duplicating device updates, which would corrupt lastActiveAt statistics.
+  func testE2E_oneCallSendsExactlyOneRequest() {
+    startE2E([devicePath: [.ok("{\"data\":{\"id\":\"\(Tests.e2eDevice)\",\"isSubscribed\":false}}")]])
+    defer { endE2E() }
+
+    updateDeviceAndWait()
+
+    XCTAssertEqual(StubURLProtocol.count(pathSuffix: devicePath), 1)
+    XCTAssertEqual(StubURLProtocol.requests.first?.method, "PATCH")
+    XCTAssertTrue(StubURLProtocol.requests.first?.body.contains("lastActiveAt") == true,
+                  "the body the SDK actually sent must carry the payload")
+  }
+
+  /// The queue is the ordering guarantee the host app relies on: tasks run in the order they were
+  /// added, one at a time. A retry policy must not be allowed to reorder them.
+  func testE2E_queuedTasksRunInOrder() {
+    startE2E()
+    defer { endE2E() }
+
+    var order: [Int] = []
+    let orderLock = NSLock()
+    let all = expectation(description: "all tasks run")
+    all.expectedFulfillmentCount = 10
+
+    for i in 0..<10 {
+      FlareLaneTaskManager.shared.addTaskAfterInit(taskName: "ordered-\(i)") { completion in
+        orderLock.lock()
+        order.append(i)
+        orderLock.unlock()
+        completion()
+        all.fulfill()
+      }
+    }
+
+    FlareLaneTaskManager.shared.initializeComplete()
+    wait(for: [all], timeout: 20)
+
+    XCTAssertEqual(order, Array(0..<10), "the queue must preserve FIFO order")
+  }
+
+  /// A scripted sequence proves the harness can express "fails, then succeeds" — the shape a retry
+  /// policy needs. Today the SDK does not retry, so the request count stays at one; when retries
+  /// land, this is where the no-loss guarantee gets asserted.
+  func testE2E_harnessSupportsPerCallResponseSequences() {
+    startE2E([devicePath: [.status(503), .ok()]])
+    defer { endE2E() }
+
+    updateDeviceAndWait()
+    XCTAssertEqual(StubURLProtocol.count(pathSuffix: devicePath), 1,
+                   "no retry today: exactly one request")
+
+    updateDeviceAndWait()
+    XCTAssertEqual(StubURLProtocol.count(pathSuffix: devicePath), 2)
+    XCTAssertTrue(FlareLaneTaskManager.shared.addTaskAfterInit(taskName: "still-running") { $0() },
+                  "a transient failure followed by a success must leave the SDK running")
+  }
 }
