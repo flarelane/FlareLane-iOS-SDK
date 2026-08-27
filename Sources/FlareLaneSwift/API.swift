@@ -12,6 +12,22 @@ final class API {
 
   private let request = Request()
 
+  /// 410 means this project or device is gone and will not come back within this app run, so the
+  /// SDK stops until the next launch. Only the device create/update endpoints carry that meaning,
+  /// which is why the check lives here instead of in the shared transport layer: a 410 from any
+  /// other endpoint must never be able to shut the SDK down.
+  static func isGone(_ error: Error?) -> Bool {
+    guard case .serverSideError(410) = error as? Request.HTTPError else { return false }
+    return true
+  }
+
+  private func stopSdkIfGone(_ error: Error?, _ path: String) {
+    guard API.isGone(error) else { return }
+
+    Logger.error("Device endpoint returned 410, stopping the SDK until the next app launch. path: \(path)")
+    FlareLaneTaskManager.shared.stop()
+  }
+
   /// API to create device
   /// - Parameters:
   ///   - body: Body params
@@ -20,6 +36,7 @@ final class API {
 
     request.post(path: "/devices", body: body) { (response, error) in
       if (error != nil) {
+        self.stopSdkIfGone(error, "/devices")
         completion(nil, error)
         return
       }
@@ -38,6 +55,7 @@ final class API {
 
     request.patch(path: "/devices/\(deviceId)", body: body) { (response, error) in
       if (error != nil) {
+        self.stopSdkIfGone(error, "/devices/\(deviceId)")
         completion(nil, error)
         return
       }

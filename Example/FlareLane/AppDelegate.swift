@@ -9,6 +9,16 @@
 import UIKit
 import FlareLane
 
+/// Example-app logging.
+///
+/// Uses `NSLog` rather than `print` so the line reaches the device syslog and `idevicesyslog` can
+/// capture it during real-device testing. `print` only goes to stdout, which needs a debugger
+/// session attached — that made the example's output invisible while the SDK's own logs (also
+/// NSLog) showed up fine. Mirrors the Android example's `Log.d("FlareLane", ...)`.
+func exampleLog(_ message: String) {
+  NSLog("%@", "[FlareLaneExample] " + message)
+}
+
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
@@ -19,7 +29,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     FlareLane.initWithLaunchOptions(launchOptions, projectId: FLARELANE_PROJECT_ID, requestPermissionOnLaunch: false)
 
     FlareLane.setNotificationClickedHandler() { payload in
-      print(payload)
+      exampleLog("notificationClicked: \(payload)")
     }
 
     FlareLane.setNotificationForegroundReceivedHandler { event in
@@ -32,7 +42,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     FlareLane.setInAppMessageActionHandler { iam, actionId in
-      print("setInAppMessageActionHandler: \(iam), \(actionId)")
+      exampleLog("setInAppMessageActionHandler: \(iam), \(actionId)")
     }
 
     UNUserNotificationCenter.current().delegate = self
@@ -49,7 +59,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
   
   // Handle deep links when app is in background or foreground
   func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
-    print("Deep link received via open URL: \(url)")
+    exampleLog("Deep link received via open URL: \(url)")
     showDeepLinkScreen(url: url.absoluteString)
     return true
   }
@@ -57,7 +67,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
   // Handle universal links
   func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
     if userActivity.activityType == NSUserActivityTypeBrowsingWeb, let url = userActivity.webpageURL {
-      print("Universal link received: \(url)")
+      exampleLog("Universal link received: \(url)")
       showDeepLinkScreen(url: url.absoluteString)
       return true
     }
