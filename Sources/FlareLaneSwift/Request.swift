@@ -62,7 +62,9 @@ final class Request {
         Logger.verbose("Retrying \(label) in \(delayMs)ms"
                        + " (attempt \(attempt + 1)/\(Self.maxAttempts), status \(responseCode))")
         // asyncAfter rather than a sleep: the wait costs a timer, not a thread.
-        DispatchQueue.global(qos: .utility).asyncAfter(deadline: .now() + TimeInterval(delayMs) / 1000) {
+        // Default QoS on purpose — utility can be deferred indefinitely under
+        // load, and a backoff that fires late breaks the 8s deadline contract.
+        DispatchQueue.global().asyncAfter(deadline: .now() + TimeInterval(delayMs) / 1000) {
           self.perform(request, label: label, idempotent: idempotent,
                        deadline: deadline, attempt: attempt + 1, handler: handler)
         }
