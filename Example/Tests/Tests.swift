@@ -568,6 +568,67 @@ extension Tests {
         XCTAssertEqual(Globals.logLevelInUserDefaults, LogLevel.error.rawValue)
     }
 
+    // MARK: - Stopping the SDK
+
+    /// 410 is the server's only directive to stop the SDK. The decision is made on the status code
+    /// alone so the SDK never has to parse a response body.
+    func testIsGone_onlyMatches410() {
+        XCTAssertTrue(API.isGone(Request.HTTPError.serverSideError(410)))
+
+        for status in [200, 201, 400, 401, 403, 404, 409, 429, 500, 503] {
+            XCTAssertFalse(API.isGone(Request.HTTPError.serverSideError(status)),
+                           "status \(status) must not stop the SDK")
+        }
+        XCTAssertFalse(API.isGone(nil))
+        XCTAssertFalse(API.isGone(Request.HTTPError.unexpectedNilResponse))
+    }
+
+    /// The queue has to be emptied, not just closed to new work: with requestPermissionOnLaunch it
+    /// stays suspended until the permission alert is answered, so anything left queued would fire
+    /// the moment the user taps.
+    func testStop_clearsPendingTasksAndRefusesNewOnes() {
+        let manager = FlareLaneTaskManager()
+        defer { manager.reset() }
+
+        for i in 0..<20 {
+            manager.addTaskAfterInit(taskName: "task-\(i)") { completion in completion() }
+        }
+        XCTAssertGreaterThan(manager.queuedTaskCount, 0)
+
+        manager.stop()
+        manager.initializeComplete()
+
+        var ran = false
+        manager.addTaskAfterInit(taskName: "after-stop") { completion in
+            ran = true
+            completion()
+        }
+
+        let settled = expectation(description: "queue drains and nothing new runs")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { settled.fulfill() }
+        wait(for: [settled], timeout: 5)
+
+        XCTAssertEqual(manager.queuedTaskCount, 0, "stop() must empty the queue, not just cancel it")
+        XCTAssertFalse(ran, "a stopped SDK must not run new tasks")
+    }
+
+    func testReset_liftsTheStoppedStateSoTheNextLaunchWorks() {
+        let manager = FlareLaneTaskManager()
+        defer { manager.reset() }
+
+        manager.stop()
+        manager.reset()
+        manager.initializeComplete()
+
+        let ran = expectation(description: "task runs after reset")
+        manager.addTaskAfterInit(taskName: "after-reset") { completion in
+            ran.fulfill()
+            completion()
+        }
+
+        wait(for: [ran], timeout: 5)
+    }
+
     @available(iOS 15.0, *)
     func testCommunicationBuilder_withoutAvatarFallsBackToOriginalContent() {
         let content = Self.makeStyledContent()

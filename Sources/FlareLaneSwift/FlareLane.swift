@@ -193,6 +193,14 @@ import UIKit
 
   /// Request a permission and subscribe for notifications
   @objc public static func subscribe(fallbackToSettings: Bool = true, completion: ((Bool) -> Void)? = nil) {
+    // Nothing will run while the SDK is stopped, so the subscription state cannot change. Answer
+    // with what we know instead of leaving the caller waiting on a result that never arrives —
+    // the Flutter and React Native bridges resolve only from inside this completion.
+    if taskManager.isStopped {
+      completion?(Globals.isSubscribedInUserDefaults ?? false)
+      return
+    }
+
     taskManager.addTaskAfterInit(taskName: "subscribe") { completionTask in
       let completeAll: (Bool) -> Void = { result in
         completion?(result)
@@ -231,6 +239,14 @@ import UIKit
 
   /// Unsubscribe for notifications
   @objc public static func unsubscribe(completion: ((Bool) -> Void)? = nil) {
+    // Nothing will run while the SDK is stopped, so the subscription state cannot change. Answer
+    // with what we know instead of leaving the caller waiting on a result that never arrives —
+    // the Flutter and React Native bridges resolve only from inside this completion.
+    if taskManager.isStopped {
+      completion?(Globals.isSubscribedInUserDefaults ?? false)
+      return
+    }
+
     FlareLane.hasPermissionForNotifications { hasPermission in
       taskManager.addTaskAfterInit(taskName: "unsubscribe") { completionTask in
         DeviceService.update(body: [
