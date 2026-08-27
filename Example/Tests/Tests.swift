@@ -956,6 +956,30 @@ extension Tests {
                      "a device echo without a userId key must clear the stale local userId")
     }
 
+    /// Cold start heals divergence: activate's echo re-syncs the local cache,
+    /// so a userId cleared elsewhere disappears on the next app launch.
+    func testUserId_coldStartActivateResyncsFromTheEcho() {
+        Globals.projectIdInUserDefaults = "test-project-id"
+        Globals.deviceIdInUserDefaults = "device-1"
+        Globals.userIdInUserDefaults = "stale-user"
+        ScriptedResponseStub.script = [(200, #"{"data":{"id":"device-1","isSubscribed":true,"tags":{}}}"#)]
+        URLProtocol.registerClass(ScriptedResponseStub.self)
+        defer {
+            URLProtocol.unregisterClass(ScriptedResponseStub.self)
+            ScriptedResponseStub.reset()
+            Globals.projectIdInUserDefaults = nil
+            Globals.deviceIdInUserDefaults = nil
+            Globals.userIdInUserDefaults = nil
+        }
+
+        let exp = expectation(description: "activate completed")
+        DeviceService.activate(deviceId: "device-1") { exp.fulfill() }
+        wait(for: [exp], timeout: 5.0)
+
+        XCTAssertNil(Globals.userIdInUserDefaults,
+                     "cold-start activate must re-sync the local cache from the echo")
+    }
+
     /// A present key still wins — set and change keep working through the same path.
     func testUserId_setByAnEchoThatCarriesTheKey() {
         Globals.projectIdInUserDefaults = "test-project-id"

@@ -75,6 +75,10 @@ final class DeviceService {
         if let error = error {
           Logger.error("Failed update device request.", error: error)
         } else {
+          // Cold start is the natural re-sync point: whatever the local cache
+          // holds, the echoed device is the persisted truth (fixed field set,
+          // absent key = null), so a diverged userId/isSubscribed heals here.
+          self.saveData(body: device)
           Logger.verbose("Succeed update device request.")
         }
 
