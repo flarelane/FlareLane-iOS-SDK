@@ -124,7 +124,13 @@ import UIKit
   /// - Parameter userId: userId
   @objc public static func setUserId(userId: String?) {
     taskManager.addTaskAfterInit(taskName: "setUserId") { completionTask in
-      DeviceService.update(body: ["userId": userId]) { _ in
+      DeviceService.update(body: ["userId": userId]) { device in
+        // The intended value is written directly on success instead of trusting
+        // the echo's shape: the server persists synchronously before answering,
+        // and it omits a cleared userId from the echo rather than sending null.
+        if device != nil {
+          Globals.userIdInUserDefaults = userId
+        }
         completionTask()
       }
     }

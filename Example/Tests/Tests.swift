@@ -920,6 +920,65 @@ extension Tests {
     }
 }
 
+// MARK: - userId clear contract
+//
+// The server persists synchronously and echoes the full fixed device field set,
+// but a cleared userId is omitted from the echo rather than sent as null. These
+// specs pin that a logout actually clears the local userId — before this, the
+// stale id survived forever and every later event stayed attributed to the old
+// user (subjectType "user").
+
+extension Tests {
+
+    /// The echo omits the cleared key — an absent userId in a device echo means "no user".
+    func testUserId_clearedByAnEchoThatOmitsTheKey() {
+        Globals.projectIdInUserDefaults = "test-project-id"
+        Globals.deviceIdInUserDefaults = "device-1"
+        Globals.userIdInUserDefaults = "stale-user"
+        ScriptedResponseStub.script = [(200, #"{"data":{"id":"device-1","isSubscribed":true,"tags":{}}}"#)]
+        URLProtocol.registerClass(ScriptedResponseStub.self)
+        defer {
+            URLProtocol.unregisterClass(ScriptedResponseStub.self)
+            ScriptedResponseStub.reset()
+            Globals.projectIdInUserDefaults = nil
+            Globals.deviceIdInUserDefaults = nil
+            Globals.userIdInUserDefaults = nil
+        }
+
+        let exp = expectation(description: "update completed")
+        DeviceService.update(body: ["userId": nil]) { device in
+            XCTAssertNotNil(device, "the update itself must succeed")
+            exp.fulfill()
+        }
+        wait(for: [exp], timeout: 5.0)
+
+        XCTAssertNil(Globals.userIdInUserDefaults,
+                     "a device echo without a userId key must clear the stale local userId")
+    }
+
+    /// A present key still wins — set and change keep working through the same path.
+    func testUserId_setByAnEchoThatCarriesTheKey() {
+        Globals.projectIdInUserDefaults = "test-project-id"
+        Globals.deviceIdInUserDefaults = "device-1"
+        Globals.userIdInUserDefaults = nil
+        ScriptedResponseStub.script = [(200, #"{"data":{"id":"device-1","isSubscribed":true,"userId":"user-a","tags":{}}}"#)]
+        URLProtocol.registerClass(ScriptedResponseStub.self)
+        defer {
+            URLProtocol.unregisterClass(ScriptedResponseStub.self)
+            ScriptedResponseStub.reset()
+            Globals.projectIdInUserDefaults = nil
+            Globals.deviceIdInUserDefaults = nil
+            Globals.userIdInUserDefaults = nil
+        }
+
+        let exp = expectation(description: "update completed")
+        DeviceService.update(body: ["userId": "user-a"]) { _ in exp.fulfill() }
+        wait(for: [exp], timeout: 5.0)
+
+        XCTAssertEqual(Globals.userIdInUserDefaults, "user-a")
+    }
+}
+
 // MARK: - Stop-and-bound contract
 //
 // A 410 from a device endpoint shuts the SDK down for the rest of the process,

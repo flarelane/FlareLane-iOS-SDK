@@ -144,12 +144,14 @@ final class DeviceService {
 
   // Save data to the local storage.
   private static func saveData(body: [String: Any?]?) {
-    if let userIdValue = body?["userId"] {
-      if let valid = userIdValue as? String  {
-        Globals.userIdInUserDefaults = valid
-      } else {
-        Globals.userIdInUserDefaults = nil
-      }
+    // The device echo always carries the full fixed field set, and a cleared
+    // userId is omitted from it rather than sent as null — so an absent key
+    // means "no user", exactly like the Android SDK reads it. Without this a
+    // userId cleared elsewhere would survive locally forever.
+    if let userIdValue = body?["userId"], let valid = userIdValue as? String {
+      Globals.userIdInUserDefaults = valid
+    } else {
+      Globals.userIdInUserDefaults = nil
     }
 
     if let isSubscribedValue = body?["isSubscribed"] {
