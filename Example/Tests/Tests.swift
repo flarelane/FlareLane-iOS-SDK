@@ -910,6 +910,111 @@ extension Tests {
                        "the retried body must be byte-identical, or the backend cannot deduplicate it")
     }
 
+    /// The key must survive a no-response retry: if the response was lost after the
+    /// server processed the request, the resend is only recognisable as a duplicate
+    /// because it carries the same key.
+    func testRetry_aNoResponseRetryReusesTheIdempotencyKey() {
+        Globals.projectIdInUserDefaults = "test-project-id"
+        ScriptedResponseStub.script = [(0, ""), (200, #"{"data":{}}"#)]
+        URLProtocol.registerClass(ScriptedResponseStub.self)
+        defer {
+            URLProtocol.unregisterClass(ScriptedResponseStub.self)
+            ScriptedResponseStub.reset()
+            Globals.projectIdInUserDefaults = nil
+        }
+
+        let exp = expectation(description: "completion invoked")
+        Request().post(path: "/events-v2", body: ["events": []], idempotent: true) { _, _ in exp.fulfill() }
+
+        wait(for: [exp], timeout: 15.0)
+
+        let keys = ScriptedResponseStub.idempotencyKeys
+        XCTAssertEqual(keys.count, 2)
+        XCTAssertNotNil(keys[0], "idempotent POSTs must carry a key")
+        XCTAssertEqual(keys[0], keys[1], "a retry after no response must reuse the key")
+    }
+
+    /// A received error means the server may have reserved the key without completing
+    /// the request — retrying with a fresh key keeps that retry deliverable.
+    func testRetry_aReceivedErrorRetryRotatesTheIdempotencyKey() {
+        Globals.projectIdInUserDefaults = "test-project-id"
+        ScriptedResponseStub.script = [(500, "{}"), (200, #"{"data":{}}"#)]
+        URLProtocol.registerClass(ScriptedResponseStub.self)
+        defer {
+            URLProtocol.unregisterClass(ScriptedResponseStub.self)
+            ScriptedResponseStub.reset()
+            Globals.projectIdInUserDefaults = nil
+        }
+
+        let exp = expectation(description: "completion invoked")
+        Request().post(path: "/events-v2", body: ["events": []], idempotent: true) { _, _ in exp.fulfill() }
+
+        wait(for: [exp], timeout: 15.0)
+
+        let keys = ScriptedResponseStub.idempotencyKeys
+        XCTAssertEqual(keys.count, 2)
+        XCTAssertNotNil(keys[0])
+        XCTAssertNotNil(keys[1])
+        XCTAssertNotEqual(keys[0], keys[1], "a retry after a received error must use a fresh key")
+    }
+
+    /// Only idempotent POSTs carry a key: nothing else has a harmful duplicate to prevent.
+    func testRetry_nonIdempotentPostsAndValueBasedMethodsCarryNoKey() {
+        Globals.projectIdInUserDefaults = "test-project-id"
+        Globals.deviceIdInUserDefaults = "device-1"
+        ScriptedResponseStub.script = [(200, #"{"data":{}}"#), (200, #"{"data":{"id":"device-1","isSubscribed":true,"tags":{}}}"#)]
+        URLProtocol.registerClass(ScriptedResponseStub.self)
+        defer {
+            URLProtocol.unregisterClass(ScriptedResponseStub.self)
+            ScriptedResponseStub.reset()
+            Globals.projectIdInUserDefaults = nil
+            Globals.deviceIdInUserDefaults = nil
+        }
+
+        let postExp = expectation(description: "post done")
+        Request().post(path: "/events", body: ["type": "x"]) { _, _ in postExp.fulfill() }
+        wait(for: [postExp], timeout: 5.0)
+
+        let patchExp = expectation(description: "patch done")
+        Request().patch(path: "/devices/device-1", body: ["userId": "u"]) { _, _ in patchExp.fulfill() }
+        wait(for: [patchExp], timeout: 5.0)
+
+        let keys = ScriptedResponseStub.idempotencyKeys
+        XCTAssertEqual(keys.count, 2)
+        XCTAssertNil(keys[0], "a non-idempotent POST must not carry a key")
+        XCTAssertNil(keys[1], "a PATCH must not carry a key")
+    }
+
+    /// 409 (idempotency conflict) is terminal: one attempt, one completion, no stop.
+    func testRetry_a409FailsOnceWithoutRetry() {
+        Globals.projectIdInUserDefaults = "test-project-id"
+        ScriptedResponseStub.script = [(409, #"{"message":"Idempotent request is already being processed"}"#)]
+        URLProtocol.registerClass(ScriptedResponseStub.self)
+        defer {
+            URLProtocol.unregisterClass(ScriptedResponseStub.self)
+            ScriptedResponseStub.reset()
+            Globals.projectIdInUserDefaults = nil
+        }
+
+        let exp = expectation(description: "completion invoked")
+        var completions = 0
+        var receivedError: Error?
+        Request().post(path: "/events-v2", body: ["events": []], idempotent: true) { _, error in
+            completions += 1
+            receivedError = error
+            exp.fulfill()
+        }
+
+        wait(for: [exp], timeout: 15.0)
+        watchForStrayCallbacks(1.2)
+
+        XCTAssertEqual(completions, 1, "exactly one completion")
+        guard case Request.HTTPError.serverSideError(409)? = receivedError else {
+            return XCTFail("expected serverSideError(409), got \(String(describing: receivedError))")
+        }
+        XCTAssertEqual(ScriptedResponseStub.requestCount, 1, "409 must not be retried")
+    }
+
     /// Keeps watching after the completion fired: a spec asserting that no retry
     /// happened has to outlast the backoff that retry would have used, or a
     /// scheduled-but-not-fired attempt slips past the assertion unseen.
@@ -1041,7 +1146,7 @@ extension Tests {
 
         API.stopSdkIfGone(nil)
         API.stopSdkIfGone(URLError(.networkConnectionLost))
-        for code in [400, 404, 408, 429, 500, 503] {
+        for code in [400, 404, 408, 409, 429, 500, 503] {
             API.stopSdkIfGone(Request.HTTPError.serverSideError(code))
         }
 
@@ -1153,13 +1258,18 @@ private final class ScriptedResponseStub: URLProtocol {
     static var script: [(status: Int, body: String)] = []
     private static let lock = NSLock()
     private static var sentBodies: [Data] = []
+    private static var sentIdempotencyKeys: [String?] = []
 
     static var requestCount: Int { lock.withLock { sentBodies.count } }
     static var bodies: [Data] { lock.withLock { sentBodies } }
+    static var idempotencyKeys: [String?] { lock.withLock { sentIdempotencyKeys } }
 
     static func reset() {
         script = []
-        lock.withLock { sentBodies = [] }
+        lock.withLock {
+            sentBodies = []
+            sentIdempotencyKeys = []
+        }
     }
 
     override class func canInit(with request: URLRequest) -> Bool {
@@ -1174,6 +1284,7 @@ private final class ScriptedResponseStub: URLProtocol {
         let index = Self.lock.withLock { () -> Int in
             let index = Self.sentBodies.count
             Self.sentBodies.append(Self.body(of: request))
+            Self.sentIdempotencyKeys.append(request.value(forHTTPHeaderField: "Idempotency-Key"))
             return index
         }
 
