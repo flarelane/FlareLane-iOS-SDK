@@ -980,6 +980,30 @@ extension Tests {
                      "cold-start activate must re-sync the local cache from the echo")
     }
 
+    /// A degenerate success (2xx without a device object) is not an echo —
+    /// activate must keep the local cache instead of clearing it on no evidence.
+    func testUserId_activateWithoutADeviceEchoKeepsLocalCache() {
+        Globals.projectIdInUserDefaults = "test-project-id"
+        Globals.deviceIdInUserDefaults = "device-1"
+        Globals.userIdInUserDefaults = "existing-user"
+        ScriptedResponseStub.script = [(200, #"{"message":"ok"}"#)]
+        URLProtocol.registerClass(ScriptedResponseStub.self)
+        defer {
+            URLProtocol.unregisterClass(ScriptedResponseStub.self)
+            ScriptedResponseStub.reset()
+            Globals.projectIdInUserDefaults = nil
+            Globals.deviceIdInUserDefaults = nil
+            Globals.userIdInUserDefaults = nil
+        }
+
+        let exp = expectation(description: "activate completed")
+        DeviceService.activate(deviceId: "device-1") { exp.fulfill() }
+        wait(for: [exp], timeout: 5.0)
+
+        XCTAssertEqual(Globals.userIdInUserDefaults, "existing-user",
+                       "a success with no device payload must not clear the local userId")
+    }
+
     /// A present key still wins — set and change keep working through the same path.
     func testUserId_setByAnEchoThatCarriesTheKey() {
         Globals.projectIdInUserDefaults = "test-project-id"
