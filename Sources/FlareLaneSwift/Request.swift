@@ -40,8 +40,12 @@ final class Request {
   /// Runs the request, retrying transient failures while the call stays inside
   /// its deadline, then hands the final (data, response, error) to the caller's
   /// existing completion logic unchanged. The URLRequest is reused verbatim, so
-  /// every attempt puts the same bytes on the wire — the event id inside stays
-  /// stable, which is what lets the backend deduplicate a resend.
+  /// every attempt puts the same bytes on the wire. Idempotent POSTs carry an
+  /// Idempotency-Key header: kept when no response arrived (a resend must be
+  /// recognisable as a duplicate in case the response was lost), regenerated
+  /// when the server answered a retryable error — a server that reserves keys
+  /// before processing would otherwise reject the retry for a request it
+  /// never completed.
   private func perform(_ request: URLRequest, label: String, idempotent: Bool,
                        deadline: Date? = nil, attempt: Int = 1,
                        handler: @escaping (Data?, URLResponse?, Error?) -> Void) {
@@ -54,6 +58,9 @@ final class Request {
     // last attempt — a floor of 0 would mean "wait forever" on this API, and
     // 8s + 1s still fits inside the task manager's 10s slot.
     var request = request
+    if attempt == 1, idempotent, request.httpMethod == "POST" {
+      request.setValue(UUID().uuidString, forHTTPHeaderField: "Idempotency-Key")
+    }
     request.timeoutInterval = max(1.0, min(10.0, deadline.timeIntervalSinceNow))
 
     URLSession.shared.dataTask(with: request) { data, response, error in
@@ -64,6 +71,10 @@ final class Request {
          Date().addingTimeInterval(TimeInterval(delayMs) / 1000) < deadline {
         Logger.verbose("Retrying \(label) in \(delayMs)ms"
                        + " (attempt \(attempt + 1)/\(Self.maxAttempts), status \(responseCode))")
+        var request = request
+        if responseCode != -1, request.value(forHTTPHeaderField: "Idempotency-Key") != nil {
+          request.setValue(UUID().uuidString, forHTTPHeaderField: "Idempotency-Key")
+        }
         // asyncAfter rather than a sleep: the wait costs a timer, not a thread.
         // Default QoS on purpose — utility can be deferred indefinitely under
         // load, and a backoff that fires late breaks the 8s deadline contract.
