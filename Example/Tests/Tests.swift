@@ -719,3 +719,536 @@ private final class EmptyDataArrayResponseStub: URLProtocol {
 
     override func stopLoading() {}
 }
+
+
+// MARK: - Retry contract
+//
+// Pins the retry policy and its wiring: what the caller sees, how many requests
+// actually left the device, and that completions still fire exactly once now
+// that a request can be sent more than once. Mirrors the Android suite.
+
+extension Tests {
+
+    func testRetry_transientFailuresAreRetriedRejectionsAreNot() {
+        // No response at all, server-side errors, timeout and rate limit are worth another try.
+        for code in [-1, 500, 502, 503, 504, 408, 429] {
+            XCTAssertTrue(Request.shouldRetry(responseCode: code, attempt: 1), "\(code) should be retried")
+        }
+        // Every other 4xx is a decision the server would simply repeat — 410 included,
+        // because it is the stop signal and must not be delayed by a backoff.
+        for code in [400, 401, 403, 404, 409, 410, 422] {
+            XCTAssertFalse(Request.shouldRetry(responseCode: code, attempt: 1), "\(code) should not be retried")
+        }
+        for code in [200, 201, 302] {
+            XCTAssertFalse(Request.shouldRetry(responseCode: code, attempt: 1), "\(code) should not be retried")
+        }
+    }
+
+    func testRetry_theLastAttemptIsNeverFollowedByAnother() {
+        XCTAssertTrue(Request.shouldRetry(responseCode: 500, attempt: Request.maxAttempts - 1))
+        XCTAssertFalse(Request.shouldRetry(responseCode: 500, attempt: Request.maxAttempts))
+        XCTAssertFalse(Request.shouldRetry(responseCode: -1, attempt: Request.maxAttempts))
+    }
+
+    func testRetry_backoffStaysInsideTheAdvertisedBoundsAndIsJittered() {
+        let first = (1...200).map { _ in Request.delayMillis(attempt: 1) }
+        let second = (1...200).map { _ in Request.delayMillis(attempt: 2) }
+
+        XCTAssertTrue(first.allSatisfy { (500...1000).contains($0) }, "first delays out of range")
+        XCTAssertTrue(second.allSatisfy { (1500...3000).contains($0) }, "second delays out of range")
+        // The random share is what keeps devices that reconnect together from retrying as one burst.
+        XCTAssertGreaterThan(Set(first).count, 1)
+    }
+
+    func testRetry_aRequestThatFailsOnceSucceedsOnTheRetry() {
+        Globals.projectIdInUserDefaults = "test-project-id"
+        ScriptedResponseStub.script = [(503, "{}"), (200, #"{"data":{"id":"device-1"}}"#)]
+        URLProtocol.registerClass(ScriptedResponseStub.self)
+        defer {
+            URLProtocol.unregisterClass(ScriptedResponseStub.self)
+            ScriptedResponseStub.reset()
+            Globals.projectIdInUserDefaults = nil
+        }
+
+        let exp = expectation(description: "completion invoked")
+        var completions = 0
+        var received: [String: Any]?
+
+        Request().post(path: "/events-v2", body: ["events": []], idempotent: true) { response, _ in
+            completions += 1
+            received = response
+            exp.fulfill()
+        }
+
+        wait(for: [exp], timeout: 15.0)
+        watchForStrayCallbacks(0.3)
+
+        XCTAssertEqual(completions, 1, "exactly one completion")
+        XCTAssertNotNil(received, "caller should see the successful retry")
+        XCTAssertEqual(ScriptedResponseStub.requestCount, 2, "request should have gone out twice")
+    }
+
+    func testRetry_exhaustedRetriesReportTheRealStatus() {
+        Globals.projectIdInUserDefaults = "test-project-id"
+        ScriptedResponseStub.script = [(503, #"{"message":"unavailable"}"#)]
+        URLProtocol.registerClass(ScriptedResponseStub.self)
+        defer {
+            URLProtocol.unregisterClass(ScriptedResponseStub.self)
+            ScriptedResponseStub.reset()
+            Globals.projectIdInUserDefaults = nil
+        }
+
+        let exp = expectation(description: "completion invoked")
+        var captured: Error?
+
+        Request().post(path: "/events-v2", body: ["events": []], idempotent: true) { _, error in
+            captured = error
+            exp.fulfill()
+        }
+
+        wait(for: [exp], timeout: 15.0)
+        watchForStrayCallbacks(3.5) // outlasts the second backoff: no fourth attempt may follow
+
+        XCTAssertEqual(ScriptedResponseStub.requestCount, Request.maxAttempts)
+        guard case Request.HTTPError.serverSideError(let status)? = captured else {
+            XCTFail("expected serverSideError, got \(String(describing: captured))")
+            return
+        }
+        XCTAssertEqual(status, 503, "the caller must see the server's status, not a placeholder")
+    }
+
+    /// 410 is the stop signal; a backoff in front of it would delay the shutdown it orders.
+    func testRetry_aRejectionIsNotRetried() {
+        Globals.projectIdInUserDefaults = "test-project-id"
+        ScriptedResponseStub.script = [(410, #"{"message":"Gone"}"#)]
+        URLProtocol.registerClass(ScriptedResponseStub.self)
+        defer {
+            URLProtocol.unregisterClass(ScriptedResponseStub.self)
+            ScriptedResponseStub.reset()
+            Globals.projectIdInUserDefaults = nil
+        }
+
+        let exp = expectation(description: "completion invoked")
+        Request().patch(path: "/devices/device-1", body: [:]) { _, _ in exp.fulfill() }
+
+        wait(for: [exp], timeout: 5.0)
+        watchForStrayCallbacks(1.2) // outlasts the first backoff a wrongly scheduled retry would use
+
+        XCTAssertEqual(ScriptedResponseStub.requestCount, 1, "410 must not be retried")
+    }
+
+    /// A POST that reached the server but lost its response would be applied twice
+    /// if resent, so only calls that declared themselves idempotent may retry.
+    func testRetry_aNonIdempotentRequestIsNeverRetried() {
+        Globals.projectIdInUserDefaults = "test-project-id"
+        ScriptedResponseStub.script = [(503, "{}")]
+        URLProtocol.registerClass(ScriptedResponseStub.self)
+        defer {
+            URLProtocol.unregisterClass(ScriptedResponseStub.self)
+            ScriptedResponseStub.reset()
+            Globals.projectIdInUserDefaults = nil
+        }
+
+        let exp = expectation(description: "completion invoked")
+        Request().post(path: "/devices", body: [:]) { _, _ in exp.fulfill() }
+
+        wait(for: [exp], timeout: 5.0)
+        watchForStrayCallbacks(1.2)
+
+        XCTAssertEqual(ScriptedResponseStub.requestCount, 1,
+                       "a non-idempotent request must fail on the first attempt")
+    }
+
+    /// The airplane-mode shape end to end: the connection dies without any HTTP
+    /// response (status -1), the retry fires, and the next attempt delivers.
+    func testRetry_aDroppedConnectionIsRetriedAndSucceeds() {
+        Globals.projectIdInUserDefaults = "test-project-id"
+        ScriptedResponseStub.script = [(0, ""), (200, #"{"data":{}}"#)]
+        URLProtocol.registerClass(ScriptedResponseStub.self)
+        defer {
+            URLProtocol.unregisterClass(ScriptedResponseStub.self)
+            ScriptedResponseStub.reset()
+            Globals.projectIdInUserDefaults = nil
+        }
+
+        let exp = expectation(description: "completion invoked")
+        var completions = 0
+        var received: [String: Any]?
+
+        Request().post(path: "/events-v2", body: ["events": []], idempotent: true) { response, _ in
+            completions += 1
+            received = response
+            exp.fulfill()
+        }
+
+        wait(for: [exp], timeout: 15.0)
+        watchForStrayCallbacks(0.3)
+
+        XCTAssertEqual(completions, 1, "exactly one completion")
+        XCTAssertNotNil(received, "caller should see the successful retry")
+        XCTAssertEqual(ScriptedResponseStub.requestCount, 2, "request should have gone out twice")
+    }
+
+    func testRetry_aRetrySendsTheExactSameBody() {
+        Globals.projectIdInUserDefaults = "test-project-id"
+        ScriptedResponseStub.script = [(500, "{}"), (200, "{}")]
+        URLProtocol.registerClass(ScriptedResponseStub.self)
+        defer {
+            URLProtocol.unregisterClass(ScriptedResponseStub.self)
+            ScriptedResponseStub.reset()
+            Globals.projectIdInUserDefaults = nil
+        }
+
+        let exp = expectation(description: "completion invoked")
+        Request().post(path: "/events-v2", body: ["events": [["id": "fixed-uuid"]]], idempotent: true) { _, _ in exp.fulfill() }
+
+        wait(for: [exp], timeout: 15.0)
+        watchForStrayCallbacks(0.3)
+
+        XCTAssertEqual(ScriptedResponseStub.bodies.count, 2)
+        XCTAssertEqual(ScriptedResponseStub.bodies.first, ScriptedResponseStub.bodies.last,
+                       "the retried body must be byte-identical, or the backend cannot deduplicate it")
+    }
+
+    /// Keeps watching after the completion fired: a spec asserting that no retry
+    /// happened has to outlast the backoff that retry would have used, or a
+    /// scheduled-but-not-fired attempt slips past the assertion unseen.
+    private func watchForStrayCallbacks(_ seconds: TimeInterval) {
+        let idle = expectation(description: "watch")
+        DispatchQueue.main.asyncAfter(deadline: .now() + seconds) { idle.fulfill() }
+        wait(for: [idle], timeout: seconds + 2.0)
+    }
+}
+
+// MARK: - userId clear contract
+//
+// The server persists synchronously and echoes the full fixed device field set,
+// but a cleared userId is omitted from the echo rather than sent as null. These
+// specs pin that a logout actually clears the local userId — before this, the
+// stale id survived forever and every later event stayed attributed to the old
+// user (subjectType "user").
+
+extension Tests {
+
+    /// The echo omits the cleared key — an absent userId in a device echo means "no user".
+    func testUserId_clearedByAnEchoThatOmitsTheKey() {
+        Globals.projectIdInUserDefaults = "test-project-id"
+        Globals.deviceIdInUserDefaults = "device-1"
+        Globals.userIdInUserDefaults = "stale-user"
+        ScriptedResponseStub.script = [(200, #"{"data":{"id":"device-1","isSubscribed":true,"tags":{}}}"#)]
+        URLProtocol.registerClass(ScriptedResponseStub.self)
+        defer {
+            URLProtocol.unregisterClass(ScriptedResponseStub.self)
+            ScriptedResponseStub.reset()
+            Globals.projectIdInUserDefaults = nil
+            Globals.deviceIdInUserDefaults = nil
+            Globals.userIdInUserDefaults = nil
+        }
+
+        let exp = expectation(description: "update completed")
+        DeviceService.update(body: ["userId": nil]) { device in
+            XCTAssertNotNil(device, "the update itself must succeed")
+            exp.fulfill()
+        }
+        wait(for: [exp], timeout: 5.0)
+
+        XCTAssertNil(Globals.userIdInUserDefaults,
+                     "a device echo without a userId key must clear the stale local userId")
+    }
+
+    /// Cold start heals divergence: activate's echo re-syncs the local cache,
+    /// so a userId cleared elsewhere disappears on the next app launch.
+    func testUserId_coldStartActivateResyncsFromTheEcho() {
+        Globals.projectIdInUserDefaults = "test-project-id"
+        Globals.deviceIdInUserDefaults = "device-1"
+        Globals.userIdInUserDefaults = "stale-user"
+        ScriptedResponseStub.script = [(200, #"{"data":{"id":"device-1","isSubscribed":true,"tags":{}}}"#)]
+        URLProtocol.registerClass(ScriptedResponseStub.self)
+        defer {
+            URLProtocol.unregisterClass(ScriptedResponseStub.self)
+            ScriptedResponseStub.reset()
+            Globals.projectIdInUserDefaults = nil
+            Globals.deviceIdInUserDefaults = nil
+            Globals.userIdInUserDefaults = nil
+        }
+
+        let exp = expectation(description: "activate completed")
+        DeviceService.activate(deviceId: "device-1") { exp.fulfill() }
+        wait(for: [exp], timeout: 5.0)
+
+        XCTAssertNil(Globals.userIdInUserDefaults,
+                     "cold-start activate must re-sync the local cache from the echo")
+    }
+
+    /// A degenerate success (2xx without a device object) is not an echo —
+    /// activate must keep the local cache instead of clearing it on no evidence.
+    func testUserId_activateWithoutADeviceEchoKeepsLocalCache() {
+        Globals.projectIdInUserDefaults = "test-project-id"
+        Globals.deviceIdInUserDefaults = "device-1"
+        Globals.userIdInUserDefaults = "existing-user"
+        ScriptedResponseStub.script = [(200, #"{"message":"ok"}"#)]
+        URLProtocol.registerClass(ScriptedResponseStub.self)
+        defer {
+            URLProtocol.unregisterClass(ScriptedResponseStub.self)
+            ScriptedResponseStub.reset()
+            Globals.projectIdInUserDefaults = nil
+            Globals.deviceIdInUserDefaults = nil
+            Globals.userIdInUserDefaults = nil
+        }
+
+        let exp = expectation(description: "activate completed")
+        DeviceService.activate(deviceId: "device-1") { exp.fulfill() }
+        wait(for: [exp], timeout: 5.0)
+
+        XCTAssertEqual(Globals.userIdInUserDefaults, "existing-user",
+                       "a success with no device payload must not clear the local userId")
+    }
+
+    /// A present key still wins — set and change keep working through the same path.
+    func testUserId_setByAnEchoThatCarriesTheKey() {
+        Globals.projectIdInUserDefaults = "test-project-id"
+        Globals.deviceIdInUserDefaults = "device-1"
+        Globals.userIdInUserDefaults = nil
+        ScriptedResponseStub.script = [(200, #"{"data":{"id":"device-1","isSubscribed":true,"userId":"user-a","tags":{}}}"#)]
+        URLProtocol.registerClass(ScriptedResponseStub.self)
+        defer {
+            URLProtocol.unregisterClass(ScriptedResponseStub.self)
+            ScriptedResponseStub.reset()
+            Globals.projectIdInUserDefaults = nil
+            Globals.deviceIdInUserDefaults = nil
+            Globals.userIdInUserDefaults = nil
+        }
+
+        let exp = expectation(description: "update completed")
+        DeviceService.update(body: ["userId": "user-a"]) { _ in exp.fulfill() }
+        wait(for: [exp], timeout: 5.0)
+
+        XCTAssertEqual(Globals.userIdInUserDefaults, "user-a")
+    }
+}
+
+// MARK: - Stop-and-bound contract
+//
+// A 410 from a device endpoint shuts the SDK down for the rest of the process,
+// no other outcome does, and the pending queue can never grow without limit.
+
+extension Tests {
+
+    func testStop_only410StopsTheSdk() {
+        let manager = FlareLaneTaskManager.shared
+        manager.reset()
+        defer { manager.reset() }
+
+        API.stopSdkIfGone(nil)
+        API.stopSdkIfGone(URLError(.networkConnectionLost))
+        for code in [400, 404, 408, 429, 500, 503] {
+            API.stopSdkIfGone(Request.HTTPError.serverSideError(code))
+        }
+
+        let exp = expectation(description: "queue must still be alive")
+        manager.addTaskAfterInit(taskName: "probe") { done in
+            done()
+            exp.fulfill()
+        }
+        manager.initializeComplete()
+        wait(for: [exp], timeout: 5.0)
+    }
+
+    func testStop_410DropsPendingTasksAndRefusesNewOnes() {
+        let manager = FlareLaneTaskManager.shared
+        manager.reset()
+        defer { manager.reset() }
+
+        // NSCounter, not a plain var: the task body runs on a background queue, so
+        // if a regression ever lets it execute, the assertion must fail cleanly
+        // instead of reading a racy value.
+        let ran = NSCounter()
+        manager.addTaskAfterInit(taskName: "pending") { done in ran.increment(); done() }
+
+        API.stopSdkIfGone(Request.HTTPError.serverSideError(410))
+
+        manager.addTaskAfterInit(taskName: "refused") { done in ran.increment(); done() }
+        manager.initializeComplete()
+
+        let idle = expectation(description: "settle")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { idle.fulfill() }
+        wait(for: [idle], timeout: 2.0)
+
+        XCTAssertEqual(ran.value, 0, "neither the pending nor the new task may run after 410")
+    }
+
+    func testStop_resetLiftsTheStopSoTheNextLaunchStartsClean() {
+        let manager = FlareLaneTaskManager.shared
+        manager.reset()
+        defer { manager.reset() }
+
+        API.stopSdkIfGone(Request.HTTPError.serverSideError(410))
+        manager.reset()
+
+        let exp = expectation(description: "queue alive again")
+        manager.addTaskAfterInit(taskName: "probe") { done in
+            done()
+            exp.fulfill()
+        }
+        manager.initializeComplete()
+        wait(for: [exp], timeout: 5.0)
+    }
+
+    /// Pins the reset() drain: cancelled operations must leave operationCount, or
+    /// they would keep counting against maxPendingTasks forever on a suspended queue.
+    func testStop_resetDrainsCancelledTasksSoTheCapIsNotConsumed() {
+        let manager = FlareLaneTaskManager.shared
+        manager.reset()
+        defer { manager.reset() }
+
+        // Fill the suspended queue to its cap, then reset. Without the drain,
+        // these would linger in operationCount and refuse everything below.
+        for _ in 0 ..< FlareLaneTaskManager.maxPendingTasks {
+            manager.addTaskAfterInit(taskName: "stale") { done in done() }
+        }
+        manager.reset()
+
+        let exp = expectation(description: "a fresh task runs after reset")
+        manager.addTaskAfterInit(taskName: "fresh") { done in
+            done()
+            exp.fulfill()
+        }
+        manager.initializeComplete()
+        wait(for: [exp], timeout: 5.0)
+    }
+
+    func testStop_thePendingQueueNeverGrowsPastItsCap() {
+        let manager = FlareLaneTaskManager.shared
+        manager.reset()
+        defer { manager.reset() }
+
+        let counter = NSLock()
+        var ran = 0
+        let all = expectation(description: "capped tasks run")
+        all.expectedFulfillmentCount = FlareLaneTaskManager.maxPendingTasks
+
+        for _ in 0 ..< (FlareLaneTaskManager.maxPendingTasks + 20) {
+            manager.addTaskAfterInit(taskName: "bulk") { done in
+                counter.lock(); ran += 1; counter.unlock()
+                all.fulfill()
+                done()
+            }
+        }
+        manager.initializeComplete()
+
+        wait(for: [all], timeout: 30.0)
+        let idle = expectation(description: "settle")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { idle.fulfill() }
+        wait(for: [idle], timeout: 2.0)
+
+        counter.lock(); let total = ran; counter.unlock()
+        XCTAssertEqual(total, FlareLaneTaskManager.maxPendingTasks,
+                       "tasks beyond the cap must have been refused at add time")
+    }
+}
+
+// Replays a scripted sequence of responses, one per request, and records the bodies that were sent.
+// Past the end of the script the last entry repeats, so a test only spells out what it cares about.
+private final class ScriptedResponseStub: URLProtocol {
+    static var script: [(status: Int, body: String)] = []
+    private static let lock = NSLock()
+    private static var sentBodies: [Data] = []
+
+    static var requestCount: Int { lock.withLock { sentBodies.count } }
+    static var bodies: [Data] { lock.withLock { sentBodies } }
+
+    static func reset() {
+        script = []
+        lock.withLock { sentBodies = [] }
+    }
+
+    override class func canInit(with request: URLRequest) -> Bool {
+        request.url?.host == "service-api.flarelane.com"
+    }
+
+    // URLProtocol strips httpBody from the request it hands over, so the bytes are read from
+    // httpBodyStream when that is where they ended up.
+    override class func canonicalRequest(for request: URLRequest) -> URLRequest { request }
+
+    override func startLoading() {
+        let index = Self.lock.withLock { () -> Int in
+            let index = Self.sentBodies.count
+            Self.sentBodies.append(Self.body(of: request))
+            return index
+        }
+
+        let entry = Self.script.isEmpty ? nil : (Self.script.count > index ? Self.script[index] : Self.script.last)
+
+        // status 0 slams the connection without an HTTP response — the airplane-mode
+        // shape: the client sees a transport error and no status code at all.
+        if entry?.status == 0 {
+            client?.urlProtocol(self, didFailWithError: URLError(.networkConnectionLost))
+            return
+        }
+
+        guard let url = request.url,
+              let entry = entry,
+              let response = HTTPURLResponse(
+                url: url,
+                statusCode: entry.status,
+                httpVersion: "HTTP/1.1",
+                headerFields: ["Content-Type": "application/json"]
+              ) else {
+            client?.urlProtocolDidFinishLoading(self)
+            return
+        }
+
+        client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
+        client?.urlProtocol(self, didLoad: Data(entry.body.utf8))
+        client?.urlProtocolDidFinishLoading(self)
+    }
+
+    override func stopLoading() {}
+
+    private static func body(of request: URLRequest) -> Data {
+        if let body = request.httpBody {
+            return body
+        }
+        guard let stream = request.httpBodyStream else {
+            return Data()
+        }
+
+        stream.open()
+        defer { stream.close() }
+
+        var data = Data()
+        var buffer = [UInt8](repeating: 0, count: 4096)
+        while stream.hasBytesAvailable {
+            let read = stream.read(&buffer, maxLength: buffer.count)
+            if read <= 0 { break }
+            data.append(buffer, count: read)
+        }
+        return data
+    }
+}
+
+private extension NSLock {
+    func withLock<T>(_ block: () -> T) -> T {
+        lock()
+        defer { unlock() }
+        return block()
+    }
+}
+
+/// Thread-safe counter for the concurrency spec above.
+private final class NSCounter {
+    private let lock = NSLock()
+    private var count = 0
+
+    func increment() {
+        lock.lock()
+        count += 1
+        lock.unlock()
+    }
+
+    var value: Int {
+        lock.lock()
+        defer { lock.unlock() }
+        return count
+    }
+}

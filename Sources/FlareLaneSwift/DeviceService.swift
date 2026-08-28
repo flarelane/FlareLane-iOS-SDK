@@ -74,8 +74,16 @@ final class DeviceService {
       API.shared.updateDevice(deviceId: deviceId, body: body) { (device, error) in
         if let error = error {
           Logger.error("Failed update device request.", error: error)
-        } else {
+        } else if let device = device {
+          // Cold start is the natural re-sync point: whatever the local cache
+          // holds, the echoed device is the persisted truth (fixed field set,
+          // absent key = null), so a diverged userId/isSubscribed heals here.
+          self.saveData(body: device)
           Logger.verbose("Succeed update device request.")
+        } else {
+          // A 2xx without a device object carries nothing to sync from —
+          // keep the local cache instead of clearing it on no evidence.
+          Logger.error("updateDevice returned no error but no device data.")
         }
 
         completion()
@@ -144,12 +152,14 @@ final class DeviceService {
 
   // Save data to the local storage.
   private static func saveData(body: [String: Any?]?) {
-    if let userIdValue = body?["userId"] {
-      if let valid = userIdValue as? String  {
-        Globals.userIdInUserDefaults = valid
-      } else {
-        Globals.userIdInUserDefaults = nil
-      }
+    // The device echo always carries the full fixed field set, and a cleared
+    // userId is omitted from it rather than sent as null — so an absent key
+    // means "no user", exactly like the Android SDK reads it. Without this a
+    // userId cleared elsewhere would survive locally forever.
+    if let userIdValue = body?["userId"], let valid = userIdValue as? String {
+      Globals.userIdInUserDefaults = valid
+    } else {
+      Globals.userIdInUserDefaults = nil
     }
 
     if let isSubscribedValue = body?["isSubscribed"] {
