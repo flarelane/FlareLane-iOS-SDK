@@ -16,7 +16,7 @@ Pod::Spec.new do |s|
   s.author           = { 'FlareLane' => 'admin@flarelane.com' }
   s.source           = { :git => 'https://github.com/flarelane/FlareLane-iOS-SDK.git', :tag => s.version.to_s }
 
-  s.ios.deployment_target = '12.0'
+  s.ios.deployment_target = '15.0'
 
   s.source_files = 'Sources/**/*'
 

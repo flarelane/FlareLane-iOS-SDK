@@ -5,7 +5,7 @@ import PackageDescription
 
 let package = Package(
     name: "FlareLane",
-    platforms: [.iOS(.v12)],
+    platforms: [.iOS(.v15)],
     products: [
         .library(
             name: "FlareLane",
