@@ -1,5 +1,5 @@
 PODS:
-  - FlareLane (1.11.2)
+  - FlareLane (1.11.3)
 
 DEPENDENCIES:
   - FlareLane (from `../`)
@@ -9,7 +9,7 @@ EXTERNAL SOURCES:
     :path: "../"
 
 SPEC CHECKSUMS:
-  FlareLane: cd2195241afe77a249414de9c0b3c293f6c13f7c
+  FlareLane: 4dd4b8ea757efe11b1b55a28132847d98d053c57
 
 PODFILE CHECKSUM: 5a704aa3796766627173bc93884efbd65968c8eb
 
