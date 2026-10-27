@@ -104,13 +104,41 @@ final class Request {
     case unexpectedNilResponse
   }
   
+  // MARK: - Region (mirrors the Android and Web SDKs: same rule, same wording)
+
+  static let defaultRegion = "us"
+
+  /// The region option as the host rule uses it: trimmed and lowercased, "us" when absent.
+  /// Returns nil for a value that cannot name a region. The caller must then refuse to start
+  /// rather than fall back to "us", which would send the project's data to the wrong region.
+  static func normalizeRegion(_ region: String?) -> String? {
+    guard let region = region else { return defaultRegion }
+
+    let normalized = region.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+    guard normalized.count <= 16,
+          normalized.range(of: "^[a-z][a-z0-9]*$", options: .regularExpression) != nil else {
+      return nil
+    }
+    return normalized
+  }
+
+  /// "us" keeps the original host byte for byte; every other region has its own host under
+  /// `<region>.flarelane.com`, so a new region needs no SDK release.
+  static func baseURL(projectId: String, region: String?) -> String {
+    let region = region ?? defaultRegion
+    let host = region == defaultRegion ? "service-api.flarelane.com" : "service-api.\(region).flarelane.com"
+    return "https://\(host)/internal/v1/projects/\(projectId)"
+  }
+
   func getBaseURL () -> String? {
     guard let projectId = Globals.projectIdInUserDefaults else {
       Logger.error("Cannot request when FlareLane has not been initialized yet.")
       return nil
     }
-    
-    return "https://service-api.flarelane.com/internal/v1/projects/\(projectId)"
+
+    // Read from storage, not from the init call: the Notification Service Extension and
+    // cold-start paths get here without ever running initWithLaunchOptions in this process.
+    return Self.baseURL(projectId: projectId, region: Globals.regionInUserDefaults)
   }
   
   func getRequestSDKInfoHeaderValue() -> String {

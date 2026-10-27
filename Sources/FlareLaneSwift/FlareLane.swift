@@ -43,6 +43,23 @@ import UIKit
   ///   - launchOptions: AppDelegate didFinishLaunchingWithOptions
   ///   - requestPermissionOnLaunch: Request permission for notifications on launch
   @objc public static func initWithLaunchOptions(_ launchOptions: [UIApplication.LaunchOptionsKey: Any]?, projectId: String, requestPermissionOnLaunch: Bool = true) {
+    initWithLaunchOptions(launchOptions, projectId: projectId, region: nil, requestPermissionOnLaunch: requestPermissionOnLaunch)
+  }
+
+  /// Initialize FlareLane SDK for a project in a given region
+  /// - Parameters:
+  ///   - projectId: FlareLane projectId
+  ///   - region: Region of the FlareLane project. nil means "us" (default); Seoul-region projects pass "kr"
+  ///   - launchOptions: AppDelegate didFinishLaunchingWithOptions
+  ///   - requestPermissionOnLaunch: Request permission for notifications on launch
+  @objc public static func initWithLaunchOptions(_ launchOptions: [UIApplication.LaunchOptionsKey: Any]?, projectId: String, region: String?, requestPermissionOnLaunch: Bool = true) {
+    // Checked before anything is stored or sent: falling back to "us" would deliver a
+    // project's data to a region that does not hold it.
+    guard let normalizedRegion = Request.normalizeRegion(region) else {
+      Logger.error("Invalid region \"\(region ?? "")\". Expected \"us\" (default) or \"kr\".")
+      return
+    }
+
     // Re-publish this launch's level so a level set by an earlier launch cannot outlive the
     // process that set it. Without this, an app that once called setLogLevel(.none) and later
     // dropped the call would keep a permanently silent extension. Order-safe either way: called
@@ -50,15 +67,8 @@ import UIKit
     Globals.logLevelInUserDefaults = Globals.logLevel.rawValue
     Logger.verbose("Initialize FlareLane")
 
-    if (Globals.projectIdInUserDefaults != projectId) {
-      // If the previous projectId and the current projectId are not the same, set deviceId to nil for device creation
-      Globals.deviceIdInUserDefaults = nil
-      Globals.isSubscribedInUserDefaults = nil
-      Globals.userIdInUserDefaults = nil // prevent cross-project linkage
-    }
-
-    // Set projectId before device is registered
-    Globals.projectIdInUserDefaults = projectId
+    // Set projectId and region before device is registered
+    storeProject(projectId: projectId, region: normalizedRegion)
 
 
     ColdStartNotificationManager.setColdStartNotification(launchOptions: launchOptions)
@@ -165,6 +175,12 @@ import UIKit
   /// Get projectId. Used by Flutter/RN plugins to build the hybrid WebView bridge sync payload.
   @objc public static func getProjectId() -> String? {
     return Globals.projectIdInUserDefaults
+  }
+
+  /// Get region ("us" unless the app passed another one). Used by Flutter/RN plugins to build the hybrid WebView bridge sync payload.
+  @objc public static func getRegion() -> String? {
+    guard Globals.projectIdInUserDefaults != nil else { return nil }
+    return Globals.regionInUserDefaults ?? Request.defaultRegion
   }
 
   /// Get userId. Used by Flutter/RN plugins to build the hybrid WebView bridge sync payload.
@@ -288,6 +304,7 @@ import UIKit
     Globals.pushTokenInUserDefaults = nil
     Globals.badgeCountUserDefaults = nil
     Globals.projectIdInUserDefaults = nil
+    Globals.regionInUserDefaults = nil
     
     // Reset task queue state
     taskManager.reset()
@@ -296,6 +313,23 @@ import UIKit
   }
 
   // MARK: Private Methods
+
+  /// Records the project and region requests go to. A different project or region drops the
+  /// cached device: it lives on the old project's server, so a new one must be created.
+  /// An install that predates the region option has no stored region, which means "us" —
+  /// so upgrading the SDK alone never re-registers the device.
+  static func storeProject(projectId: String, region: String) {
+    let storedRegion = Globals.regionInUserDefaults ?? Request.defaultRegion
+
+    if (Globals.projectIdInUserDefaults != projectId || storedRegion != region) {
+      Globals.deviceIdInUserDefaults = nil
+      Globals.isSubscribedInUserDefaults = nil
+      Globals.userIdInUserDefaults = nil // prevent cross-project linkage
+    }
+
+    Globals.projectIdInUserDefaults = projectId
+    Globals.regionInUserDefaults = region
+  }
 
   private static func updateDeviceWithPushToken(completion: @escaping () -> Void) {
     FlareLane.hasPermissionForNotifications { hasPermission in
