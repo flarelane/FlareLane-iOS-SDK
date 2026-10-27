@@ -20,6 +20,18 @@ it, simply add the following line to your Podfile:
 pod 'FlareLane'
 ```
 
+## Region
+
+Projects live in one FlareLane region. The default is `us`, so existing integrations need no change.
+Projects created in the Seoul region pass `"kr"`:
+
+```swift
+FlareLane.initWithLaunchOptions(launchOptions, projectId: "YOUR_PROJECT_ID", region: "kr")
+```
+
+Any other region label maps to `service-api.<region>.flarelane.com`. A value that cannot form a label
+(empty, spaces, punctuation, starting with a digit) is logged and initialization is skipped rather than falling back to `us`.
+
 ## Author
 
 FlareLabs

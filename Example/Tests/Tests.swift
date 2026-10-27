@@ -1363,3 +1363,170 @@ private final class NSCounter {
         return count
     }
 }
+
+// MARK: - Region
+//
+// The region option picks the host. "us" (or no option) must keep the original host byte for
+// byte, an invalid value must stop init before anything is stored, and moving to another region
+// must drop the cached device — it belongs to the old region's server.
+
+extension Tests {
+
+    /// Runs `body` and puts the stored identity back afterwards, so these specs cannot leak a
+    /// region into the host-filtered stubs other specs rely on.
+    private func preservingStoredIdentity(_ body: () -> Void) {
+        let projectId = Globals.projectIdInUserDefaults
+        let region = Globals.regionInUserDefaults
+        let deviceId = Globals.deviceIdInUserDefaults
+        let userId = Globals.userIdInUserDefaults
+        let isSubscribed = Globals.isSubscribedInUserDefaults
+        let pushToken = Globals.pushTokenInUserDefaults
+        defer {
+            Globals.projectIdInUserDefaults = projectId
+            Globals.regionInUserDefaults = region
+            Globals.deviceIdInUserDefaults = deviceId
+            Globals.userIdInUserDefaults = userId
+            Globals.isSubscribedInUserDefaults = isSubscribed
+            Globals.pushTokenInUserDefaults = pushToken
+        }
+        body()
+    }
+
+    func testRegion_normalizesValidValues() {
+        XCTAssertEqual(Request.normalizeRegion(nil), "us", "no option means the default region")
+        XCTAssertEqual(Request.normalizeRegion("us"), "us")
+        XCTAssertEqual(Request.normalizeRegion("kr"), "kr")
+        XCTAssertEqual(Request.normalizeRegion("KR "), "kr", "trimmed and lowercased")
+        XCTAssertEqual(Request.normalizeRegion(" Kr\n"), "kr")
+        XCTAssertEqual(Request.normalizeRegion("a1"), "a1")
+        XCTAssertEqual(Request.normalizeRegion(String(repeating: "a", count: 16)), String(repeating: "a", count: 16))
+    }
+
+    func testRegion_rejectsValuesThatCannotNameARegion() {
+        for value in ["", "   ", "k r", "1kr", "k-r", "kr.", "한국", String(repeating: "a", count: 17)] {
+            XCTAssertNil(Request.normalizeRegion(value), "\"\(value)\" must be rejected, not defaulted")
+        }
+    }
+
+    func testRegion_hostRule() {
+        XCTAssertEqual(Request.baseURL(projectId: "p1", region: nil),
+                       "https://service-api.flarelane.com/internal/v1/projects/p1")
+        XCTAssertEqual(Request.baseURL(projectId: "p1", region: "us"),
+                       "https://service-api.flarelane.com/internal/v1/projects/p1",
+                       "us must keep the original host byte for byte")
+        XCTAssertEqual(Request.baseURL(projectId: "p1", region: "kr"),
+                       "https://service-api.kr.flarelane.com/internal/v1/projects/p1")
+    }
+
+    func testRegion_requestsResolveTheStoredRegion() {
+        preservingStoredIdentity {
+            Globals.projectIdInUserDefaults = "test-project-id"
+
+            // An install that predates the option has no stored region.
+            Globals.regionInUserDefaults = nil
+            XCTAssertEqual(Request().getBaseURL(),
+                           "https://service-api.flarelane.com/internal/v1/projects/test-project-id")
+
+            Globals.regionInUserDefaults = "kr"
+            XCTAssertEqual(Request().getBaseURL(),
+                           "https://service-api.kr.flarelane.com/internal/v1/projects/test-project-id")
+        }
+    }
+
+    func testRegion_invalidRegionAbortsInitWithoutStoringAnything() {
+        preservingStoredIdentity {
+            Globals.projectIdInUserDefaults = "existing-project"
+            Globals.regionInUserDefaults = "us"
+            Globals.deviceIdInUserDefaults = "device-1"
+
+            for value in ["", "k r", "1kr"] {
+                FlareLane.initWithLaunchOptions(nil, projectId: "new-project", region: value, requestPermissionOnLaunch: false)
+
+                XCTAssertEqual(Globals.projectIdInUserDefaults, "existing-project", "\"\(value)\" must not store the projectId")
+                XCTAssertEqual(Globals.regionInUserDefaults, "us", "\"\(value)\" must not store a region")
+                XCTAssertEqual(Globals.deviceIdInUserDefaults, "device-1", "\"\(value)\" must not drop the device")
+            }
+        }
+    }
+
+    func testRegion_changingRegionDropsTheCachedDevice() {
+        preservingStoredIdentity {
+            Globals.projectIdInUserDefaults = "project-1"
+            Globals.regionInUserDefaults = "us"
+            Globals.deviceIdInUserDefaults = "device-1"
+            Globals.userIdInUserDefaults = "user-1"
+            Globals.isSubscribedInUserDefaults = true
+            Globals.pushTokenInUserDefaults = "token-1"
+
+            FlareLane.storeProject(projectId: "project-1", region: "kr")
+
+            XCTAssertNil(Globals.deviceIdInUserDefaults, "the device lives on the old region's server")
+            XCTAssertNil(Globals.userIdInUserDefaults)
+            XCTAssertNil(Globals.isSubscribedInUserDefaults)
+            XCTAssertNil(Globals.pushTokenInUserDefaults, "the same APNs token must be sent to the new device")
+            XCTAssertEqual(Globals.projectIdInUserDefaults, "project-1")
+            XCTAssertEqual(Globals.regionInUserDefaults, "kr")
+        }
+    }
+
+    func testRegion_sameProjectAndRegionKeepsTheDevice() {
+        preservingStoredIdentity {
+            Globals.projectIdInUserDefaults = "project-1"
+            Globals.regionInUserDefaults = "kr"
+            Globals.deviceIdInUserDefaults = "device-1"
+            Globals.pushTokenInUserDefaults = "token-1"
+
+            FlareLane.storeProject(projectId: "project-1", region: "kr")
+
+            XCTAssertEqual(Globals.deviceIdInUserDefaults, "device-1")
+            XCTAssertEqual(Globals.pushTokenInUserDefaults, "token-1")
+        }
+    }
+
+    func testRegion_upgradingTheSdkDoesNotReRegisterTheDevice() {
+        preservingStoredIdentity {
+            // Stored by an SDK version without the option: projectId and device, no region.
+            Globals.projectIdInUserDefaults = "project-1"
+            Globals.regionInUserDefaults = nil
+            Globals.deviceIdInUserDefaults = "device-1"
+
+            FlareLane.storeProject(projectId: "project-1", region: "us")
+
+            XCTAssertEqual(Globals.deviceIdInUserDefaults, "device-1", "a missing stored region means us, not a change")
+            XCTAssertEqual(Globals.regionInUserDefaults, "us")
+        }
+    }
+
+    func testRegion_getRegion() {
+        preservingStoredIdentity {
+            Globals.projectIdInUserDefaults = nil
+            Globals.regionInUserDefaults = nil
+            XCTAssertNil(FlareLane.getRegion(), "not initialized")
+
+            Globals.projectIdInUserDefaults = "project-1"
+            XCTAssertEqual(FlareLane.getRegion(), "us", "no stored region means us")
+
+            Globals.regionInUserDefaults = "kr"
+            XCTAssertEqual(FlareLane.getRegion(), "kr")
+        }
+    }
+
+    func testRegion_resetDeviceClearsTheRegion() {
+        let pushToken = Globals.pushTokenInUserDefaults
+        let badgeCount = Globals.badgeCountUserDefaults
+        defer {
+            Globals.pushTokenInUserDefaults = pushToken
+            Globals.badgeCountUserDefaults = badgeCount
+        }
+
+        preservingStoredIdentity {
+            Globals.projectIdInUserDefaults = "project-1"
+            Globals.regionInUserDefaults = "kr"
+
+            FlareLane.resetDevice()
+
+            XCTAssertNil(Globals.projectIdInUserDefaults)
+            XCTAssertNil(Globals.regionInUserDefaults)
+        }
+    }
+}

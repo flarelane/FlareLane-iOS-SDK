@@ -19,7 +19,11 @@ final class API {
   static func stopSdkIfGone(_ error: Error?) {
     guard case Request.HTTPError.serverSideError(410)? = error else { return }
 
-    Logger.error("Device endpoint returned 410, stopping the SDK until the next app launch.")
+    // A project created in another region is unknown here and answers the same way, so name
+    // the region in use: a missing region option is the likeliest cause on a new integration.
+    let region = Globals.regionInUserDefaults ?? Request.defaultRegion
+    Logger.error("Device endpoint returned 410, stopping the SDK until the next app launch."
+                 + " Region: \"\(region)\" — if the project belongs to another region, check the region option.")
     FlareLaneTaskManager.shared.stop()
   }
 

@@ -59,7 +59,10 @@ import WebKit
         "platform": Globals.sdkPlatform,
         "deviceId": Globals.deviceIdInUserDefaults ?? NSNull(),
         "userId": Globals.userIdInUserDefaults ?? NSNull(),
-        "projectId": Globals.projectIdInUserDefaults ?? NSNull()
+        "projectId": Globals.projectIdInUserDefaults ?? NSNull(),
+        // The web SDK still sends some requests itself (in-app messages), so it needs the
+        // region to pick the same host native does.
+        "region": FlareLane.getRegion() ?? NSNull()
       ]
       // Guard against NSException from `data(withJSONObject:)` should one of the
       // Globals ever be an unexpected non-JSON type — `try?` cannot recover from

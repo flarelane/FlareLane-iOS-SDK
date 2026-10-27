@@ -36,6 +36,7 @@ final class Globals {
   // MARK: - Keys
   private enum DefaultsKey: String {
     case projectId = "flarelane_projectIdKey"
+    case region = "flarelane_regionKey"
     case deviceId = "flarelane_deviceIdKey"
     case userId = "flarelane_userIdKey"
     case pushToken = "flarelane_pushTokenKey"
@@ -78,7 +79,14 @@ final class Globals {
     get { getValue(forKey: .projectId) }
     set { setValue(newValue, forKey: .projectId) }
   }
-  
+
+  /// region of the project, normalized. nil on installs that predate the option, which means "us".
+  /// Stored next to projectId so the extension and cold-start paths resolve the same host.
+  static var regionInUserDefaults: String? {
+    get { getValue(forKey: .region) }
+    set { setValue(newValue, forKey: .region) }
+  }
+
   /// deviceId
   static var deviceIdInUserDefaults: String? {
     get { getValue(forKey: .deviceId) }
