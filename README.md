@@ -29,7 +29,8 @@ Projects created in the Seoul region pass `"kr"`:
 FlareLane.initWithLaunchOptions(launchOptions, projectId: "YOUR_PROJECT_ID", region: "kr")
 ```
 
-An unrecognized region value is logged and initialization is skipped rather than falling back to `us`.
+Any other region label maps to `service-api.<region>.flarelane.com`. A value that cannot form a label
+(empty, spaces, punctuation, starting with a digit) is logged and initialization is skipped rather than falling back to `us`.
 
 ## Author
 

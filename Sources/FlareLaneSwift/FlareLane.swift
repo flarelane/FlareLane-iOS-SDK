@@ -325,6 +325,9 @@ import UIKit
       Globals.deviceIdInUserDefaults = nil
       Globals.isSubscribedInUserDefaults = nil
       Globals.userIdInUserDefaults = nil // prevent cross-project linkage
+      // The new device is created without a token, and the APNs callback only sends one that
+      // differs from the cached value — so the cache must go too, or the same token is never sent.
+      Globals.pushTokenInUserDefaults = nil
     }
 
     Globals.projectIdInUserDefaults = projectId

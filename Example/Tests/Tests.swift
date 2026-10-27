@@ -1380,12 +1380,14 @@ extension Tests {
         let deviceId = Globals.deviceIdInUserDefaults
         let userId = Globals.userIdInUserDefaults
         let isSubscribed = Globals.isSubscribedInUserDefaults
+        let pushToken = Globals.pushTokenInUserDefaults
         defer {
             Globals.projectIdInUserDefaults = projectId
             Globals.regionInUserDefaults = region
             Globals.deviceIdInUserDefaults = deviceId
             Globals.userIdInUserDefaults = userId
             Globals.isSubscribedInUserDefaults = isSubscribed
+            Globals.pushTokenInUserDefaults = pushToken
         }
         body()
     }
@@ -1454,12 +1456,14 @@ extension Tests {
             Globals.deviceIdInUserDefaults = "device-1"
             Globals.userIdInUserDefaults = "user-1"
             Globals.isSubscribedInUserDefaults = true
+            Globals.pushTokenInUserDefaults = "token-1"
 
             FlareLane.storeProject(projectId: "project-1", region: "kr")
 
             XCTAssertNil(Globals.deviceIdInUserDefaults, "the device lives on the old region's server")
             XCTAssertNil(Globals.userIdInUserDefaults)
             XCTAssertNil(Globals.isSubscribedInUserDefaults)
+            XCTAssertNil(Globals.pushTokenInUserDefaults, "the same APNs token must be sent to the new device")
             XCTAssertEqual(Globals.projectIdInUserDefaults, "project-1")
             XCTAssertEqual(Globals.regionInUserDefaults, "kr")
         }
@@ -1470,10 +1474,12 @@ extension Tests {
             Globals.projectIdInUserDefaults = "project-1"
             Globals.regionInUserDefaults = "kr"
             Globals.deviceIdInUserDefaults = "device-1"
+            Globals.pushTokenInUserDefaults = "token-1"
 
             FlareLane.storeProject(projectId: "project-1", region: "kr")
 
             XCTAssertEqual(Globals.deviceIdInUserDefaults, "device-1")
+            XCTAssertEqual(Globals.pushTokenInUserDefaults, "token-1")
         }
     }
 
