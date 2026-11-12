@@ -1449,7 +1449,9 @@ extension Tests {
         }
     }
 
-    func testRegion_changingRegionDropsTheCachedDevice() {
+    func testRegion_changingOnlyTheRegionKeepsTheCachedDevice() {
+        // A project lives in one region, so a region change alone is a misconfiguration:
+        // the release that fixes it must resume the same device, not register a second one.
         preservingStoredIdentity {
             Globals.projectIdInUserDefaults = "project-1"
             Globals.regionInUserDefaults = "us"
@@ -1460,12 +1462,20 @@ extension Tests {
 
             FlareLane.storeProject(projectId: "project-1", region: "kr")
 
-            XCTAssertNil(Globals.deviceIdInUserDefaults, "the device lives on the old region's server")
+            XCTAssertEqual(Globals.deviceIdInUserDefaults, "device-1")
+            XCTAssertEqual(Globals.userIdInUserDefaults, "user-1")
+            XCTAssertEqual(Globals.isSubscribedInUserDefaults, true)
+            XCTAssertEqual(Globals.pushTokenInUserDefaults, "token-1")
+            XCTAssertEqual(Globals.regionInUserDefaults, "kr")
+
+            // A projectId change still drops the device, and the push token with it.
+            FlareLane.storeProject(projectId: "project-2", region: "kr")
+
+            XCTAssertNil(Globals.deviceIdInUserDefaults)
             XCTAssertNil(Globals.userIdInUserDefaults)
             XCTAssertNil(Globals.isSubscribedInUserDefaults)
             XCTAssertNil(Globals.pushTokenInUserDefaults, "the same APNs token must be sent to the new device")
-            XCTAssertEqual(Globals.projectIdInUserDefaults, "project-1")
-            XCTAssertEqual(Globals.regionInUserDefaults, "kr")
+            XCTAssertEqual(Globals.projectIdInUserDefaults, "project-2")
         }
     }
 

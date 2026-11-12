@@ -313,14 +313,13 @@ import UIKit
 
   // MARK: Private Methods
 
-  /// Records the project and region requests go to. A different project or region drops the
-  /// cached device: it lives on the old project's server, so a new one must be created.
-  /// An install that predates the region option has no stored region, which means "us" —
-  /// so upgrading the SDK alone never re-registers the device.
+  /// Records the project and region requests go to. A different project drops the cached
+  /// device: it lives on the old project's server, so a new one must be created.
+  /// A region change alone keeps it: a project lives in one region, so the same projectId with
+  /// another region is a misconfiguration (the wrong region answers 410), and keeping the device
+  /// lets the corrected release resume it instead of registering a second one.
   static func storeProject(projectId: String, region: String) {
-    let storedRegion = Globals.regionInUserDefaults ?? Request.defaultRegion
-
-    if (Globals.projectIdInUserDefaults != projectId || storedRegion != region) {
+    if (Globals.projectIdInUserDefaults != projectId) {
       Globals.deviceIdInUserDefaults = nil
       Globals.isSubscribedInUserDefaults = nil
       Globals.userIdInUserDefaults = nil // prevent cross-project linkage
