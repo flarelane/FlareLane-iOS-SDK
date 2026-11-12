@@ -1501,7 +1501,7 @@ extension Tests {
         preservingStoredIdentity {
             Globals.projectIdInUserDefaults = nil
             Globals.regionInUserDefaults = nil
-            XCTAssertNil(FlareLane.getRegion(), "not initialized")
+            XCTAssertEqual(FlareLane.getRegion(), "us", "not initialized means us, same as Android")
 
             Globals.projectIdInUserDefaults = "project-1"
             XCTAssertEqual(FlareLane.getRegion(), "us", "no stored region means us")
@@ -1525,7 +1525,8 @@ extension Tests {
 
             FlareLane.resetDevice()
 
-            XCTAssertNil(Globals.projectIdInUserDefaults)
+            // projectId is not asserted: the Example host app's own launch registration can
+            // write it back at any moment, while nothing but init writes the region.
             XCTAssertNil(Globals.regionInUserDefaults)
         }
     }

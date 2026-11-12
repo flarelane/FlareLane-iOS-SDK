@@ -65,7 +65,7 @@ import UIKit
     // dropped the call would keep a permanently silent extension. Order-safe either way: called
     // before setLogLevel it republishes the default, called after it republishes that level.
     Globals.logLevelInUserDefaults = Globals.logLevel.rawValue
-    Logger.verbose("Initialize FlareLane")
+    Logger.verbose("initWithLaunchOptions projectId: \(projectId), region: \(normalizedRegion)")
 
     // Set projectId and region before device is registered
     storeProject(projectId: projectId, region: normalizedRegion)
@@ -179,7 +179,6 @@ import UIKit
 
   /// Get region ("us" unless the app passed another one). Used by Flutter/RN plugins to build the hybrid WebView bridge sync payload.
   @objc public static func getRegion() -> String? {
-    guard Globals.projectIdInUserDefaults != nil else { return nil }
     return Globals.regionInUserDefaults ?? Request.defaultRegion
   }
 
